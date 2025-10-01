@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  nome        String
+  email       String        @unique
+  tipoUsuario String
+  keywords    UserKeyword[]
+  student     Student?
+  teacher     Teacher?
+}
+
+model Keyword {
+  id    Int    @id @default(autoincrement())
+  nome  String @unique
+  users UserKeyword[]
+}
+
+model UserKeyword {
+  user      User   @relation(fields: [userId], references: [id])
+  userId    Int
+  keyword   Keyword @relation(fields: [keywordId], references: [id])
+  keywordId Int
+
+  @@id([userId, keywordId])
+}
+
+model Student {
+  id            Int             @id @default(autoincrement())
+  ra            String          @unique
+  userId        Int             @unique
+  user          User            @relation(fields: [userId], references: [id])
+  solicitations Solicitation[]
+  orientations  Orientation[]   @relation("StudentOrientations")
+}
+
+model Teacher {
+  id                   Int                 @id @default(autoincrement())
+  linkLattes           String?
+  isCoordinator        Boolean             @default(false)
+  userId               Int                 @unique
+  user                 User                @relation(fields: [userId], references: [id])
+  attendedSolicitations Solicitation[]
+  supervisorOf         Orientation[]       @relation("SupervisorOrientations")
+  memberOf             OrientationMember[]
+  coordinator          Coordinator?
+}
+
+model Coordinator {
+  id           Int           @id @default(autoincrement())
+  teacherId    Int           @unique
+  teacher      Teacher       @relation(fields: [teacherId], references: [id])
+  contestations Contestation[]
+  vagas        Vacancy[]
+}
+
+model Solicitation {
+  id                 Int       @id @default(autoincrement())
+  dataEnvio          DateTime  @default(now())
+  status             String
+  justificativaRecusa String?
+  student            Student   @relation(fields: [studentId], references: [id])
+  studentId          Int
+  teacher            Teacher?  @relation(fields: [teacherId], references: [id])
+  teacherId          Int?
+}
+
+model Orientation {
+  id            Int               @id @default(autoincrement())
+  status        String
+  dataInicio    DateTime?
+  dataConclusao DateTime?
+  semester      Semester?         @relation(fields: [semesterId], references: [id])
+  semesterId    Int?
+  students      Student[]         @relation("StudentOrientations")
+  supervisor    Teacher?          @relation("SupervisorOrientations", fields: [supervisorId], references: [id])
+  supervisorId  Int?
+  members       OrientationMember[]
+}
+
+model OrientationMember {
+  id            Int         @id @default(autoincrement())
+  orientation   Orientation @relation(fields: [orientationId], references: [id])
+  orientationId Int
+  teacher       Teacher     @relation(fields: [teacherId], references: [id])
+  teacherId     Int
+
+  @@unique([orientationId, teacherId])
+}
+
+model Semester {
+  id          Int          @id @default(autoincrement())
+  ano         Int
+  periodo     String
+  orientations Orientation[]
+}
+
+model Contestation {
+  id                Int        @id @default(autoincrement())
+  motivoContestacao String
+  coordinator       Coordinator @relation(fields: [coordinatorId], references: [id])
+  coordinatorId     Int
+}
+
+model Vacancy {
+  id            Int        @id @default(autoincrement())
+  quantidade    Int
+  coordinator   Coordinator @relation(fields: [coordinatorId], references: [id])
+  coordinatorId Int
+}
