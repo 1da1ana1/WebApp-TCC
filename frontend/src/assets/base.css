@@ -1,20 +1,26 @@
-/* color palette from <https://github.com/vuejs/theme> */
 :root {
-  --background-general: #E2E2E2;
-  --text-color-primary: #1E1E1E;
-  --text-color-secondary: #fff;
-  --text-color-submenu: #6C757D;
-  --text-color-submenu-hover: #065F8B;
-  --ft-color-blue: #065F8B;
-  --ft-color-green: #53B57C;
-  --status-color-sucess: #28A745;
-  --status-color-unsuccessful: #DC3545;
-  --status-color-await: #FF9500;
-  --status-color-done: #9A9AB6;
-  --border-color: #818181;
-  --coordenator-statistics-card-btn: #FFC107;
-  --orientation-card-background: #FBF9C5;
-  --filter-btn: #0D6EFD;
-} 
+
+  --color-brand-primary: #065F8B;   
+  --color-brand-secondary: #53B57C;
+
+  --color-background-default: #E2E2E2;
+  --color-background-card-highlight: #FBF9C5; 
+  --color-background-card-default: #FFFFFF; 
+
+  --color-text-primary: #1E1E1E;   
+  --color-text-secondary: #FFFFFF;
+  --color-text-muted: #6C757D;     
+  --color-text-link: #065F8B;       
+
+  --color-status-success: #28A745;       
+  --color-status-danger: #DC3545;       
+  --color-status-warning: #FF9500;       
+  --color-status-neutral: #9A9AB6;       
+
+  --color-button-primary: #0D6EFD;     
+  --color-button-warning: #FFC107;      
+  --color-border-default: #818181; 
+  --color-border-subtle: #CED4DA; 
+}
 
  
