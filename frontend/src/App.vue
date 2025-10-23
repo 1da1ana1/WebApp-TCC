@@ -1,5 +1,5 @@
 <template>
-  <h1>WebApp TCC</h1>
+  <HeaderMenu />
 </template>
 
 <script>
@@ -32,3 +32,6 @@
   })
 
 </script>
+
+<style>
+</style>
