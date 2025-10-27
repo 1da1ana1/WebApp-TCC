@@ -1,1 +1,0 @@
-# Inicializa a aplicação Flask (padrão "Application Factory")
