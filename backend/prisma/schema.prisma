@@ -2,7 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,9 +9,9 @@ datasource db {
 
 model User {
   id          Int           @id @default(autoincrement())
-  nome        String
+  name        String
   email       String        @unique
-  tipoUsuario String
+  typeUser    String
   keywords    UserKeyword[]
   student     Student?
   teacher     Teacher?
@@ -20,16 +19,15 @@ model User {
 
 model Keyword {
   id    Int    @id @default(autoincrement())
-  nome  String @unique
+  name  String @unique
   users UserKeyword[]
 }
 
 model UserKeyword {
-  user      User   @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   userId    Int
-  keyword   Keyword @relation(fields: [keywordId], references: [id])
+  keyword   Keyword  @relation(fields: [keywordId], references: [id])
   keywordId Int
-
   @@id([userId, keywordId])
 }
 
@@ -38,17 +36,17 @@ model Student {
   ra            String          @unique
   userId        Int             @unique
   user          User            @relation(fields: [userId], references: [id])
-  solicitations Solicitation[]
+  requests      Request[]
   orientations  Orientation[]   @relation("StudentOrientations")
 }
 
 model Teacher {
   id                   Int                 @id @default(autoincrement())
-  linkLattes           String?
+  lattesLink           String?
   isCoordinator        Boolean             @default(false)
   userId               Int                 @unique
   user                 User                @relation(fields: [userId], references: [id])
-  attendedSolicitations Solicitation[]
+  attendedRequests     Request[]
   supervisorOf         Orientation[]       @relation("SupervisorOrientations")
   memberOf             OrientationMember[]
   coordinator          Coordinator?
@@ -59,14 +57,14 @@ model Coordinator {
   teacherId    Int           @unique
   teacher      Teacher       @relation(fields: [teacherId], references: [id])
   contestations Contestation[]
-  vagas        Vacancy[]
+  vacancies        Vacancy[]
 }
 
-model Solicitation {
+model Request {
   id                 Int       @id @default(autoincrement())
-  dataEnvio          DateTime  @default(now())
+  sendDate          DateTime  @default(now())
   status             String
-  justificativaRecusa String?
+  denialJustification String?
   student            Student   @relation(fields: [studentId], references: [id])
   studentId          Int
   teacher            Teacher?  @relation(fields: [teacherId], references: [id])
@@ -76,8 +74,8 @@ model Solicitation {
 model Orientation {
   id            Int               @id @default(autoincrement())
   status        String
-  dataInicio    DateTime?
-  dataConclusao DateTime?
+  startDate     DateTime?
+  endDate       DateTime?
   semester      Semester?         @relation(fields: [semesterId], references: [id])
   semesterId    Int?
   students      Student[]         @relation("StudentOrientations")
@@ -98,21 +96,21 @@ model OrientationMember {
 
 model Semester {
   id          Int          @id @default(autoincrement())
-  ano         Int
-  periodo     String
+  year         Int
+  period     String
   orientations Orientation[]
 }
 
 model Contestation {
   id                Int        @id @default(autoincrement())
-  motivoContestacao String
+  contestationReason String
   coordinator       Coordinator @relation(fields: [coordinatorId], references: [id])
   coordinatorId     Int
 }
 
 model Vacancy {
   id            Int        @id @default(autoincrement())
-  quantidade    Int
+  quantity    Int
   coordinator   Coordinator @relation(fields: [coordinatorId], references: [id])
   coordinatorId Int
 }
