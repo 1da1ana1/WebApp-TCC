@@ -145,14 +145,14 @@
 
 #menu {
   position: fixed; 
-  width: 250px; 
+  width: 15.625rem; 
   height: 100vh; 
   top: 0; 
   left: 0; 
   margin: 0; 
-  padding: 50px;
+  padding: 1.8rem;
   padding-top: 6rem; 
-  background-color: var(--white-color);
+  background: linear-gradient(90deg, var(--color-brand-primary), var(--color-brand-secondary));
   -webkit-font-smoothing: antialiased;
   transform-origin: 0% 0%;
   transform: translate(-100%, 0); 
@@ -168,12 +168,20 @@
 }
 
 #menu a {
+  display: flex;
   text-decoration: none;
+  height: 2.3rem;
+  width: 12rem;
+  background-color: var(--white-color);
+  border-radius: 1.3rem;
   color: #1E1E23;
   font-family: 'Poppins', sans serif;
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: 500;
   transition: 200ms;
+    justify-content: center;
+  align-items: center;
+
 }
 
 #menu a:hover {
@@ -194,8 +202,9 @@
   .header-nav-mobile {
     display: block;
   }
+
   .header {
-    padding: 0 1rem;
+    padding: 1rem;
   }
 
   .header-logo {
@@ -205,7 +214,11 @@
 
 @media (max-width: 400px) {
   .header-logo {
-    max-width: 120px;
+    max-width: 180px;
+  }
+
+    .header {
+    padding: 1rem;
   }
 }
 </style>
