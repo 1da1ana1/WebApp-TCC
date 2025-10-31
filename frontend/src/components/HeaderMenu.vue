@@ -13,11 +13,11 @@
     <nav role="navigation" class="header-nav-mobile">
       <div id="menuToggle">
         <input type="checkbox" />
-        
+
         <span></span>
         <span></span>
         <span></span>
-        
+
         <ul id="menu">
           <li><a href="#">Página Inicial</a></li>
           <li><a href="#">Buscar Orientador</a></li>
@@ -29,20 +29,19 @@
 </template>
 
 <style scoped>
-
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 3.8rem 4.5rem; 
+  padding: 3.8rem 4.5rem;
   background: linear-gradient(90deg, var(--color-brand-primary), var(--color-brand-secondary));
   height: 5rem;
   width: 100%;
-  box-sizing: border-box; 
-  position: fixed; 
+  box-sizing: border-box;
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 10; 
+  z-index: 10;
 }
 
 .header-logo {
@@ -51,13 +50,12 @@
   object-fit: contain;
 }
 
-
 .header-nav-desktop {
-  background-color: var(--white-color); 
+  background-color: var(--white-color);
   height: 3rem;
   width: 33rem;
   border-radius: 2rem;
-  display: flex; 
+  display: flex;
   justify-content: center;
   align-items: center;
 }
@@ -75,17 +73,23 @@
   text-decoration: none;
   color: #000;
   font-size: 0.8rem;
-  font-weight: bold;
+  font-weight: 500;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
 }
 
+.header-links a:hover {
+  color: var(--color-text-muted);
+  transform: scale(1.1);
+}
 
 .header-nav-mobile {
   display: none;
 }
 
-
 #menuToggle {
-  display: block; 
+  display: block;
   position: relative;
   z-index: 1;
   -webkit-user-select: none;
@@ -100,8 +104,8 @@
   top: -7px;
   left: -5px;
   cursor: pointer;
-  opacity: 0; 
-  z-index: 2; 
+  opacity: 0;
+  z-index: 2;
 }
 
 #menuToggle span {
@@ -110,13 +114,14 @@
   height: 2px;
   margin-bottom: 5px;
   position: relative;
-  background: var(--white-color); 
+  background: var(--white-color);
   border-radius: 3px;
   z-index: 1;
   transform-origin: 4px 0px;
-  transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0),
-              background 0.5s cubic-bezier(0.77,0.2,0.05,1.0),
-              opacity 0.55s ease;
+  transition:
+    transform 0.5s cubic-bezier(0.77, 0.2, 0.05, 1),
+    background 0.5s cubic-bezier(0.77, 0.2, 0.05, 1),
+    opacity 0.55s ease;
 }
 
 #menuToggle span:first-child {
@@ -130,7 +135,7 @@
 #menuToggle input:checked ~ span {
   opacity: 1;
   transform: rotate(45deg) translate(-3px, -1px);
-  background: var(--white-color); 
+  background: var(--white-color);
 }
 
 #menuToggle input:checked ~ span:nth-last-child(3) {
@@ -142,26 +147,25 @@
   transform: rotate(-45deg) translate(0, -1px);
 }
 
-
 #menu {
-  position: fixed; 
-  width: 15.625rem; 
-  height: 100vh; 
-  top: 0; 
-  left: 0; 
-  margin: 0; 
+  position: fixed;
+  width: 15.625rem;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  margin: 0;
   padding: 1.8rem;
-  padding-top: 6rem; 
+  padding-top: 6rem;
   background: linear-gradient(90deg, var(--color-brand-primary), var(--color-brand-secondary));
   -webkit-font-smoothing: antialiased;
   transform-origin: 0% 0%;
-  transform: translate(-100%, 0); 
-  transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
-  z-index: -1; 
+  transform: translate(-100%, 0);
+  transition: transform 0.5s cubic-bezier(0.77, 0.2, 0.05, 1);
+  z-index: -1;
 }
 
 #menu li {
-   list-style-type: none;
+  list-style-type: none;
   padding: 10px 0;
   transition-delay: 2s;
   text-decoration: none;
@@ -171,30 +175,30 @@
   display: flex;
   text-decoration: none;
   height: 2.3rem;
-  width: 12rem;
+  width: 11.3rem;
   background-color: var(--white-color);
   border-radius: 1.3rem;
-  color: #1E1E23;
-  font-family: 'Poppins', sans serif;
+  color: #1e1e23;
+  font-family:
+    'Poppins',
+    sans serif;
   font-size: 1rem;
   font-weight: 500;
-  transition: 200ms;
-    justify-content: center;
+  justify-content: center;
   align-items: center;
-
+   transition: transform 0.3s ease;
 }
 
 #menu a:hover {
-  opacity: 0.5;
+  transform: scale(1.06);
 }
 
 #menuToggle input:checked ~ ul {
-  transform: none; 
-  z-index: 1; 
+  transform: none;
+  z-index: 1;
 }
 
 @media (max-width: 769px) {
-  
   .header-nav-desktop {
     display: none;
   }
@@ -217,7 +221,7 @@
     max-width: 180px;
   }
 
-    .header {
+  .header {
     padding: 1rem;
   }
 }
