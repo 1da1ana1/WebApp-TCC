@@ -10,6 +10,7 @@ import UserCard from './components/UserCard.vue'
 import UserProfile from './components/UserProfile.vue'
 import UserProfileMenu from './components/UserProfileMenu.vue'
 import UserRegisterTags from './components/UserRegisterTags.vue'
+import ProfessorCard from './components/ProfessorCard.vue'
 
 export default defineComponent({
   name: 'App',
@@ -24,6 +25,7 @@ export default defineComponent({
     UserProfile,
     UserProfileMenu,
     UserRegisterTags,
+    ProfessorCard
   },
 })
 </script>
@@ -31,11 +33,15 @@ export default defineComponent({
 <template>
   <div>
     <HeaderMenu />
-
+    <SideBar />
     <main class="main-content">
-      <SideBar />
+      <ProfessorCard />
     </main>
   </div>
 </template>
+
+
+
+
 
 

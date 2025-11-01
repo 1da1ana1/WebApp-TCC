@@ -1,52 +1,59 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
 :root {
+  --color-brand-primary: #065f8b;
+  --color-brand-secondary: #53b57c;
 
-  --color-brand-primary: #065F8B;   
-  --color-brand-secondary: #53B57C;
+  --color-background-default: #d9d9d9;
+  --color-background-card-highlight: #fbf9c5;
+  --color-background-card-default: #ffffff;
 
-  --color-background-default: #E2E2E2;
-  --color-background-card-highlight: #FBF9C5; 
-  --color-background-card-default: #FFFFFF; 
+  --color-text-primary: #1e1e1e;
+  --color-text-secondary: #ffffff;
+  --color-text-muted: #6c757d;
+  --color-text-link: #065f8b;
 
-  --color-text-primary: #1E1E1E;   
-  --color-text-secondary: #FFFFFF;
-  --color-text-muted: #6C757D;     
-  --color-text-link: #065F8B;       
+  --color-status-success: #28a745;
+  --color-status-danger: #dc3545;
+  --color-status-warning: #ff9500;
+  --color-status-neutral: #cacad8;
+  --color-text-neutral: #494965;
 
-  --color-status-success: #28A745;       
-  --color-status-danger: #DC3545;       
-  --color-status-warning: #FF9500;       
-  --color-status-neutral: #9A9AB6;       
+  --color-button-primary: #0d6efd;
+  --color-button-warning: #ffc107;
+  --color-border-default: #818181;
+  --color-border-subtle: #ced4da;
 
-  --color-button-primary: #0D6EFD;     
-  --color-button-warning: #FFC107;      
-  --color-border-default: #818181; 
-  --color-border-subtle: #CED4DA; 
+  --color-tag1: #FFFCB3;
+  --color-tag1-darker: #807a00;
 
+  --color-tag2: #CCB3FF;
+  --color-tag2-darker: #620080;
 
-  --header-height: 3rem;
+  --color-tag3: #87B1FF;
+  --color-tag3-darker: #005580;
+
+  --header-height: 7.6rem;
+  --side-bar-width: 6.25rem;
   --nav-width: 68px;
-  --first-color: #065F8B;
-  --first-color-light: #AFA5D9;
   --white-color: #ffffff;
   --body-font: 'Poppins', sans-serif;
   --normal-font-size: 1rem;
 }
 
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-html, body{
-    height: 100vh;
-    font-family: "Poppins", sans-serif;
+html,
+body {
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
 }
 
- body {
-    overflow-x: hidden;
+body {
+  overflow-x: hidden;
+  background-color: var(--color-background-default);
 }
-
- 

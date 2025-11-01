@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import SearchSupervisor from '../components/SearchSupervisor.vue';
+import SearchSupervisor from '../components/SearchProfessor.vue';
 
 const routes = [
   {
