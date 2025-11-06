@@ -1,4 +1,5 @@
 <template>
+  
   <div class="professor-card">
     <div class="professor-info">
       <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" />
@@ -16,6 +17,16 @@
   </div>
 </template>
 
+<script setup>
+import { defineProps } from 'vue';
+defineProps({
+  teacher: {
+    type: Object,
+    required: true
+  }
+});
+</script>
+
 <style scoped>
 .professor-card {
   background-color: var(--white-color);
@@ -25,7 +36,6 @@
 
   border-bottom: 2px solid var(--color-border-default);
 
-
   justify-content: space-between;
   align-items: center;
 
@@ -33,9 +43,7 @@
 
   right: var(--side-bar-width);
   top: var(--header-height);
-
-  padding: 3rem;
-
+  padding: 0 2rem 0 2rem;
   display: grid;
   grid-template-columns: 2fr 1fr;
 }
