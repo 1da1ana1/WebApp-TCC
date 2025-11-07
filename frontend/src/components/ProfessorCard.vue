@@ -1,10 +1,10 @@
 <template>
-  
   <div class="professor-card">
     <div class="professor-info">
       <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" />
-      <p>Prof Nome Sobrenome</p>
-      <div class="available-spots">5/5 vagas disponíveis</div>
+
+      <p>{{ professor.name }}</p>
+      <div class="available-spots">{{ professor.vagas }}vagas disponíveis</div>
       <div class="registered-tags">
         <span class="tag">Inteligência Artificial</span>
         <span class="tag">Machine Learning</span>
@@ -12,19 +12,24 @@
       </div>
     </div>
     <div class="send-request">
-      <button class="send-request-btn">Enviar Solicitação</button>
+      <router-link
+        :to="{ name: 'ProfessorProfile', params: { id: professor.id } }"
+        class="send-request-btn"
+      >
+        Enviar Solicitação
+      </router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps } from 'vue'
 defineProps({
-  teacher: {
+  professor: {
     type: Object,
-    required: true
-  }
-});
+    required: true,
+  },
+})
 </script>
 
 <style scoped>
@@ -39,8 +44,6 @@ defineProps({
   justify-content: space-between;
   align-items: center;
 
-  position: absolute;
-
   right: var(--side-bar-width);
   top: var(--header-height);
   padding: 0 2rem 0 2rem;
@@ -49,8 +52,8 @@ defineProps({
 }
 
 .professor-info {
- display: grid;
-  grid-template-columns: 1fr 1fr; 
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
 }
 
@@ -62,25 +65,23 @@ defineProps({
 .professor-info > p {
   grid-column: 1;
   grid-row: 1;
-  margin: 0 0 0 6rem; 
+  margin: 0 0 0 6rem;
 }
 
 .professor-info > .available-spots {
   grid-column: 1;
   grid-row: 2;
-  margin-left: 6rem; 
-  align-self: start; 
-  
+  margin-left: 6rem;
+  align-self: start;
 }
 
 .professor-info > .registered-tags {
   grid-row: 1 / span 2;
   display: flex;
-  flex-wrap: wrap;         
-  gap: 0.5rem;             
-  justify-content: flex-start; 
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-start;
 }
-
 
 .available-spots {
   background-color: var(--color-status-success);
@@ -94,12 +95,10 @@ defineProps({
   justify-content: center;
   align-items: center;
   display: flex;
-  
 }
 
 .registered-tags {
   display: flex;
-
 }
 
 .tag {
@@ -138,7 +137,7 @@ defineProps({
   justify-self: center;
 }
 
-.send-request-btn {
+.send-request {
   width: 11.813rem;
   height: 2.625rem;
   background-color: var(--color-status-neutral);
@@ -152,7 +151,7 @@ defineProps({
   transition: opacity 0.2s ease;
 }
 
-.send-request-btn:hover {
+.send-request:hover {
   opacity: 0.8;
 }
 </style>

@@ -1,47 +1,53 @@
+<template>
+  <div class="app-layout">
+    <HeaderMenu />
+    <div class="app-body">
+      <main class="main-content">
+        <router-view /> 
+      </main>
+      <SideBar />
+
+    </div>
+  </div>
+</template>
+
 <script>
+
 import { defineComponent } from 'vue'
-import CronogramSchedule from './components/CronogramSchedule.vue'
-import FilterBar from './components/FilterBar.vue'
 import HeaderMenu from './components/HeaderMenu.vue'
-import SearchBar from './components/SearchBar.vue'
-import SearchResult from './components/SearchResult.vue'
 import SideBar from './components/SideBar.vue'
-import UserCard from './components/UserCard.vue'
-import UserProfile from './components/UserProfile.vue'
-import UserProfileMenu from './components/UserProfileMenu.vue'
-import UserRegisterTags from './components/UserRegisterTags.vue'
-import ProfessorCard from './components/ProfessorCard.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
-    CronogramSchedule,
-    FilterBar,
     HeaderMenu,
-    SearchBar,
-    SearchResult,
     SideBar,
-    UserCard,
-    UserProfile,
-    UserProfileMenu,
-    UserRegisterTags,
-    ProfessorCard
+ 
   },
+
+  data() {
+    return {
+      mockProfessor: {
+        id: 1,
+        name: "Teste de Layout do Professor",
+        vagas: "3/5"
+      }
+    }
+  }
 })
 </script>
 
-<template>
-  <div>
-    <HeaderMenu />
-    <SideBar />
-    <main class="main-content">
-      <ProfessorCard />
-    </main>
-  </div>
-</template>
+<style>
 
 
+.app-body {
+  display: flex; 
+  padding-top: var(--header-height); 
+}
 
 
+.main-content {
+  flex-grow: 1; 
 
-
+}
+</style>
