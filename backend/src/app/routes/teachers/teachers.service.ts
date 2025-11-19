@@ -1,23 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../../../prisma/prisma.service';
 
 @Injectable()
 export class TeachersService {
+  constructor(private readonly prisma: PrismaService) {}
+
   async findAll() {
-    const teachers = await prisma.teacher.findMany({
-      include: {
-        user: true, 
-      },
+    return this.prisma.teacher.findMany();
+  }
+
+  async findOne(id: string) {
+    const teacherId = Number(id);
+
+    const teacher = await this.prisma.teacher.findUnique({
+      where: { id: teacherId },
     });
 
-    return teachers.map((teacher) => ({
-      id: teacher.id,
-      name: teacher.user.name,
-      email: teacher.user.email,
-      lattesLink: teacher.lattesLink,
-      isCoordinator: teacher.isCoordinator,
-    }));
+    if (!teacher) {
+      throw new NotFoundException('Teacher not found');
+    }
+
+    return teacher;
   }
 }
