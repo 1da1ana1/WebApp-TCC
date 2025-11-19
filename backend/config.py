@@ -1,0 +1,1 @@
+ # Configurações da aplicação (ex: chave secreta)
