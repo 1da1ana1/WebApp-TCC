@@ -1,0 +1,1 @@
+state: () => ({ user: null, token: null })
