@@ -138,6 +138,7 @@ defineProps({
 }
 
 .send-request {
+  display:flex;
   width: 11.813rem;
   height: 2.625rem;
   background-color: var(--color-status-neutral);
@@ -149,6 +150,9 @@ defineProps({
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .send-request:hover {
