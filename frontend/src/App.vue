@@ -1,53 +1,19 @@
 <template>
-  <div class="app-layout">
-    <HeaderMenu />
-    <div class="app-body">
-      <main class="main-content">
-        <router-view /> 
-      </main>
-      <SideBar />
-
-    </div>
-  </div>
+  <component :is="layout">
+    <router-view />
+  </component>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
-import { defineComponent } from 'vue'
-import HeaderMenu from './components/HeaderMenu.vue'
-import SideBar from './components/SideBar.vue'
+import PublicLayout from '@/layouts/PublicLayout.vue';
+import SystemLayout from '@/layouts/SystemLayout.vue';
 
-export default defineComponent({
-  name: 'App',
-  components: {
-    HeaderMenu,
-    SideBar,
- 
-  },
+const route = useRoute();
 
-  data() {
-    return {
-      mockProfessor: {
-        id: 1,
-        name: "Teste de Layout do Professor",
-        vagas: "3/5"
-      }
-    }
-  }
-})
+const layout = computed(() => {
+  return (route.meta.layout === 'public') ? PublicLayout : SystemLayout;
+});
 </script>
-
-<style>
-
-
-.app-body {
-  display: flex; 
-  padding-top: var(--header-height); 
-}
-
-
-.main-content {
-  flex-grow: 1; 
-
-}
-</style>
