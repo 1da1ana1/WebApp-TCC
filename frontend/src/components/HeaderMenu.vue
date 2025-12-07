@@ -1,5 +1,5 @@
 <template>
-  <header class="header">
+  <header class="header" :class="{ 'header-public': isPublic }">
     <img src="/src/assets/img/logos-header.png" alt="logo ft" class="header-logo" />
 
     <nav class="header-nav-desktop">
@@ -7,8 +7,8 @@
         
         <li v-if="isPublic">
           <a href="https://sso.unicamp.br..." class="header-nav-item btn-login-especial">
-            <i class="bi bi-box-arrow-in-right"></i>
             <span>Fazer Login</span>
+            <i class="bi bi-box-arrow-in-right"></i>
           </a>
         </li>
 
@@ -90,6 +90,33 @@ defineProps({
 
 .header-nav-mobile {
   display: none;
+}
+
+.header-public .header-nav-desktop {
+  width: auto;
+  padding: 0 2rem;
+  height: 3rem; 
+}
+
+.header-public span{
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: italic;
+}
+
+
+.header-public .btn-login-especial {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem; 
+  width: auto; 
+  color: var(--color-brand-primary); 
+}
+
+.header-public .btn-login-especial i {
+  display: flex;
+  align-items: center;
+  font-size: 2em;
 }
 
 #menuToggle {
