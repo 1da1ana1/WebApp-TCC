@@ -7,7 +7,7 @@
         
         <li v-if="isPublic">
           <router-link to="/login" class="header-nav-item btn-login-especial">
-            <span>Fazer Login </span>
+            <span>Fazer Login</span>
             <i class="bi bi-box-arrow-in-right"></i>
           </router-link>
         </li>
@@ -16,14 +16,12 @@
           <li><router-link to="/" class="header-nav-item">PÁGINA INICIAL</router-link></li>
           <li><router-link to="/search-supervisor" class="header-nav-item">BUSCAR ORIENTADOR</router-link></li>
 
-          
           <li v-if="authStore.user">
             <router-link to="/perfil/aluno" class="header-nav-item">
               MEU PERFIL
             </router-link>
           </li>
-
-          </template>
+        </template>
 
       </ul>
     </nav>
@@ -36,17 +34,16 @@ import { useAuthStore } from '@/stores/auth';
 
 const authStore = useAuthStore();
 
-
 defineProps({
   isPublic: {
     type: Boolean,
     default: false
   }
 });
-
 </script>
 
 <style scoped>
+/* SEUS ESTILOS ORIGINAIS */
 .header {
   display: flex;
   align-items: center;
@@ -106,25 +103,25 @@ defineProps({
   display: none;
 }
 
+/* --- ESTILOS ESPECÍFICOS PARA O MODO PÚBLICO --- */
 .header-public .header-nav-desktop {
   width: auto;
   padding: 0 2rem;
-  height: 3rem; 
+  height: 3rem;
 }
 
-.header-public span{
+.header-public span {
   font-size: 1rem;
   font-weight: 400;
   font-style: italic;
 }
 
-
 .header-public .btn-login-especial {
   display: flex;
   align-items: center;
-  gap: 0.7rem; 
-  width: auto; 
-  color: var(--color-brand-primary); 
+  gap: 0.7rem;
+  width: auto;
+  color: var(--color-brand-primary);
 }
 
 .header-public .btn-login-especial i {
@@ -133,6 +130,7 @@ defineProps({
   font-size: 2em;
 }
 
+/* --- MENU MOBILE --- */
 #menuToggle {
   display: block;
   position: relative;
@@ -231,7 +229,7 @@ defineProps({
   font-weight: 500;
   justify-content: center;
   align-items: center;
-   transition: transform 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 #menu a:hover {

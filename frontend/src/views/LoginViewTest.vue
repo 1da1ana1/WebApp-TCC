@@ -1,13 +1,14 @@
 <template>
-  <div class="login-container">
-    <h1>Login de Desenvolvimento</h1>
-    <p>Simule o login da UNICAMP para testar o sistema.</p>
-
-    <button @click="entrarComoAluno" class="btn-dev">
-      Entrar como Aluno (Teste)
-    </button>
-
+  <div class="login-page">
+    <div class="login-card">
+      <h2>Login de Desenvolvimento</h2>
+      <p>Simule o acesso do aluno (Mock)</p>
+      
+      <button @click="entrar" class="btn-login">
+        Entrar como Aluno
+      </button>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -17,37 +18,41 @@ import { useRouter } from 'vue-router';
 const authStore = useAuthStore();
 const router = useRouter();
 
-function entrarComoAluno() {
-  // Chama aquela ação mockada que criamos no Pinia
-  // Passamos as credenciais que sabemos que funcionam no teste
-  const sucesso = authStore.login('aluno@unicamp.br', '123456');
+async function entrar() {
+  // Chama a ação login do seu arquivo auth.js
+  const sucesso = await authStore.login('aluno@unicamp.br', '123456');
   
   if (sucesso) {
-    // Se deu certo, manda o usuário para a Home ou Dashboard
-    router.push('/'); 
+    alert('Login realizado com sucesso!');
+    router.push('/'); // Manda para a Home
+  } else {
+    alert('Erro no login');
   }
 }
 </script>
 
 <style scoped>
-.login-container {
+.login-page {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   height: 60vh;
-  gap: 1rem;
 }
-.btn-dev {
-  padding: 1rem 2rem;
-  background-color: var(--color-brand-primary);
-  color: white;
-  border: none;
+.login-card {
+  text-align: center;
+  padding: 2rem;
+  border: 1px solid #ccc;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
+  background: white;
 }
-.btn-dev:hover {
-  opacity: 0.9;
+.btn-login {
+  background-color: var(--color-brand-primary, #004b86);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+  font-size: 1rem;
 }
 </style>
