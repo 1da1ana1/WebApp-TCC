@@ -6,30 +6,44 @@
       <ul class="header-links">
         
         <li v-if="isPublic">
-          <a href="https://sso.unicamp.br..." class="header-nav-item btn-login-especial">
-            <span>Fazer Login</span>
+          <router-link to="/login" class="header-nav-item btn-login-especial">
+            <span>Fazer Login </span>
             <i class="bi bi-box-arrow-in-right"></i>
-          </a>
+          </router-link>
         </li>
 
         <template v-else>
           <li><router-link to="/" class="header-nav-item">PÁGINA INICIAL</router-link></li>
           <li><router-link to="/search-supervisor" class="header-nav-item">BUSCAR ORIENTADOR</router-link></li>
-          <li><router-link to="/perfil/aluno" class="header-nav-item">MEU PERFIL</router-link></li>
+
+          
+          <li v-if="authStore.user">
+            <router-link to="/perfil/aluno" class="header-nav-item">
+              MEU PERFIL
+            </router-link>
+          </li>
+
           </template>
 
       </ul>
     </nav>
-  </header>
+    
+    </header>
 </template>
 
 <script setup>
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
+
+
 defineProps({
   isPublic: {
     type: Boolean,
     default: false
   }
 });
+
 </script>
 
 <style scoped>
