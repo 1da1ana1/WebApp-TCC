@@ -1,32 +1,36 @@
 <template>
-  <header class="header">
+  <header class="header" :class="{ 'header-public': isPublic }">
     <img src="/src/assets/img/logos-header.png" alt="logo ft" class="header-logo" />
 
     <nav class="header-nav-desktop">
       <ul class="header-links">
-        <li><a href="#" class="header-nav-item">PÁGINA INICIAL</a></li>
-        <li><a href="#" class="header-nav-item">BUSCAR ORIENTADOR</a></li>
-        <li><a href="#" class="header-nav-item">MEU PERFIL</a></li>
+        
+        <li v-if="isPublic">
+          <a href="https://sso.unicamp.br..." class="header-nav-item btn-login-especial">
+            <span>Fazer Login</span>
+            <i class="bi bi-box-arrow-in-right"></i>
+          </a>
+        </li>
+
+        <template v-else>
+          <li><router-link to="/" class="header-nav-item">PÁGINA INICIAL</router-link></li>
+          <li><router-link to="/search-supervisor" class="header-nav-item">BUSCAR ORIENTADOR</router-link></li>
+          <li><router-link to="/perfil/aluno" class="header-nav-item">MEU PERFIL</router-link></li>
+          </template>
+
       </ul>
-    </nav>
-
-    <nav role="navigation" class="header-nav-mobile">
-      <div id="menuToggle">
-        <input type="checkbox" />
-
-        <span></span>
-        <span></span>
-        <span></span>
-
-        <ul id="menu">
-          <li><a href="#">Página Inicial</a></li>
-          <li><a href="#">Buscar Orientador</a></li>
-          <li><a href="#">Meu perfil</a></li>
-        </ul>
-      </div>
     </nav>
   </header>
 </template>
+
+<script setup>
+defineProps({
+  isPublic: {
+    type: Boolean,
+    default: false
+  }
+});
+</script>
 
 <style scoped>
 .header {
@@ -86,6 +90,33 @@
 
 .header-nav-mobile {
   display: none;
+}
+
+.header-public .header-nav-desktop {
+  width: auto;
+  padding: 0 2rem;
+  height: 3rem; 
+}
+
+.header-public span{
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: italic;
+}
+
+
+.header-public .btn-login-especial {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem; 
+  width: auto; 
+  color: var(--color-brand-primary); 
+}
+
+.header-public .btn-login-especial i {
+  display: flex;
+  align-items: center;
+  font-size: 2em;
 }
 
 #menuToggle {

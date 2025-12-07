@@ -15,9 +15,9 @@ import { ref } from 'vue';
 import ProfessorCard from '@/components/ProfessorCard.vue';
 // (Aqui você faria a chamada API para buscar os docentes)
 const docentes = ref([
-  { id: 1, name: "Prof. Mock 1", vagas: "5/5" },
-  { id: 2, name: "Prof. Mock 2", vagas: "3/5" },
-  { id: 3, name: "Prof. Mock 3", vagas: "0/5" },
+  { id: 1, name: "Prof. Mock 1", vagas: " 5/5" },
+  { id: 2, name: "Prof. Mock 2", vagas: " 3/5" },
+  { id: 3, name: "Prof. Mock 3", vagas: " 0/5" },
 ]);
 </script>
 
