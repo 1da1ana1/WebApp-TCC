@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <h2>🔐 Login de Desenvolvimento</h2>
+      <h2>Login de Desenvolvimento</h2>
       <p>Simule o acesso do aluno (Mock)</p>
       
       <button @click="entrar" class="btn-login">
@@ -24,7 +24,7 @@ async function entrar() {
   
   if (sucesso) {
     alert('Login realizado com sucesso!');
-    router.push('/'); // Manda para a Home (agora logado)
+    router.push('/'); // Manda para a Home
   } else {
     alert('Erro no login');
   }

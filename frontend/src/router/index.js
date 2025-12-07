@@ -5,44 +5,46 @@ import SearchSupervisor from '../views/SearchProfessorView.vue'
 
 
 const routes = [
+
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/LoginViewTest.vue'),
+    meta: { layout: 'public' }
+  },
   
   {
     path: '/',
     name: 'Home',
-    component: SearchSupervisor, // Define a busca como página inicial
-    // Se quiser que a Home use o layout padrão, não precisa por meta
+    component: SearchSupervisor, 
+
   },
 
-  // --- 2. ROTA DE INFORMAÇÕES (Layout Público) ---
   {
     path: '/info',
     name: 'PublicInfo',
     component: () => import('@/views/PublicInfoView.vue'),
-    meta: { layout: 'public' } // <--- ISSO ATIVA O PublicLayout
+    meta: { layout: 'public' } 
   },
 
-  // --- 3. ROTA DE BUSCA (A mesma da Home, mas com URL explícita) ---
   {
     path: '/search-supervisor',
     name: 'SearchSupervisor',
     component: SearchSupervisor,
   },
 
-  // --- 4. PERFIL DO ALUNO ---
   {
     path: '/perfil/aluno',
     name: 'StudentProfile',
     component: () => import('@/views/StudentProfileView.vue'),
   },
 
-  // --- 5. PERFIL DO DOCENTE (Com ID dinâmico) ---
   {
     path: '/docente/:id',
     name: 'ProfessorProfile',
     component: () => import('@/views/ProfessorProfileView.vue'),
   },
 
-  // --- 6. PAINEL DO COORDENADOR ---
   {
     path: '/painel/coordenador',
     name: 'CoordinatorDashboard',

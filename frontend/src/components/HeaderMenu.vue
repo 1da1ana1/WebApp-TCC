@@ -4,20 +4,22 @@
 
     <nav class="header-nav-desktop">
       <ul class="header-links">
-        
         <li v-if="isPublic">
-          <a href="https://sso.unicamp.br..." class="header-nav-item btn-login-especial">
+          <router-link to="/login" class="header-nav-item btn-login-especial">
             <span>Fazer Login</span>
             <i class="bi bi-box-arrow-in-right"></i>
-          </a>
+          </router-link>
         </li>
 
         <template v-else>
           <li><router-link to="/" class="header-nav-item">PÁGINA INICIAL</router-link></li>
-          <li><router-link to="/search-supervisor" class="header-nav-item">BUSCAR ORIENTADOR</router-link></li>
+          <li>
+            <router-link to="/search-supervisor" class="header-nav-item"
+              >BUSCAR ORIENTADOR</router-link
+            >
+          </li>
           <li><router-link to="/perfil/aluno" class="header-nav-item">MEU PERFIL</router-link></li>
-          </template>
-
+        </template>
       </ul>
     </nav>
   </header>
@@ -27,9 +29,9 @@
 defineProps({
   isPublic: {
     type: Boolean,
-    default: false
-  }
-});
+    default: false,
+  },
+})
 </script>
 
 <style scoped>
@@ -95,22 +97,21 @@ defineProps({
 .header-public .header-nav-desktop {
   width: auto;
   padding: 0 2rem;
-  height: 3rem; 
+  height: 3rem;
 }
 
-.header-public span{
+.header-public span {
   font-size: 1rem;
   font-weight: 400;
   font-style: italic;
 }
 
-
 .header-public .btn-login-especial {
   display: flex;
   align-items: center;
-  gap: 0.7rem; 
-  width: auto; 
-  color: var(--color-brand-primary); 
+  gap: 0.7rem;
+  width: auto;
+  color: var(--color-brand-primary);
 }
 
 .header-public .btn-login-especial i {
@@ -217,7 +218,7 @@ defineProps({
   font-weight: 500;
   justify-content: center;
   align-items: center;
-   transition: transform 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 #menu a:hover {
