@@ -157,7 +157,6 @@ const scrollToSection = (id) => {
 }
 
 .info-section {
-  min-height: 90vh;
   margin-bottom: 2rem;
 }
 
