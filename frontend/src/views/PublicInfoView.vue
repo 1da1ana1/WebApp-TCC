@@ -34,13 +34,20 @@
 
       <section id="section-2" class="info-section">
         <div class="glass-card">
-          <h2>Cronograma de buscas</h2>
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia vitae similique modi
-            iure quaerat nostrum quo veritatis illo amet non? Quo ipsum voluptatibus facilis
-            temporibus, error quis nobis earum qui.
-          </p>
-          <div class="fake-content"></div>
+          <h2>Cronograma de Buscas</h2>
+          <p class="subtitle">Fique atento às datas e prazos do semestre atual.</p>
+
+          <div class="timeline-grid">
+            <div v-for="item in cronograma" :key="item.id" class="timeline-item">
+              <div class="icon-box">
+                <i :class="['bi', item.icon]"></i>
+              </div>
+
+              <span class="timeline-date">{{ item.data }}</span>
+
+              <h4 class="timeline-title">{{ item.titulo }}</h4>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -60,19 +67,70 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+
+// --- DADOS DO CRONOGRAMA (SCRIPT PRONTO) ---
+// Para mudar a data, basta alterar o campo 'data' aqui.
+// No futuro, isso pode vir de uma API: const cronograma = await api.get('/cronograma')
+const cronograma = ref([
+  { 
+    id: 1, 
+    titulo: 'Definição de vagas', 
+    data: '01/02 a 10/02', 
+    icon: 'bi-paperclip' // O ícone de clipe que você pediu
+  },
+  { 
+    id: 2, 
+    titulo: 'Cadastro de temas', 
+    data: '11/02 a 15/02', 
+    icon: 'bi-pencil-square' 
+  },
+  { 
+    id: 3, 
+    titulo: 'Período de busca e solicitação', 
+    data: '16/02 a 25/02', 
+    icon: 'bi-search' 
+  },
+  { 
+    id: 4, 
+    titulo: 'Confirmação do vínculo', 
+    data: '26/02 a 28/02', 
+    icon: 'bi-check-circle-fill' 
+  },
+  { 
+    id: 5, 
+    titulo: 'Encerramento do período', 
+    data: '01/03', 
+    icon: 'bi-calendar-x' 
+  },
+  { 
+    id: 6, 
+    titulo: 'Início das orientações', 
+    data: '05/03', 
+    icon: 'bi-people-fill' 
+  },
+  { 
+    id: 7, 
+    titulo: 'Homologação e análise', 
+    data: '10/03', 
+    icon: 'bi-file-earmark-check' 
+  }
+]);
+
+// Função de Rolagem
 const scrollToSection = (id) => {
-  const element = document.getElementById(id)
+  const element = document.getElementById(id);
   if (element) {
-    const headerOffset = 100
-    const elementPosition = element.getBoundingClientRect().top
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+    const headerOffset = 100;
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
     window.scrollTo({
       top: offsetPosition,
       behavior: 'smooth',
-    })
+    });
   }
-}
+};
 </script>
 
 <style scoped>
