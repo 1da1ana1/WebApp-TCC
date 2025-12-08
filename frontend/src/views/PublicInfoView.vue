@@ -62,11 +62,20 @@
         </div>
       </section>
     </main>
+    <button
+      v-show="showBackToTop"
+      @click="scrollToTop"
+      type="button"
+      class="btn btn-danger btn-floating btn-lg"
+      id="btn-back-to-top"
+    >
+      <i class="bi bi-arrow-up"></i>
+    </button>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const cronograma = ref([
   { id: 1, titulo: 'Definição de vagas', data: '01/02 a 10/02', icon: 'bi-paperclip' },
@@ -75,18 +84,37 @@ const cronograma = ref([
   { id: 4, titulo: 'Confirmação vínculo', data: '26/02 a 28/02', icon: 'bi-check-circle-fill' },
   { id: 5, titulo: 'Encerramento', data: '01/03', icon: 'bi-calendar-x' },
   { id: 6, titulo: 'Início orientações', data: '05/03', icon: 'bi-people-fill' },
-  { id: 7, titulo: 'Homologação', data: '10/03', icon: 'bi-file-earmark-check' }
-]);
+  { id: 7, titulo: 'Homologação', data: '10/03', icon: 'bi-file-earmark-check' },
+])
 
 const scrollToSection = (id) => {
-  const element = document.getElementById(id);
+  const element = document.getElementById(id)
   if (element) {
-    const headerOffset = 100;
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    const headerOffset = 100
+    const elementPosition = element.getBoundingClientRect().top
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+    window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
   }
-};
+}
+
+const showBackToTop = ref(false)
+
+const handleScroll = () => {
+
+  showBackToTop.value = window.scrollY > 700
+}
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style scoped>
@@ -161,71 +189,62 @@ const scrollToSection = (id) => {
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-background-card-default);
   padding: 3rem;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .fake-content {
   height: 400px;
-  background-color: #f4f4f4;
-  margin-top: 1rem;
-  border-radius: 4px;
 }
 
-
 .timeline-grid {
-  display: flex; 
+  display: flex;
   justify-content: space-between;
   align-items: flex-start;
   position: relative;
   margin-top: 2rem;
   padding-bottom: 1rem;
-  overflow-x: auto; /* Garante scroll se a tela for muito pequena */
+  overflow-x: auto; 
 }
 
 .timeline-item {
-  flex: 1; 
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   position: relative;
-  min-width: 100px; 
+  min-width: 100px;
   padding: 0 5px;
 }
 
 .timeline-item::after {
   content: '';
   position: absolute;
-  top: 25px; 
-  left: 50%; 
-  width: 100%; 
+  top: 25px;
+  left: 50%;
+  width: 100%;
   height: 2px;
-  background-color: var(--color-brand-primary); 
+  background-color: var(--color-brand-primary);
   z-index: 0;
   opacity: 0.3;
 }
-
 
 .timeline-item:last-child::after {
   display: none;
 }
 
-
 .icon-box {
-  background-color: #fff; 
-  z-index: 1; 
+  background-color: var( --color-background-card-default);
+  z-index: 1;
   padding: 0 10px;
   margin-bottom: 15px;
 }
 
-
 .timeline-item .bi {
-  font-size: 2.5rem; 
+  font-size: 2.5rem;
 }
-
 
 .timeline-title {
   font-size: 0.9rem;
@@ -237,7 +256,37 @@ const scrollToSection = (id) => {
 
 .timeline-date {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--color-text-muted);
   font-weight: bold;
+}
+
+#btn-back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 999;
+
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-secondary);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+
+  transition:
+    transform 0.3s,
+    background-color 0.3s;
+}
+
+#btn-back-to-top:hover {
+  background-color: var(--color-brand-primary);
+  transform: scale(1.15);
 }
 </style>
