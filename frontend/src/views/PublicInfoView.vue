@@ -43,9 +43,8 @@
                 <i :class="['bi', item.icon]"></i>
               </div>
 
-              <span class="timeline-date">{{ item.data }}</span>
-
               <h4 class="timeline-title">{{ item.titulo }}</h4>
+              <span class="timeline-date">{{ item.data }}</span>
             </div>
           </div>
         </div>
@@ -69,66 +68,23 @@
 <script setup>
 import { ref } from 'vue';
 
-// --- DADOS DO CRONOGRAMA (SCRIPT PRONTO) ---
-// Para mudar a data, basta alterar o campo 'data' aqui.
-// No futuro, isso pode vir de uma API: const cronograma = await api.get('/cronograma')
 const cronograma = ref([
-  { 
-    id: 1, 
-    titulo: 'Definição de vagas', 
-    data: '01/02 a 10/02', 
-    icon: 'bi-paperclip' // O ícone de clipe que você pediu
-  },
-  { 
-    id: 2, 
-    titulo: 'Cadastro de temas', 
-    data: '11/02 a 15/02', 
-    icon: 'bi-pencil-square' 
-  },
-  { 
-    id: 3, 
-    titulo: 'Período de busca e solicitação', 
-    data: '16/02 a 25/02', 
-    icon: 'bi-search' 
-  },
-  { 
-    id: 4, 
-    titulo: 'Confirmação do vínculo', 
-    data: '26/02 a 28/02', 
-    icon: 'bi-check-circle-fill' 
-  },
-  { 
-    id: 5, 
-    titulo: 'Encerramento do período', 
-    data: '01/03', 
-    icon: 'bi-calendar-x' 
-  },
-  { 
-    id: 6, 
-    titulo: 'Início das orientações', 
-    data: '05/03', 
-    icon: 'bi-people-fill' 
-  },
-  { 
-    id: 7, 
-    titulo: 'Homologação e análise', 
-    data: '10/03', 
-    icon: 'bi-file-earmark-check' 
-  }
+  { id: 1, titulo: 'Definição de vagas', data: '01/02 a 10/02', icon: 'bi-paperclip' },
+  { id: 2, titulo: 'Cadastro de temas', data: '11/02 a 15/02', icon: 'bi-pencil-square' },
+  { id: 3, titulo: 'Busca e solicitação', data: '16/02 a 25/02', icon: 'bi-search' },
+  { id: 4, titulo: 'Confirmação vínculo', data: '26/02 a 28/02', icon: 'bi-check-circle-fill' },
+  { id: 5, titulo: 'Encerramento', data: '01/03', icon: 'bi-calendar-x' },
+  { id: 6, titulo: 'Início orientações', data: '05/03', icon: 'bi-people-fill' },
+  { id: 7, titulo: 'Homologação', data: '10/03', icon: 'bi-file-earmark-check' }
 ]);
 
-// Função de Rolagem
 const scrollToSection = (id) => {
   const element = document.getElementById(id);
   if (element) {
     const headerOffset = 100;
     const elementPosition = element.getBoundingClientRect().top;
     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth',
-    });
+    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
   }
 };
 </script>
@@ -217,5 +173,72 @@ const scrollToSection = (id) => {
   background-color: #f4f4f4;
   margin-top: 1rem;
   border-radius: 4px;
+}
+
+
+.timeline-grid {
+  display: flex; 
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  margin-top: 2rem;
+  padding-bottom: 1rem;
+  overflow-x: auto; /* Garante scroll se a tela for muito pequena */
+}
+
+.timeline-item {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  min-width: 100px; 
+  padding: 0 5px;
+}
+
+.timeline-item::after {
+  content: '';
+  position: absolute;
+  top: 25px; 
+  left: 50%; 
+  width: 100%; 
+  height: 2px;
+  background-color: var(--color-brand-primary); 
+  z-index: 0;
+  opacity: 0.3;
+}
+
+
+.timeline-item:last-child::after {
+  display: none;
+}
+
+
+.icon-box {
+  background-color: #fff; 
+  z-index: 1; 
+  padding: 0 10px;
+  margin-bottom: 15px;
+}
+
+
+.timeline-item .bi {
+  font-size: 2.5rem; 
+}
+
+
+.timeline-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 5px 0;
+  line-height: 1.2;
+}
+
+.timeline-date {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: bold;
 }
 </style>
