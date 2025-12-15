@@ -4,19 +4,21 @@
       <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" />
 
       <p>{{ professor.name }}</p>
-      <div class="available-spots">{{ professor.vagas }}vagas disponíveis</div>
+      <div class="available-spots">{{ professor.vagas }} vagas disponíveis</div>
       <div class="registered-tags">
         <span class="tag">Inteligência Artificial</span>
         <span class="tag">Machine Learning</span>
         <span class="tag">Mineração de Dados</span>
       </div>
     </div>
+    
     <div class="send-request">
       <router-link
         :to="{ name: 'ProfessorProfile', params: { id: professor.id } }"
         class="send-request-btn"
+        style="text-decoration: none; color: inherit; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"
       >
-        Enviar Solicitação
+        Ver Perfil
       </router-link>
     </div>
   </div>
@@ -158,4 +160,22 @@ defineProps({
 .send-request:hover {
   opacity: 0.8;
 }
+
+.professor-card {
+  background-color: var(--white-color);
+  max-width: 68.313rem;
+  width: 100%;
+  height: 9.125rem;
+  border-bottom: 2px solid var(--color-border-default);
+  /* Ajuste no posicionamento */
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: center;
+}
+
+.card-action {
+  justify-self: center;
+}
+
 </style>
