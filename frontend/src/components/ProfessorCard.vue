@@ -167,7 +167,6 @@ defineProps({
   width: 100%;
   height: 9.125rem;
   border-bottom: 2px solid var(--color-border-default);
-  /* Ajuste no posicionamento */
   padding: 0 2rem;
   display: grid;
   grid-template-columns: 2fr 1fr;

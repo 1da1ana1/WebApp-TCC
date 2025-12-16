@@ -9,6 +9,7 @@
     </div>
 
     <div v-else-if="docente" class="profile-content">
+      
       <div class="profile-header">
         <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" />
         <div class="profile-info">
@@ -19,66 +20,63 @@
       </div>
 
       <div class="profile-body">
-        <h3>Temas de Interesse:</h3>
-        <div class="tags-container">
-          <span class="tag" v-for="tag in docente.tags" :key="tag">{{ tag }}</span>
+        
+        <div class="interests-content">
+            <h3>Temas de Interesse:</h3>
+            <div class="tags-container">
+            <span class="tag" v-for="tag in docente.tags" :key="tag">{{ tag }}</span>
+            </div>
         </div>
+
+        <button class="btn-send-request" @click="enviarSolicitacao">
+            Enviar Solicitação
+        </button>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-
 import { ref, onMounted } from 'vue';
-
 import { useRoute } from 'vue-router';
 
 const docente = ref(null); 
-
 const isLoading = ref(true);
-
 const error = ref(null);
-
-
 const route = useRoute(); 
-
 const docenteId = route.params.id; 
 
+const enviarSolicitacao = () => {
+    alert(`Solicitação enviada para ${docente.value.name}!`);
+};
 
 onMounted(async () => {
   try {
-
     const mockDatabase = {
       '1': { id: 1, name: "Prof. Mock 1 Detalhado", email: "mock1@unicamp.br", lattes: "http://lattes...", tags: ['IA', 'Redes Neurais'] },
       '2': { id: 2, name: "Prof. Mock 2 Detalhado", email: "mock2@unicamp.br", lattes: "http://lattes...", tags: ['Banco de Dados', 'Sistemas'] },
       '3': { id: 3, name: "Prof. Mock 3 Detalhado", email: "mock3@unicamp.br", lattes: "http://lattes...", tags: ['Engenharia de Software'] },
     };
     
-    
     await new Promise(resolve => setTimeout(resolve, 1000)); 
     
     const data = mockDatabase[docenteId];
     
     if (data) {
-     
       docente.value = data; 
     } else {
-      
       throw new Error('Docente não encontrado');
     }
   } catch (err) {
-   
     error.value = err.message;
   } finally {
-    
     isLoading.value = false;
   }
 });
 </script>
 
 <style scoped>
-
 .profile-container {
   padding: 2rem;
   background-color: var(--white-color, #fff);
@@ -128,8 +126,17 @@ onMounted(async () => {
   font-weight: bold;
 }
 
+
 .profile-body {
   padding-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.interests-content {
+    flex: 1;
 }
 
 .tags-container {
@@ -138,7 +145,6 @@ onMounted(async () => {
   gap: 0.5rem;
   padding-top: 0.5rem;
 }
-
 
 .tag {
   width: fit-content;
@@ -154,5 +160,32 @@ onMounted(async () => {
   background-color: var(--color-tag1, #eee);
   color: var(--color-tag1-darker, #333);
   border: 1px solid var(--color-tag1-darker, #333);
+}
+
+.btn-send-request {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  
+  width: 11.813rem;
+  height: 2.625rem;
+  
+  flex-shrink: 0; 
+  
+  background-color: var(--color-status-neutral, #eee);
+  color: var(--color-text-neutral, #333);
+  border: 2px solid var(--color-border-default, #ccc);
+  border-radius: 8px;
+  
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.btn-send-request:hover {
+  opacity: 0.8;
 }
 </style>
