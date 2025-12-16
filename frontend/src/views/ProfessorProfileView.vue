@@ -41,8 +41,21 @@
         <p>Você deseja enviar uma solicitação de orientação para <strong>{{ docente?.name }}</strong>?</p>
         
         <div class="modal-actions">
-          <button class="btn-cancel" @click="fecharModal">Cancelar</button>
-          <button class="btn-confirm" @click="confirmarEnvio">Confirmar</button>
+          <button 
+            class="btn-cancel" 
+            @click="fecharModal" 
+            :disabled="isSending"
+          >
+            Cancelar
+          </button>
+          
+          <button 
+            class="btn-confirm" 
+            @click="confirmarEnvio" 
+            :disabled="isSending"
+          >
+            {{ isSending ? 'Enviando...' : 'Confirmar' }}
+          </button>
         </div>
       </div>
     </div>
@@ -52,6 +65,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import Swal from 'sweetalert2'; 
 
 const docente = ref(null); 
 const isLoading = ref(true);
@@ -59,24 +73,64 @@ const error = ref(null);
 const route = useRoute(); 
 const docenteId = route.params.id; 
 
-// --- LÓGICA DO MODAL ---
+const authUser = { id: 5, name: "Aluno Exemplo" };
+
+// --- LÓGICA DO MODAL E ENVIO ---
 const showModal = ref(false);
+const isSending = ref(false);
 
 const abrirModal = () => {
   showModal.value = true;
 };
 
 const fecharModal = () => {
-  showModal.value = false;
+  // Só fecha se NÃO estiver enviando (para evitar fechar no meio do loading)
+  if (!isSending.value) {
+    showModal.value = false;
+  }
 };
 
-const confirmarEnvio = () => {
-  // AQUI VAI A LÓGICA REAL DE ENVIO (API)
-  alert(`Sucesso! Solicitação enviada para ${docente.value.name}.`);
-  
-  fecharModal();
-};
+const confirmarEnvio = async () => {
+  isSending.value = true; // 1. Começa o Loading
 
+  try {
+    // === SIMULAÇÃO BACK-END ===
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // === 2. FECHA O MODAL PRIMEIRO (SUCESSO) ===
+    // Forçamos o fechamento direto aqui, ignorando a função fecharModal
+    showModal.value = false;
+
+    // === 3. MOSTRA O ALERTA COM PEQUENO DELAY ===
+    // O setTimeout permite que o modal suma visualmente antes do alerta aparecer
+    setTimeout(() => {
+        Swal.fire({
+          title: 'Sucesso!',
+          text: `Solicitação enviada para ${docente.value.name}.`,
+          icon: 'success',
+          confirmButtonColor: 'var(--color-status-success)',
+          timer: 3000
+        });
+    }, 200); // 200ms de espera
+
+  } catch (err) {
+    console.error(err);
+    
+    // Se der erro, fecha o modal também antes de avisar (opcional)
+    showModal.value = false;
+
+    setTimeout(() => {
+        Swal.fire({
+          title: 'Erro!',
+          text: 'Não foi possível enviar a solicitação. Tente novamente.',
+          icon: 'error',
+          confirmButtonColor: 'var(--color-status-danger)'
+        });
+    }, 200);
+  } finally {
+    isSending.value = false; 
+  }
+};
 
 onMounted(async () => {
   try {
@@ -104,6 +158,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* SEUS ESTILOS ORIGINAIS MANTIDOS */
+
 .profile-container {
   padding: 2rem;
   background-color: var(--white-color, #fff);
@@ -189,22 +245,19 @@ onMounted(async () => {
   border: 1px solid var(--color-tag1-darker, #333);
 }
 
+/* BOTÃO DE ENVIAR SOLICITAÇÃO */
 .btn-send-request {
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-
   width: 11.813rem;
   height: 2.625rem;
-
   flex-shrink: 0;
-
   background-color: var(--color-button-primary);
   border: 2px solid #0e4392;
   color:#fff;
   border-radius: 8px;
-
   font-family: 'Poppins', sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
@@ -217,6 +270,7 @@ onMounted(async () => {
   opacity: 0.8;
 }
 
+/* MODAL */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -270,13 +324,9 @@ onMounted(async () => {
   font-style: italic;
 }
 
-.btn-cancel:hover, .btn-confirm:hover {
- opacity: 0.8;
-}
-
 .btn-confirm {
   background-color: var(--color-status-success); 
-  border:  2px solid #137c2c;
+  border: 2px solid #137c2c;
   color: var(--color-text-secondary);
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -284,6 +334,16 @@ onMounted(async () => {
   font-weight: 600;
   font-style: italic;
   transition: opacity 0.2s ease;
+  min-width: 100px; 
+}
+
+.btn-cancel:hover:not(:disabled), .btn-confirm:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.btn-cancel:disabled, .btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @keyframes fadeIn {
