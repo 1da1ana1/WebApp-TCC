@@ -1,12 +1,15 @@
 <template>
   <div class="profile-container">
-    <div v-if="isLoading" class="loading-message">Carregando dados do docente...</div>
+    <div v-if="isLoading" class="loading-message">
+      Carregando dados do docente...
+    </div>
 
     <div v-else-if="error" class="error-message">
       {{ error }}
     </div>
 
     <div v-else-if="docente" class="profile-content">
+      
       <div class="profile-header">
         <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" />
         <div class="profile-info">
@@ -17,77 +20,146 @@
       </div>
 
       <div class="profile-body">
+        
         <div class="interests-content">
-          <h3>Temas de Interesse:</h3>
-          <div class="tags-container">
+            <h3>Temas de Interesse:</h3>
+            <div class="tags-container">
             <span class="tag" v-for="tag in docente.tags" :key="tag">{{ tag }}</span>
-          </div>
+            </div>
         </div>
 
-        <button class="btn-send-request" @click="enviarSolicitacao">Enviar Solicitação</button>
+        <button class="btn-send-request" @click="abrirModal">
+            Enviar Solicitação
+        </button>
+      </div>
+
+    </div>
+
+    <div v-if="showModal" class="modal-overlay" @click.self="fecharModal">
+      <div class="modal-card">
+        <h3>Confirmar Envio</h3>
+        <p>Você deseja enviar uma solicitação de orientação para <strong>{{ docente?.name }}</strong>?</p>
+        
+        <div class="modal-actions">
+          <button 
+            class="btn-cancel" 
+            @click="fecharModal" 
+            :disabled="isSending"
+          >
+            Cancelar
+          </button>
+          
+          <button 
+            class="btn-confirm" 
+            @click="confirmarEnvio" 
+            :disabled="isSending"
+          >
+            {{ isSending ? 'Enviando...' : 'Confirmar' }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+    </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import Swal from 'sweetalert2'; 
 
-const docente = ref(null)
-const isLoading = ref(true)
-const error = ref(null)
-const route = useRoute()
-const docenteId = route.params.id
+const docente = ref(null); 
+const isLoading = ref(true);
+const error = ref(null);
+const route = useRoute(); 
+const docenteId = route.params.id; 
 
-const enviarSolicitacao = () => {
-  alert(`Solicitação enviada para ${docente.value.name}!`)
-}
+const authUser = { id: 5, name: "Aluno Exemplo" };
+
+// --- LÓGICA DO MODAL E ENVIO ---
+const showModal = ref(false);
+const isSending = ref(false);
+
+const abrirModal = () => {
+  showModal.value = true;
+};
+
+const fecharModal = () => {
+  // Só fecha se NÃO estiver enviando (para evitar fechar no meio do loading)
+  if (!isSending.value) {
+    showModal.value = false;
+  }
+};
+
+const confirmarEnvio = async () => {
+  isSending.value = true; // 1. Começa o Loading
+
+  try {
+    // === SIMULAÇÃO BACK-END ===
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // === 2. FECHA O MODAL PRIMEIRO (SUCESSO) ===
+    // Forçamos o fechamento direto aqui, ignorando a função fecharModal
+    showModal.value = false;
+
+    // === 3. MOSTRA O ALERTA COM PEQUENO DELAY ===
+    // O setTimeout permite que o modal suma visualmente antes do alerta aparecer
+    setTimeout(() => {
+        Swal.fire({
+          title: 'Sucesso!',
+          text: `Solicitação enviada para ${docente.value.name}.`,
+          icon: 'success',
+          confirmButtonColor: 'var(--color-status-success)',
+          timer: 3000
+        });
+    }, 200); // 200ms de espera
+
+  } catch (err) {
+    console.error(err);
+    
+    // Se der erro, fecha o modal também antes de avisar (opcional)
+    showModal.value = false;
+
+    setTimeout(() => {
+        Swal.fire({
+          title: 'Erro!',
+          text: 'Não foi possível enviar a solicitação. Tente novamente.',
+          icon: 'error',
+          confirmButtonColor: 'var(--color-status-danger)'
+        });
+    }, 200);
+  } finally {
+    isSending.value = false; 
+  }
+};
 
 onMounted(async () => {
   try {
     const mockDatabase = {
-      1: {
-        id: 1,
-        name: 'Prof. Mock 1 Detalhado',
-        email: 'mock1@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['IA', 'Redes Neurais'],
-      },
-      2: {
-        id: 2,
-        name: 'Prof. Mock 2 Detalhado',
-        email: 'mock2@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['Banco de Dados', 'Sistemas'],
-      },
-      3: {
-        id: 3,
-        name: 'Prof. Mock 3 Detalhado',
-        email: 'mock3@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['Engenharia de Software'],
-      },
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    const data = mockDatabase[docenteId]
-
+      '1': { id: 1, name: "Prof. Mock 1 Detalhado", email: "mock1@unicamp.br", lattes: "http://lattes...", tags: ['IA', 'Redes Neurais'] },
+      '2': { id: 2, name: "Prof. Mock 2 Detalhado", email: "mock2@unicamp.br", lattes: "http://lattes...", tags: ['Banco de Dados', 'Sistemas'] },
+      '3': { id: 3, name: "Prof. Mock 3 Detalhado", email: "mock3@unicamp.br", lattes: "http://lattes...", tags: ['Engenharia de Software'] },
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    
+    const data = mockDatabase[docenteId];
+    
     if (data) {
-      docente.value = data
+      docente.value = data; 
     } else {
-      throw new Error('Docente não encontrado')
+      throw new Error('Docente não encontrado');
     }
   } catch (err) {
-    error.value = err.message
+    error.value = err.message;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-})
+});
 </script>
 
 <style scoped>
+/* SEUS ESTILOS ORIGINAIS MANTIDOS */
+
 .profile-container {
   padding: 2rem;
   background-color: var(--white-color, #fff);
@@ -173,22 +245,19 @@ onMounted(async () => {
   border: 1px solid var(--color-tag1-darker, #333);
 }
 
+/* BOTÃO DE ENVIAR SOLICITAÇÃO */
 .btn-send-request {
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-
   width: 11.813rem;
   height: 2.625rem;
-
   flex-shrink: 0;
-
-  background-color: var(--color-status-success);
-  border: 3px solid #0d6a24;
+  background-color: var(--color-button-primary);
+  border: 2px solid #0e4392;
   color:#fff;
   border-radius: 8px;
-
   font-family: 'Poppins', sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
@@ -199,5 +268,86 @@ onMounted(async () => {
 
 .btn-send-request:hover {
   opacity: 0.8;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; 
+  backdrop-filter: blur(2px); 
+}
+
+.modal-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-card h3 {
+  margin-top: 0;
+  color: var(--color-text-primary, #333);
+}
+
+.modal-card p {
+  color: var(--color-text-muted, #666);
+  margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-cancel {
+  background-color: var(--color-status-danger);
+  border: 2px solid #971b27;
+  color: var(--color-text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  font-style: italic;
+}
+
+.btn-confirm {
+  background-color: var(--color-status-success); 
+  border: 2px solid #137c2c;
+  color: var(--color-text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-style: italic;
+  transition: opacity 0.2s ease;
+  min-width: 100px; 
+}
+
+.btn-cancel:hover:not(:disabled), .btn-confirm:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.btn-cancel:disabled, .btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
