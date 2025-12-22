@@ -5,4 +5,8 @@ import { TeachersService } from '../services/app.service';
 export class AppController {
   constructor(private readonly appService: TeachersService) { }
 
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
 }
