@@ -1,4 +1,5 @@
 <template>
+  
   <header class="header" :class="{ 'header-public': isPublic }">
     <img src="/src/assets/img/logos-header.png" alt="logo ft" class="header-logo" />
 
@@ -17,7 +18,7 @@
           <li><router-link to="/search-supervisor" class="header-nav-item">BUSCAR ORIENTADOR</router-link></li>
 
           <li v-if="authStore.user">
-            <router-link to="/perfil/aluno" class="header-nav-item">
+            <router-link :to="linkPerfil" class="header-nav-item">
               MEU PERFIL
             </router-link>
           </li>
@@ -31,6 +32,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
+import { computed, onMounted } from 'vue';
 
 const authStore = useAuthStore();
 
@@ -39,6 +41,35 @@ defineProps({
     type: Boolean,
     default: false
   }
+});
+
+onMounted(() => {
+  // Se o Pinia estiver vazio, tenta buscar do localStorage
+  if (!authStore.user) {
+    const userSalvo = localStorage.getItem('user'); // Verifique se você salvou com o nome 'user' no login
+    const tokenSalvo = localStorage.getItem('token'); 
+    
+    if (userSalvo && tokenSalvo) {
+      // Reconecta os dados no Pinia
+      authStore.user = JSON.parse(userSalvo);
+      authStore.token = tokenSalvo; // Se seu store tiver token
+      
+      console.log("Usuário restaurado do LocalStorage:", authStore.user);
+    } else {
+      console.log("Nenhum usuário salvo encontrado no navegador.");
+    }
+  }
+});
+// -------------------------------------
+
+const linkPerfil = computed(() => {
+  // Use o operador ?. para evitar erro se user for null durante o carregamento
+  const tipoUsuario = authStore.user?.tipo || authStore.user?.role;
+  
+  if (tipoUsuario === 'docente' || tipoUsuario === 'orientador') {
+    return '/perfil/docente';
+  }
+  return '/perfil/aluno';
 });
 </script>
 
@@ -68,16 +99,18 @@ defineProps({
 .header-nav-desktop {
   background-color: var(--white-color);
   height: 3rem;
-  width: 33rem;
+  
+  width: auto; 
+  padding: 0 3rem; /* Adicione padding lateral para dar respiro */
+  
   border-radius: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .header-nav-desktop .header-links {
   display: flex;
-  gap: 5rem;
+  gap: 3rem; 
   list-style: none;
   justify-content: center;
   margin: 0;

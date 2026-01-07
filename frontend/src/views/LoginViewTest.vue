@@ -19,12 +19,12 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 async function entrar() {
-  // Chama a ação login do seu arquivo auth.js
+  
   const sucesso = await authStore.login('aluno@unicamp.br', '123456');
   
   if (sucesso) {
     alert('Login realizado com sucesso!');
-    router.push('/'); // Manda para a Home
+    router.push('/'); 
   } else {
     alert('Erro no login');
   }
