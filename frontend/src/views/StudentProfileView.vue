@@ -1,19 +1,6 @@
 <template>
+  <CronogramSchedule />
   <div class="page-wrapper">
-    <section class="timeline-section">
-      <div class="timeline-container">
-        <div v-for="(step, index) in timelineSteps" :key="index" class="timeline-block">
-          <div class="timeline-step" :class="{ active: step.active }">
-            <div class="icon-box">
-              <i :class="['bi', step.icon]"></i>
-            </div>
-            <p>{{ step.label }}</p>
-          </div>
-          <div v-if="index < timelineSteps.length - 1" class="line"></div>
-        </div>
-      </div>
-    </section>
-
     <div class="main-layout">
       <aside class="student-sidebar">
         <div class="profile-card">
@@ -42,7 +29,6 @@
           </div>
         </div>
       </aside>
-
       <main class="content-panel">
         <section class="card-section tags-input-area">
           <h3>Cadastrar temas:</h3>
@@ -113,6 +99,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import CronogramSchedule from '@/components/CronogramSchedule.vue'
 
 // --- 1. DADOS DO ALUNO (MOCK) ---
 const student = ref({
@@ -145,18 +132,6 @@ const getTagColor = (index) => {
 // --- 3. DADOS DAS SOLICITAÇÕES (MOCK DO BANCO) ---
 const myRequests = ref([])
 const hasGuidance = ref(false)
-
-// --- 4. DADOS DO CRONOGRAMA ---
-const timelineSteps = ref([
-  { label: 'Definição de vagas', icon: 'bi-paperclip', active: false },
-  { label: 'Cadastro de temas', icon: 'bi-list-check', active: false }, // Ícone ajustado
-  { label: 'Período de busca', icon: 'bi-chat-left-text', active: true }, // Ativo atual
-  { label: 'Análise solicitações', icon: 'bi-hourglass-split', active: false },
-  { label: 'Confirmação vínculo', icon: 'bi-person-check', active: false },
-  { label: 'Encerramento', icon: 'bi-lock', active: false },
-  { label: 'Início orientações', icon: 'bi-pencil-square', active: false },
-  { label: 'Homologação', icon: 'bi-graph-up', active: false },
-])
 
 // Helpers de Status
 const getStatusClass = (status) => {
@@ -202,61 +177,6 @@ onMounted(async () => {
 .page-wrapper {
   background-color: #e0e0e0; /* Fundo cinza da imagem */
   min-height: 100vh;
-}
-
-/* --- TIMELINE (CRONOGRAMA) --- */
-.timeline-section {
-  background-color: #d3d3d3; /* Cinza um pouco mais escuro */
-  padding: 1.5rem 0;
-  border-bottom: 1px solid #bcbcbc;
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
-}
-
-.timeline-container {
-  display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  padding: 0 20px;
-}
-
-.timeline-block {
-  display: flex;
-  align-items: center; /* Alinha a linha no meio do ícone */
-}
-
-.timeline-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  width: 90px;
-}
-
-.icon-box {
-  font-size: 1.8rem;
-  margin-bottom: 5px;
-  color: #000;
-}
-
-.timeline-step p {
-  font-size: 0.7rem;
-  line-height: 1.2;
-  color: #333;
-}
-
-/* Item Ativo (Destaque visual se quiser) */
-.timeline-step.active .icon-box {
-  color: #065f8b; /* Exemplo de destaque */
-  font-weight: bold;
-}
-
-.line {
-  width: 40px;
-  height: 2px;
-  background-color: #000;
-  margin-top: -25px; /* Sobe a linha para alinhar com o ícone */
 }
 
 /* --- MAIN LAYOUT (SIDEBAR + CONTENT) --- */
