@@ -210,7 +210,6 @@ onMounted(async () => {
 .avatar-circle {
   display: flex;
   justify-content: center;
-  padding: 2rem 0;
 }
 
 .avatar-circle img {
@@ -222,17 +221,14 @@ onMounted(async () => {
 }
 
 .student-name {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 400;
   margin: 0;
-  color: #333;
 }
 
 .student-ra {
-  font-size: 1.2rem;
-  font-weight: 800; /* RA bem grosso conforme imagem */
-  margin: 0.2rem 0 1rem 0;
-  color: #000;
+  font-size: 0.89rem;
+  font-weight: 800; 
 }
 
 /* Menu Sidebar */
@@ -257,11 +253,13 @@ onMounted(async () => {
   align-items: center;
   cursor: pointer;
   font-style: italic;
-  margin-bottom: 1px;
   font-size: 0.85rem;
   height: 95px;
 }
 
+.btn-history:last-child {
+  margin-top: 1px;
+}
 /* --- CONTEÚDO PRINCIPAL --- */
 .content-panel {
   flex: 1;
@@ -368,7 +366,7 @@ button {
 .professor-mini-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.2rem;
 }
 
 .mini-avatar {
