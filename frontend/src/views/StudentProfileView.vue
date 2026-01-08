@@ -302,18 +302,40 @@ const showJustification = (msg) => {
   background-color: var(--color-brand-primary);
   color: white;
   border: none;
-  padding: 12px;
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
   font-style: italic;
   font-size: 0.85rem;
-  height: 95px;
+  height: 76px; 
+  
+  transition: filter 0.3s ease;
+}
+
+.btn-history:hover {
+  filter: brightness(1.2);
+}
+
+.btn-history i {
+  transition: transform 0.3s ease;
+  display: inline-block; 
+}
+
+.btn-history:hover i {
+  transform: translateX(6px); 
+  
+}
+
+
+.btn-history.active-btn {
+  background-color: var(--color-brand-secondary);
+  font-weight: bold;
 }
 
 .btn-history:last-child {
-  margin-top: 1px;
+  margin-top: 2px;
 }
 /* --- CONTEÚDO PRINCIPAL --- */
 .content-panel {

@@ -50,12 +50,21 @@ defineEmits(['view-reason'])
 </script>
 
 <style scoped>
-h3{
-    margin-top: 0;
-    font-weight: 400;
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+
+
+.history-area {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
+
+h3 {
+  margin-top: 0;
+  font-weight: 400;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 2rem; 
+}
+
 .history-table {
   width: 100%;
   border-collapse: collapse;
@@ -70,8 +79,24 @@ h3{
 }
 
 .history-table tbody tr {
-  background-color: #d9d9d9; /* Cor cinza da imagem */
+  background-color: #d9d9d9;
   border-bottom: 1px solid #ccc;
+  transition: background-color 0.2s;
+}
+
+.history-table tbody tr:hover {
+  background-color: #cfcfcf;
+}
+
+
+.history-table th:first-child,
+.history-table td:first-child {
+  padding-left: 2rem; 
+}
+
+.history-table th:last-child,
+.history-table td:last-child {
+  padding-right: 2rem; 
 }
 
 .history-table td {
@@ -83,7 +108,7 @@ h3{
   display: flex;
   align-items: center;
   gap: 1rem;
-  border-right: 1px solid #999; /* Divisor vertical da imagem */
+  border-right: 1px solid #999; 
   margin: 0.5rem 0;
 }
 
@@ -115,5 +140,8 @@ h3{
   font-size: 1.1rem;
 }
 
-.btn-lupa:hover { color: var(--color-brand-primary); }
+.btn-lupa:hover { 
+  color: var(--color-brand-primary); 
+  transform: scale(1.1);
+}
 </style>
