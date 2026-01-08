@@ -30,29 +30,31 @@
         </div>
       </aside>
       <main class="content-panel">
-        <section class="card-section tags-input-area">
-          <h3>Cadastrar temas:</h3>
-          <p class="instruction italic">Insira palavras-chave aqui:</p>
+<section class="card-section tags-input-area">
+  <h3>Cadastrar temas:</h3>
+  <p class="instruction italic">Insira palavras-chave aqui:</p>
 
-          <div class="input-wrapper">
-            <input
-              type="text"
-              v-model="newTag"
-              @keyup.enter="addTag"
-              placeholder="Ex: Inteligência Artificial"
-            />
-            <button class="add-tag-btn" @click="addTag">
-              <i class="bi bi-plus-lg"></i>
-            </button>
-          </div>
+  <div class="tags-control-container">
+    <div class="input-wrapper">
+      <input
+        type="text"
+        v-model="newTag"
+        @keyup.enter="addTag"
+        placeholder="Ex: Inteligência Artificial"
+      />
+      <button type="button" class="add-tag-btn" @click="addTag">
+        <i class="bi bi-plus-lg"></i>
+      </button>
+    </div>
 
-          <div class="tags-display">
-            <span v-for="(tag, index) in tags" :key="index" class="tag" :class="getTagColor(index)">
-              {{ tag }}
-              <i class="bi bi-x" @click="removeTag(index)"></i>
-            </span>
-          </div>
-        </section>
+    <div class="tags-display">
+      <span v-for="(tag, index) in tags" :key="index" class="tag" :class="getTagColor(index)">
+        {{ tag }}
+        <i class="bi bi-x" @click="removeTag(index)"></i>
+      </span>
+    </div>
+  </div>
+</section>
 
         <section class="card-section requests-area">
           <h3>Minhas solicitações:</h3>
@@ -313,14 +315,6 @@ button {
   font-family: poppins;
 }
 
-.add-tag-btn {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  color: #666;
-  cursor: pointer;
-}
-
 /* Tags Coloridas */
 .tags-display {
   display: flex;
@@ -356,7 +350,41 @@ button {
   color: #1e3a8a;
 }
 
-/* --- ITEM DE SOLICITAÇÃO --- */
+.tags-control-container {
+  display: flex;
+  align-items: center; /* Alinha verticalmente ao centro */
+  flex-wrap: wrap;     /* Permite que as tags quebrem linha se houver muitas */
+  gap: 1.5rem;         /* Espaço entre a caixa de escrita e as tags */
+}
+
+/* Ajuste no wrapper para não forçar quebra de linha */
+.input-wrapper {
+  display: flex;
+  border: 1px solid #999;
+  border-radius: 4px;
+  padding: 5px;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 0; /* Removido para alinhar com as tags */
+}
+
+/* Garantir que o botão de adicionar seja clicável em toda sua área */
+.add-tag-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.add-tag-btn:hover {
+  color: var(--color-brand-primary); 
+}
+
 .request-item {
   display: flex;
   align-items: center;
