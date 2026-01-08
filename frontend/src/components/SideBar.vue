@@ -4,7 +4,7 @@
 
 <style>
 .side-bar {
-  width: 4rem;
+  width: 3.75rem;
   background-color: var(--color-brand-primary);
   height: calc(100vh - var(--header-height));
   position: sticky; 

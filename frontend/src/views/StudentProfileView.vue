@@ -19,8 +19,19 @@
             <nav class="sidebar-nav">
               <ul>
                 <li>
-                  <button class="btn-history">Início <i class="bi bi-chevron-right"></i></button>
-                  <button class="btn-history">
+                  <button 
+                    class="btn-history" 
+                    :class="{ 'active-btn': currentView === 'home' }"
+                    @click="currentView = 'home'"
+                  >
+                    Início <i class="bi bi-chevron-right"></i>
+                  </button>
+
+                  <button 
+                    class="btn-history" 
+                    :class="{ 'active-btn': currentView === 'history' }"
+                    @click="currentView = 'history'"
+                  >
                     Acessar histórico de solicitações <i class="bi bi-chevron-right"></i>
                   </button>
                 </li>
@@ -29,71 +40,88 @@
           </div>
         </div>
       </aside>
+
       <main class="content-panel">
-<section class="card-section tags-input-area">
-  <h3>Cadastrar temas:</h3>
-  <p class="instruction italic">Insira palavras-chave aqui:</p>
+        
+        <div v-if="currentView === 'home'">
+          <section class="card-section tags-input-area">
+            <h3>Cadastrar temas:</h3>
+            <p class="instruction italic">Insira palavras-chave aqui:</p>
 
-  <div class="tags-control-container">
-    <div class="input-wrapper">
-      <input
-        type="text"
-        v-model="newTag"
-        @keyup.enter="addTag"
-        placeholder="Ex: Inteligência Artificial"
-      />
-      <button type="button" class="add-tag-btn" @click="addTag">
-        <i class="bi bi-plus-lg"></i>
-      </button>
-    </div>
-
-    <div class="tags-display">
-      <span v-for="(tag, index) in tags" :key="index" class="tag" :class="getTagColor(index)">
-        {{ tag }}
-        <i class="bi bi-x" @click="removeTag(index)"></i>
-      </span>
-    </div>
-  </div>
-</section>
-
-        <section class="card-section requests-area">
-          <h3>Minhas solicitações:</h3>
-
-          <div v-for="req in myRequests" :key="req.id" class="request-item">
-            <div class="teacher-info">
-              <div class="professor-mini-card">
-                <img src="/src/assets/img/foto-perfil.svg" class="mini-avatar" />
-                <div class="prof-details">
-                  <p class="prof-name">{{ req.professorName }}</p>
-                  <span class="vagas-badge">{{ req.availableSpots }} vagas disponíveis</span>
-                </div>
+            <div class="tags-control-container">
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  v-model="newTag"
+                  @keyup.enter="addTag"
+                  placeholder="Ex: Inteligência Artificial"
+                />
+                <button type="button" class="add-tag-btn" @click="addTag">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
               </div>
-            </div>
 
-            <div class="vertical-divider"></div>
-
-            <div class="status-info">
-              <div class="status-row">
-                <p>Situação:</p>
-                <span :class="['status-btn', getStatusClass(req.status)]">
-                  {{ req.status }}
+              <div class="tags-display">
+                <span
+                  v-for="(tag, index) in tags"
+                  :key="index"
+                  class="tag"
+                  :class="getTagColor(index)"
+                >
+                  {{ tag }}
+                  <i class="bi bi-x" @click="removeTag(index)"></i>
                 </span>
               </div>
-              <p class="status-note">
-                {{ getStatusMessage(req.status) }}
-              </p>
             </div>
-          </div>
+          </section>
 
-          <p v-if="myRequests.length === 0" class="no-data">Nenhuma solicitação encontrada.</p>
-        </section>
+          <section class="card-section requests-area">
+            <h3>Minhas solicitações:</h3>
 
-        <section class="card-section guidances-area">
-          <h3>Minhas orientações:</h3>
-          <div class="empty-state">
-            <p v-if="!hasGuidance">Você ainda não possui orientações ativas.</p>
-          </div>
-        </section>
+            <div v-for="req in myRequests" :key="req.id" class="request-item">
+              <div class="teacher-info">
+                <div class="professor-mini-card">
+                  <img src="/src/assets/img/foto-perfil.svg" class="mini-avatar" />
+                  <div class="prof-details">
+                    <p class="prof-name">{{ req.professorName }}</p>
+                    <span class="vagas-badge">{{ req.availableSpots }} vagas disponíveis</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="vertical-divider"></div>
+
+              <div class="status-info">
+                <div class="status-row">
+                  <p>Situação:</p>
+                  <span :class="['status-btn', getStatusClass(req.status)]">
+                    {{ req.status }}
+                  </span>
+                </div>
+                <p class="status-note">
+                  {{ getStatusMessage(req.status) }}
+                </p>
+              </div>
+            </div>
+
+            <p v-if="myRequests.length === 0" class="no-data">Nenhuma solicitação encontrada.</p>
+          </section>
+
+          <section class="card-section guidances-area">
+            <h3>Minhas orientações:</h3>
+            <div class="empty-state">
+              <p v-if="!hasGuidance">Você ainda não possui orientações ativas.</p>
+            </div>
+          </section>
+        </div>
+
+        <RequestHistoryTable 
+          v-else-if="currentView === 'history'" 
+          title="Histórico de solicitações"
+          :data="historyData"
+          @view-reason="showJustification" 
+        />
+
       </main>
     </div>
   </div>
@@ -102,6 +130,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
+import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
+import Swal from 'sweetalert2'
 
 // --- 1. DADOS DO ALUNO (MOCK) ---
 const student = ref({
@@ -172,6 +202,29 @@ onMounted(async () => {
     ]
   }, 500)
 })
+
+const currentView = ref('home')
+
+const historyData = ref([
+  {
+    id: 1,
+    name: 'Lorem Ipsum Dolor Siamet',
+    ra: '123456',
+    sendDate: '30/04/2025 16:45',
+    replyDate: '30/04/2025 16:45',
+    status: 'Recusada',
+    justification: 'Não tenho disponibilidade para novas orientações este semestre.',
+  },
+])
+
+const showJustification = (msg) => {
+  Swal.fire({
+    title: 'Motivo da Recusa',
+    text: msg,
+    icon: 'info',
+    confirmButtonColor: 'var(--color-brand-primary)',
+  })
+}
 </script>
 
 <style scoped>
@@ -204,9 +257,9 @@ onMounted(async () => {
 
 .sidebar-header {
   display: flex;
-  align-items: center; 
-  padding: 1rem;     
-  gap: 1rem;           
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
 }
 
 .avatar-circle {
@@ -230,7 +283,7 @@ onMounted(async () => {
 
 .student-ra {
   font-size: 0.89rem;
-  font-weight: 800; 
+  font-weight: 800;
 }
 
 /* Menu Sidebar */
@@ -353,8 +406,8 @@ button {
 .tags-control-container {
   display: flex;
   align-items: center; /* Alinha verticalmente ao centro */
-  flex-wrap: wrap;     /* Permite que as tags quebrem linha se houver muitas */
-  gap: 1.5rem;         /* Espaço entre a caixa de escrita e as tags */
+  flex-wrap: wrap; /* Permite que as tags quebrem linha se houver muitas */
+  gap: 1.5rem; /* Espaço entre a caixa de escrita e as tags */
 }
 
 /* Ajuste no wrapper para não forçar quebra de linha */
@@ -382,7 +435,7 @@ button {
 }
 
 .add-tag-btn:hover {
-  color: var(--color-brand-primary); 
+  color: var(--color-brand-primary);
 }
 
 .request-item {
