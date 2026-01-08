@@ -186,7 +186,7 @@ onMounted(async () => {
   background-color: #fff;
   display: flex;
   max-width: 1200px;
-  margin: 2rem auto;
+  margin: 1.7rem auto;
   padding: 1.2rem;
   gap: 1.3rem;
 }
