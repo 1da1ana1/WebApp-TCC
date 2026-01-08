@@ -37,3 +37,8 @@ __screenshots__/
 
 test-results/
 playwright-report/
+
+node_modules/
+dist/
+.env
+.local

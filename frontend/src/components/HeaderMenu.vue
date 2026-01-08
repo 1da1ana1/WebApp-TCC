@@ -1,5 +1,4 @@
 <template>
-  
   <header class="header" :class="{ 'header-public': isPublic }">
     <img src="/src/assets/img/logos-header.png" alt="logo ft" class="header-logo" />
 
@@ -32,7 +31,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 
 const authStore = useAuthStore();
 
@@ -43,30 +42,13 @@ defineProps({
   }
 });
 
-onMounted(() => {
-  // Se o Pinia estiver vazio, tenta buscar do localStorage
-  if (!authStore.user) {
-    const userSalvo = localStorage.getItem('user'); // Verifique se você salvou com o nome 'user' no login
-    const tokenSalvo = localStorage.getItem('token'); 
-    
-    if (userSalvo && tokenSalvo) {
-      // Reconecta os dados no Pinia
-      authStore.user = JSON.parse(userSalvo);
-      authStore.token = tokenSalvo; // Se seu store tiver token
-      
-      console.log("Usuário restaurado do LocalStorage:", authStore.user);
-    } else {
-      console.log("Nenhum usuário salvo encontrado no navegador.");
-    }
-  }
-});
-// -------------------------------------
+// O plugin de persistência cuida do resto, não precisa de onMounted aqui!
 
 const linkPerfil = computed(() => {
-  // Use o operador ?. para evitar erro se user for null durante o carregamento
-  const tipoUsuario = authStore.user?.tipo || authStore.user?.role;
+  // Ajustado para 'type' que é o padrão que você usou no mock da Store
+  const userType = authStore.user?.type; 
   
-  if (tipoUsuario === 'docente' || tipoUsuario === 'orientador') {
+  if (userType === 'docente' || userType === 'orientador') {
     return '/perfil/docente';
   }
   return '/perfil/aluno';
