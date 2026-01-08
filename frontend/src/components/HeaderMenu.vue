@@ -56,14 +56,13 @@ const linkPerfil = computed(() => {
 </script>
 
 <style scoped>
-/* SEUS ESTILOS ORIGINAIS */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 3.8rem 4.5rem;
+  padding: 1rem 4rem; 
   background: linear-gradient(90deg, var(--color-brand-primary), var(--color-brand-secondary));
-  height: 5rem;
+  height: 4.325rem; 
   width: 100%;
   box-sizing: border-box;
   position: fixed;
@@ -73,36 +72,34 @@ const linkPerfil = computed(() => {
 }
 
 .header-logo {
-  width: 20rem;
+  width: 13.9rem; 
   height: auto;
   object-fit: contain;
 }
 
 .header-nav-desktop {
   background-color: var(--white-color);
-  height: 3rem;
-  
+  height: 2.3rem; 
   width: auto; 
-  padding: 0 3rem; /* Adicione padding lateral para dar respiro */
-  
+  padding: 0 2rem; 
   border-radius: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .header-nav-desktop .header-links {
   display: flex;
-  gap: 3rem; 
+  gap: 2rem; 
   list-style: none;
   justify-content: center;
   margin: 0;
   padding: 0;
 }
-
 .header-nav-desktop .header-links a {
   text-decoration: none;
   color: #000;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
   transition:
     color 0.3s ease,
