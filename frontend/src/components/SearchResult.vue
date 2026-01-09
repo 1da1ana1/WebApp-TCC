@@ -1,6 +1,6 @@
 <template>
   <div class="search-layout">
-    <FilterSidebar 
+    <FilterBar 
       :themes="allThemes" 
       v-model:selectedThemes="selectedThemes"
       @clear="resetFilters"
@@ -20,7 +20,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import SearchBar from './components/SearchBar.vue';
-import FilterSidebar from './components/FilterSidebar.vue';
+import FilterBar from './FilterBar.vue';
 
 const searchQuery = ref('');
 const selectedThemes = ref([]);
