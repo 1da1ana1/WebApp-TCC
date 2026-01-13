@@ -1,10 +1,12 @@
 <template>
+  
   <div class="search-page-layout">
     <FilterBar 
       :themes="themesList" 
       v-model:selectedThemes="selectedThemes"
       @clear="resetFilters"
     />
+
 
     <main class="content-area">
       <SearchBar v-model="searchQuery" />
