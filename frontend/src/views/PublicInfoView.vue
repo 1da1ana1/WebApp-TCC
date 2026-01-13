@@ -37,16 +37,7 @@
           <h2>Cronograma de Buscas</h2>
           <p class="subtitle">Fique atento às datas e prazos do semestre atual.</p>
 
-          <div class="timeline-grid">
-            <div v-for="item in cronograma" :key="item.id" class="timeline-item">
-              <div class="icon-box">
-                <i :class="['bi', item.icon]"></i>
-              </div>
-
-              <h4 class="timeline-title">{{ item.titulo }}</h4>
-              <span class="timeline-date">{{ item.data }}</span>
-            </div>
-          </div>
+          <CronogramSchedule />
         </div>
       </section>
 
@@ -77,15 +68,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const cronograma = ref([
-  { id: 1, titulo: 'Definição de vagas', data: '01/02 a 10/02', icon: 'bi-paperclip' },
-  { id: 2, titulo: 'Cadastro de temas', data: '11/02 a 15/02', icon: 'bi-pencil-square' },
-  { id: 3, titulo: 'Busca e solicitação', data: '16/02 a 25/02', icon: 'bi-search' },
-  { id: 4, titulo: 'Confirmação vínculo', data: '26/02 a 28/02', icon: 'bi-check-circle-fill' },
-  { id: 5, titulo: 'Encerramento', data: '01/03', icon: 'bi-calendar-x' },
-  { id: 6, titulo: 'Início orientações', data: '05/03', icon: 'bi-people-fill' },
-  { id: 7, titulo: 'Homologação', data: '10/03', icon: 'bi-file-earmark-check' },
-])
+import CronogramSchedule from '@/components/CronogramSchedule.vue'
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id)
@@ -198,67 +181,6 @@ onUnmounted(() => {
   height: 400px;
 }
 
-.timeline-grid {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  position: relative;
-  margin-top: 2rem;
-  padding-bottom: 1rem;
-  overflow-x: auto; 
-}
-
-.timeline-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  min-width: 100px;
-  padding: 0 5px;
-}
-
-.timeline-item::after {
-  content: '';
-  position: absolute;
-  top: 25px;
-  left: 50%;
-  width: 100%;
-  height: 2px;
-  background-color: var(--color-brand-primary);
-  z-index: 0;
-  opacity: 0.3;
-}
-
-.timeline-item:last-child::after {
-  display: none;
-}
-
-.icon-box {
-  background-color: var( --color-background-card-default);
-  z-index: 1;
-  padding: 0 10px;
-  margin-bottom: 15px;
-}
-
-.timeline-item .bi {
-  font-size: 2.5rem;
-}
-
-.timeline-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 5px 0;
-  line-height: 1.2;
-}
-
-.timeline-date {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  font-weight: bold;
-}
 
 #btn-back-to-top {
   position: fixed;

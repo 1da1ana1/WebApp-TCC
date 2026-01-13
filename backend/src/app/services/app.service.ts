@@ -15,4 +15,8 @@ export class TeachersService {
   findOne(id: string) {
     return this.mockTeachers.find(t => t.id === Number(id));
   }
+
+  getHello(): string {
+    return 'API is running!';
+  }
 }
