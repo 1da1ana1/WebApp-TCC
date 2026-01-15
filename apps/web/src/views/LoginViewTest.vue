@@ -28,7 +28,6 @@ import { useRouter } from 'vue-router';
 const authStore = useAuthStore();
 const router = useRouter();
 
-// Mapeamento de credenciais para facilitar
 const credenciais = {
   aluno:   { email: 'aluno@unicamp.br', pass: '123456' },
   docente: { email: 'prof@unicamp.br',  pass: '123456' },
@@ -38,15 +37,13 @@ const credenciais = {
 async function entrar(tipo) {
   const { email, pass } = credenciais[tipo];
   
-  // Tenta fazer o login na store
   const sucesso = await authStore.login(email, pass);
   
   if (sucesso) {
-    // Redirecionamento inteligente
     if (tipo === 'admin') {
-      router.push('/perfil-coordenador'); // Ou a home do coord
+      router.push('/perfil-coordenador'); 
     } else {
-      router.push('/'); // Home padrão para alunos/profs
+      router.push('/'); 
     }
   } else {
     alert('Erro no login simulado.');
@@ -59,7 +56,7 @@ async function entrar(tipo) {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80vh; /* Aumentei um pouco */
+  height: 80vh; 
   background-color: #f4f4f4;
 }
 
@@ -77,7 +74,7 @@ async function entrar(tipo) {
 .button-group {
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Espaço entre os botões */
+  gap: 1rem; 
   margin-top: 1.5rem;
 }
 
