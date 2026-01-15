@@ -2,11 +2,21 @@
   <div class="login-page">
     <div class="login-card">
       <h2>Login de Desenvolvimento</h2>
-      <p>Simule o acesso do aluno (Mock)</p>
+      <p>Selecione um perfil para simular o acesso:</p>
       
-      <button @click="entrar" class="btn-login">
-        Entrar como Aluno
-      </button>
+      <div class="button-group">
+        <button @click="entrar('aluno')" class="btn-login btn-aluno">
+          👨‍🎓 Entrar como Aluno
+        </button>
+
+        <button @click="entrar('docente')" class="btn-login btn-docente">
+          👨‍🏫 Entrar como Docente
+        </button>
+
+        <button @click="entrar('admin')" class="btn-login btn-admin">
+          👔 Entrar como Coordenador
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -18,15 +28,28 @@ import { useRouter } from 'vue-router';
 const authStore = useAuthStore();
 const router = useRouter();
 
-async function entrar() {
+// Mapeamento de credenciais para facilitar
+const credenciais = {
+  aluno:   { email: 'aluno@unicamp.br', pass: '123456' },
+  docente: { email: 'prof@unicamp.br',  pass: '123456' },
+  admin:   { email: 'coord@unicamp.br', pass: '123456' }
+};
+
+async function entrar(tipo) {
+  const { email, pass } = credenciais[tipo];
   
-  const sucesso = await authStore.login('aluno@unicamp.br', '123456');
+  // Tenta fazer o login na store
+  const sucesso = await authStore.login(email, pass);
   
   if (sucesso) {
-    alert('Login realizado com sucesso!');
-    router.push('/'); 
+    // Redirecionamento inteligente
+    if (tipo === 'admin') {
+      router.push('/perfil-coordenador'); // Ou a home do coord
+    } else {
+      router.push('/'); // Home padrão para alunos/profs
+    }
   } else {
-    alert('Erro no login');
+    alert('Erro no login simulado.');
   }
 }
 </script>
@@ -36,23 +59,43 @@ async function entrar() {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60vh;
+  height: 80vh; /* Aumentei um pouco */
+  background-color: #f4f4f4;
 }
+
 .login-card {
   text-align: center;
-  padding: 2rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: 2.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
   background: white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
 }
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Espaço entre os botões */
+  margin-top: 1.5rem;
+}
+
 .btn-login {
-  background-color: var(--color-brand-primary, #004b86);
   color: white;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  margin-top: 1rem;
   font-size: 1rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
 }
+
+.btn-login:hover {
+  opacity: 0.9;
+}
+.btn-aluno { background-color: #004b86; }   /* Azul Unicamp */
+.btn-docente { background-color: #2e7d32; } /* Verde */
+.btn-admin { background-color: #c62828; }   /* Vermelho */
 </style>
