@@ -6,7 +6,7 @@
        @click.prevent="item.action" 
        class="header-nav-item" 
        :class="item.class">
-       <span v-if="!item.iconOnly">{{ item.label }}</span>
+       <span>{{ item.label }}</span>
        <i v-if="item.icon" :class="item.icon"></i>
     </a>
 
@@ -14,7 +14,7 @@
        :to="item.path" 
        class="header-nav-item" 
        :class="item.class">
-       <span v-if="!item.iconOnly">{{ item.label }}</span>
+       <span>{{ item.label }}</span>
        <i v-if="item.icon" :class="item.icon"></i>
     </router-link>
 
@@ -43,33 +43,33 @@ const menuItems = computed(() => {
       { 
         label: 'FAZER LOGIN', 
         path: '/login', 
-        icon: 'bi bi-box-arrow-in-right', 
+        icon: 'bi bi-box-arrow-in-right', // Mantido pois é botão especial
         class: 'btn-login-especial' 
       }
     ];
   }
 
-  // 2. Coordenador (Menu Novo)
+  // 2. COORDENADOR (Sem ícones na navegação)
   if (user.type === 'coordinator') {
     return [
-      { label: 'DASHBOARD', path: '/perfil-coordenador', icon: 'bi bi-speedometer2' },
-      { label: 'GESTÃO', path: '/coordenador/gestao' },
-      { label: 'MEU PERFIL', path: '/perfil-coordenador/editar' },
+      { label: 'PÁGINA INICIAL', path: '/' },
+      { label: 'BUSCAR USUÁRIO', path: '/coordenador/buscar-usuario' },
+      { label: 'PAINEL DE ANÁLISES', path: '/perfil-coordenador' },
       { label: 'SAIR', action: logout, icon: 'bi bi-box-arrow-right', class: 'btn-logout' }
     ];
   }
 
-  // 3. Docente
+  // 3. DOCENTE (Sem ícones na navegação)
   if (user.type === 'teacher') {
     return [
-      { label: 'MEUS ORIENTANDOS', path: '/docente/orientandos' },
-      { label: 'SOLICITAÇÕES', path: '/docente/solicitacoes' },
+      { label: 'PÁGINA INICIAL', path: '/' },
+      { label: 'PÁGINA DE ALUNOS', path: '/docente/orientandos' },
       { label: 'MEU PERFIL', path: '/perfil/docente' },
       { label: 'SAIR', action: logout, icon: 'bi bi-box-arrow-right', class: 'btn-logout' }
     ];
   }
 
-  // 4. Aluno (Padrão)
+  // 4. ALUNO (Padrão)
   return [
     { label: 'PÁGINA INICIAL', path: '/' },
     { label: 'BUSCAR ORIENTADOR', path: '/search-supervisor' },
