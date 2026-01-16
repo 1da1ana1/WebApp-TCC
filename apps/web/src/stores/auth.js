@@ -6,24 +6,50 @@ export const useAuthStore = defineStore('auth', {
     token: null  
   }),
 
-  // Ativa a persistência automática para esta store
+  // Ativa a persistência automática (salva no localStorage)
   persist: true, 
 
   actions: {
     async login(email, password) {
       console.log("Tentando logar com:", email, password);
 
-      // LÓGICA MOCKADA
+      let mockUser = null;
+
+      // 1. Lógica para ALUNO
       if (email === 'aluno@unicamp.br' && password === '123456') {
-        this.user = {
+        mockUser = {
           id: 1,
           name: 'Yasmim Daiana',
-          email: 'aluno@unicamp.br',
-          type: 'student' // Fique atento: no seu Header você usou 'tipo' ou 'role'
+          email: email,
+          type: 'student', // Usado para controlar o menu de aluno
+          avatar: 'https://i.pravatar.cc/150?u=a' // Opcional: avatar fake
         };
-        this.token = 'token-falso-123456';
-        
-        // O plugin salva no localStorage automaticamente aqui!
+      } 
+      // 2. Lógica para DOCENTE
+      else if (email === 'prof@unicamp.br' && password === '123456') {
+        mockUser = {
+          id: 2,
+          name: 'Prof. Carlos Silva',
+          email: email,
+          type: 'teacher', // Usado para controlar o menu de professor
+          avatar: 'https://i.pravatar.cc/150?u=b'
+        };
+      }
+      // 3. Lógica para COORDENADOR
+      else if (email === 'coord@unicamp.br' && password === '123456') {
+        mockUser = {
+          id: 3,
+          name: 'Coord. Maria Oliveira',
+          email: email,
+          type: 'coordinator', // Usado para controlar o menu de coordenador
+          avatar: 'https://i.pravatar.cc/150?u=c'
+        };
+      }
+
+      // Se encontrou algum usuário válido
+      if (mockUser) {
+        this.user = mockUser;
+        this.token = `token-falso-${mockUser.type}-123`; // Token diferente para cada tipo
         return true; 
       } else {
         return false; 

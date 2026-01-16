@@ -16,15 +16,15 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: SearchSupervisor, 
-
+    component: () => import('@/views/PublicInfoView.vue'),
+    meta: { layout: 'public' }
   },
 
   {
     path: '/info',
     name: 'PublicInfo',
     component: () => import('@/views/PublicInfoView.vue'),
-    meta: { layout: 'public' } 
+    meta: { layout: 'public' }
   },
 
   {
@@ -49,6 +49,12 @@ const routes = [
     path: '/painel/coordenador',
     name: 'CoordinatorDashboard',
     component: () => import('@/views/CoordinatorDashboardView.vue'),
+  },
+
+  {
+    path: '/coordenador/buscar-usuario',
+    name: 'CoordinatorSearch',
+    component: () => import('@/views/CoordinatorSearchView.vue'),
   },
 ]
 
