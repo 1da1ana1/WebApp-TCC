@@ -52,7 +52,7 @@ const menuItems = computed(() => {
   // 2. COORDENADOR (Sem ícones na navegação)
   if (user.type === 'coordinator') {
     return [
-      { label: 'PÁGINA INICIAL', path: '/' },
+      { label: 'PÁGINA INICIAL', path: '/info' },
       { label: 'BUSCAR USUÁRIO', path: '/coordenador/buscar-usuario' },
       { label: 'PAINEL DE ANÁLISES', path: '/perfil-coordenador' },
       { label: 'SAIR', action: logout, icon: 'bi bi-box-arrow-right', class: 'btn-logout' }
@@ -62,7 +62,7 @@ const menuItems = computed(() => {
   // 3. DOCENTE (Sem ícones na navegação)
   if (user.type === 'teacher') {
     return [
-      { label: 'PÁGINA INICIAL', path: '/' },
+      { label: 'PÁGINA INICIAL', path: '/info' },
       { label: 'PÁGINA DE ALUNOS', path: '/docente/orientandos' },
       { label: 'MEU PERFIL', path: '/perfil/docente' },
       { label: 'SAIR', action: logout, icon: 'bi bi-box-arrow-right', class: 'btn-logout' }
@@ -71,7 +71,7 @@ const menuItems = computed(() => {
 
   // 4. ALUNO (Padrão)
   return [
-    { label: 'PÁGINA INICIAL', path: '/' },
+    { label: 'PÁGINA INICIAL', path: '/info' },
     { label: 'BUSCAR ORIENTADOR', path: '/search-supervisor' },
     { label: 'MEU PERFIL', path: '/perfil/aluno' },
     { label: 'SAIR', action: logout, icon: 'bi bi-box-arrow-right', class: 'btn-logout' }
