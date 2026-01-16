@@ -193,7 +193,6 @@ onMounted(() => {
 .tabs-nav {
   display: flex;
   gap: 2rem;
-  border-bottom: 2px solid #eee;
   margin-bottom: 1.5rem;
   justify-content: center;
   font-family: poppins;
