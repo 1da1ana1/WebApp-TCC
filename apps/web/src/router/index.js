@@ -16,15 +16,15 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: SearchSupervisor, 
-
+    component: () => import('@/views/PublicInfoView.vue'),
+    meta: { layout: 'public' }
   },
 
   {
     path: '/info',
     name: 'PublicInfo',
     component: () => import('@/views/PublicInfoView.vue'),
-    meta: { layout: 'public' } 
+    meta: { layout: 'public' }
   },
 
   {
