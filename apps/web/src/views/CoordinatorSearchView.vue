@@ -11,8 +11,13 @@
     </div>
 
     <div class="filter-wrapper">
-      <button class="btn-filter" @click="mostrarFiltros = !mostrarFiltros">
+      <button 
+        class="btn-filter" 
+        @click="mostrarFiltros = !mostrarFiltros"
+        :class="{ 'active': temFiltroAtivo }"
+      >
          Filtrar <i class="bi bi-funnel"></i>
+         <span v-if="temFiltroAtivo" class="filter-badge"></span>
       </button>
       
       <div v-if="mostrarFiltros" class="filter-dropdown">
@@ -32,6 +37,12 @@
             <option value="pendente">Sem Orientador / Com Vagas</option>
             <option value="ok">Com Orientador / Lotado</option>
           </select>
+        </div>
+
+        <div v-if="temFiltroAtivo" class="filter-actions">
+          <button @click="limparFiltros" class="btn-clear">
+            <i class="bi bi-trash"></i> Limpar Filtros
+          </button>
         </div>
       </div>
     </div>
@@ -119,7 +130,19 @@ const todosUsuarios = [
   { id: 6, type: 'student', nome: 'Fernanda Torres', registro: 'RA998877', temOrientador: true, avatar: 'https://i.pravatar.cc/150?u=6' },
 ];
 
-// --- LÓGICA DE FILTRAGEM (Atualizada para suportar divisão) ---
+// --- NOVA LÓGICA DE LIMPEZA ---
+const temFiltroAtivo = computed(() => {
+  return filtroTipo.value !== 'todos' || filtroStatus.value !== 'todos';
+});
+
+function limparFiltros() {
+  filtroTipo.value = 'todos';
+  filtroStatus.value = 'todos';
+  // Opcional: fechar o dropdown após limpar
+  // mostrarFiltros.value = false;
+}
+
+// --- LÓGICA DE FILTRAGEM ---
 const usuariosFiltradosGlobalmente = computed(() => {
   return todosUsuarios.filter(user => {
     
@@ -128,7 +151,7 @@ const usuariosFiltradosGlobalmente = computed(() => {
     const matchTexto = user.nome.toLowerCase().includes(termo) || 
                        user.registro.toLowerCase().includes(termo);
 
-    // 2. Filtro Tipo (Ainda respeita o dropdown se o usuário quiser esconder uma coluna inteira)
+    // 2. Filtro Tipo 
     const matchTipo = filtroTipo.value === 'todos' ? true : user.type === filtroTipo.value;
 
     // 3. Filtro Status
@@ -145,7 +168,6 @@ const usuariosFiltradosGlobalmente = computed(() => {
   });
 });
 
-// Computed properties separadas para alimentar as duas colunas
 const listaDocentes = computed(() => 
   usuariosFiltradosGlobalmente.value.filter(u => u.type === 'teacher')
 );
@@ -200,6 +222,18 @@ const listaAlunos = computed(() =>
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
+}
+
+/* Bolinha vermelha indicando filtro ativo */
+.filter-badge {
+  width: 8px;
+  height: 8px;
+  background-color: #ff5252;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 
 .filter-dropdown {
@@ -235,10 +269,39 @@ const listaAlunos = computed(() =>
   border-radius: 4px;
 }
 
-/* --- NOVO LAYOUT DIVIDIDO --- */
+/* --- NOVO ESTILO DO BOTÃO LIMPAR --- */
+.filter-actions {
+  margin-top: 1rem;
+  border-top: 1px solid #eee;
+  padding-top: 0.8rem;
+  text-align: center;
+}
+
+.btn-clear {
+  background: none;
+  border: none;
+  color: #c62828; /* Vermelho */
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0.3rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.btn-clear:hover {
+  background-color: #ffebee; /* Fundo vermelho bem clarinho */
+  text-decoration: underline;
+}
+
+/* --- LAYOUT DIVIDIDO (Mantido Igual) --- */
 .split-layout {
   display: grid;
-  grid-template-columns: 1fr 1px 1fr; /* Coluna | Linha | Coluna */
+  grid-template-columns: 1fr 1px 1fr;
   gap: 2rem;
   align-items: start;
 }
@@ -260,7 +323,6 @@ const listaAlunos = computed(() =>
   display: inline-block;
 }
 
-/* Cores dos títulos das colunas */
 .header-teacher h3 { border-color: #7b1fa2; color: #4a148c; }
 .header-student h3 { border-color: #1565c0; color: #0d47a1; }
 
@@ -270,11 +332,10 @@ const listaAlunos = computed(() =>
   gap: 1rem;
 }
 
-/* CARDS */
 .user-card {
   background: white;
   border: 1px solid #e0e0e0;
-  border-left: 4px solid transparent; /* Indicador lateral */
+  border-left: 4px solid transparent;
   padding: 1rem; 
   display: flex;
   align-items: center;
@@ -289,7 +350,6 @@ const listaAlunos = computed(() =>
   border-color: #bbb;
 }
 
-/* Cores das bordas laterais */
 .card-teacher { border-left-color: #7b1fa2; }
 .card-student { border-left-color: #1565c0; }
 
@@ -301,9 +361,7 @@ const listaAlunos = computed(() =>
   background-color: #f0f0f0;
 }
 
-.card-info {
-  flex: 1;
-}
+.card-info { flex: 1; }
 
 .user-name {
   font-size: 0.95rem;
@@ -332,7 +390,6 @@ const listaAlunos = computed(() =>
   white-space: nowrap;
 }
 
-/* TAG COLORS */
 .status-ok { background-color: #e8f5e9; color: #2e7d32; }
 .status-warn { background-color: #fff3e0; color: #ef6c00; }
 .status-open { background-color: #e1f5fe; color: #0288d1; }
