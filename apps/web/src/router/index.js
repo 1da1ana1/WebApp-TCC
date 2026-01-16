@@ -50,6 +50,12 @@ const routes = [
     name: 'CoordinatorDashboard',
     component: () => import('@/views/CoordinatorDashboardView.vue'),
   },
+
+  {
+    path: '/coordenador/buscar-usuario',
+    name: 'CoordinatorSearch',
+    component: () => import('@/views/CoordinatorSearchView.vue'),
+  },
 ]
 
 const router = createRouter({
