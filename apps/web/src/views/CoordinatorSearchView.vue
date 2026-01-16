@@ -7,39 +7,31 @@
     </div>
 
     <div class="search-container">
-      <div class="search-input-wrapper">
-        <i class="bi bi-search search-icon"></i>
-        <input 
-          v-model="termoPesquisa" 
-          type="text" 
-          placeholder="Ex: Nome, RA ou Matrícula..." 
-          class="search-input"
-        />
-      </div>
+      <SearchBar v-model="searchQuery" />
+    </div>
 
-      <div class="filter-wrapper">
-        <button class="btn-filter" @click="mostrarFiltros = !mostrarFiltros">
-          <i class="bi bi-funnel"></i> Filtrar
-        </button>
-        
-        <div v-if="mostrarFiltros" class="filter-dropdown">
-          <div class="filter-group">
-            <label>Tipo de Usuário:</label>
-            <select v-model="filtroTipo">
-              <option value="todos">Todos</option>
-              <option value="student">Apenas Alunos</option>
-              <option value="teacher">Apenas Docentes</option>
-            </select>
-          </div>
+    <div class="filter-wrapper">
+      <button class="btn-filter" @click="mostrarFiltros = !mostrarFiltros">
+        <i class="bi bi-funnel"></i> Filtrar
+      </button>
+      
+      <div v-if="mostrarFiltros" class="filter-dropdown">
+        <div class="filter-group">
+          <label>Tipo de Usuário:</label>
+          <select v-model="filtroTipo">
+            <option value="todos">Todos</option>
+            <option value="student">Apenas Alunos</option>
+            <option value="teacher">Apenas Docentes</option>
+          </select>
+        </div>
 
-          <div class="filter-group">
-            <label>Status:</label>
-            <select v-model="filtroStatus">
-              <option value="todos">Qualquer Status</option>
-              <option value="pendente">Sem Orientador / Com Vagas</option>
-              <option value="ok">Com Orientador / Lotado</option>
-            </select>
-          </div>
+        <div class="filter-group">
+          <label>Status:</label>
+          <select v-model="filtroStatus">
+            <option value="todos">Qualquer Status</option>
+            <option value="pendente">Sem Orientador / Com Vagas</option>
+            <option value="ok">Com Orientador / Lotado</option>
+          </select>
         </div>
       </div>
     </div>
@@ -90,6 +82,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import SearchBar from '../components/SearchBar.vue'
 
 // --- ESTADO ---
 const termoPesquisa = ref('');
@@ -188,45 +181,27 @@ function getStatusClass(user) {
 
 /* --- BARRA DE PESQUISA E FILTROS --- */
 .search-container {
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  display: flex;
   gap: 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  margin-bottom: 2rem;
-  position: relative; /* Para o dropdown absoluto */
-}
-
-.search-input-wrapper {
-  flex: 1;
+  margin-bottom: 1rem;
   position: relative;
+}
+
+.filter-wrapper {
   display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 1rem;
-  color: #999;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+  position: relative;
 }
 
 .btn-filter {
-  background-color: var(--color-brand-primary, #004b86);
+  background-color: var(--color-button-primary);
   color: white;
   border: none;
-  padding: 0 1.5rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
+  font-family: poppins, sans-serif;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -244,6 +219,7 @@ function getStatusClass(user) {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   width: 250px;
   z-index: 10;
+  margin-top: 1rem;
 }
 
 .filter-group {
