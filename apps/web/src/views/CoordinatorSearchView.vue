@@ -55,7 +55,7 @@
         </div>
 
         <div class="cards-list">
-          <div v-for="user in listaDocentes" :key="user.id" class="user-card card-teacher">
+          <div v-for="user in listaDocentes" :key="user.id" class="user-card card-teacher" @click="abrirPerfil(user.id)" style="cursor: pointer;">
             <div class="card-avatar">
               <img :src="user.avatar || 'https://via.placeholder.com/150'" alt="Foto">
             </div>
@@ -84,7 +84,7 @@
         </div>
 
         <div class="cards-list">
-          <div v-for="user in listaAlunos" :key="user.id" class="user-card card-student">
+          <div v-for="user in listaAlunos" :key="user.id" class="user-card card-student" @click="abrirPerfil(user.id)" style="cursor: pointer;">
             <div class="card-avatar">
               <img :src="user.avatar || 'https://via.placeholder.com/150'" alt="Foto">
             </div>
@@ -113,6 +113,12 @@
 <script setup>
 import { ref, computed } from 'vue';
 import SearchBar from '../components/SearchBar.vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+function abrirPerfil(id) {
+  router.push(`/coordenador/usuario/${id}`);
+}
 
 // --- ESTADO ---
 const searchQuery = ref('');

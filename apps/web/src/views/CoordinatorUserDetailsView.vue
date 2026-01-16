@@ -131,13 +131,13 @@ onMounted(() => {
   max-width: 1000px;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
 }
 
 /* CARDS BRANCOS */
 .profile-card {
   background: white;
-  border-radius: 8px;
   border: 1px solid #ccc;
   padding: 2rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -195,6 +195,8 @@ onMounted(() => {
   gap: 2rem;
   border-bottom: 2px solid #eee;
   margin-bottom: 1.5rem;
+  justify-content: center;
+  font-family: poppins;
 }
 
 .tab-btn {
@@ -206,12 +208,13 @@ onMounted(() => {
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: all 0.3s;
+  font-family: poppins;
 }
 
 .tab-btn.active {
   color: var(--color-brand-primary, #004b86);
   border-bottom-color: var(--color-brand-primary, #004b86);
-  font-weight: 600;
+  font-family: poppins;
 }
 
 /* TABELA */

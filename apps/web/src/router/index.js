@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 
 import SearchSupervisor from '../views/SearchProfessorView.vue'
+import CoordinatorUserDetailsView from '../views/CoordinatorUserDetailsView.vue';
 
 
 const routes = [
@@ -56,6 +57,12 @@ const routes = [
     name: 'CoordinatorSearch',
     component: () => import('@/views/CoordinatorSearchView.vue'),
   },
+  {
+    path: '/coordenador/usuario/:id', // :id é o parâmetro dinâmico
+    name: 'CoordinatorUserDetails',
+    component: CoordinatorUserDetailsView,
+    meta: { layout: 'coordinator' } // Se usar layout system
+  }
 ]
 
 const router = createRouter({
