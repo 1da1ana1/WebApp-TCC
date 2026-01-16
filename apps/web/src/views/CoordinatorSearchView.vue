@@ -12,7 +12,7 @@
 
     <div class="filter-wrapper">
       <button class="btn-filter" @click="mostrarFiltros = !mostrarFiltros">
-        <i class="bi bi-funnel"></i> Filtrar
+         Filtrar <i class="bi bi-funnel"></i>
       </button>
       
       <div v-if="mostrarFiltros" class="filter-dropdown">
