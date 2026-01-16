@@ -33,8 +33,8 @@ defineEmits(['update:modelValue']);
   padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.09);
-  width: 97%;
-  margin: 1.75rem 1rem 0 1rem;
+  width: 100%;
+  
 }
 
 .search-input-container {

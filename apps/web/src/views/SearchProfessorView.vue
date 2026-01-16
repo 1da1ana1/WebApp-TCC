@@ -9,7 +9,11 @@
 
 
     <main class="content-area">
-      <SearchBar v-model="searchQuery" />
+
+      <div class="search-container">
+         <SearchBar v-model="searchQuery" />
+      </div>
+     
 
       <div class="results-list">
         <ProfessorCard 
@@ -79,6 +83,10 @@ const resetFilters = () => {
   flex-shrink: 0; /* Impede que a barra lateral seja esmagada */
   position: sticky; /* Opcional: faz o filtro "rolar" junto com a tela */
   top: 6.5rem;
+}
+
+.search-container {
+  margin: 2rem 2rem 0 2rem;
 }
 
 /* 3. ÁREA DE CONTEÚDO: Ocupa o restante do espaço à direita */
