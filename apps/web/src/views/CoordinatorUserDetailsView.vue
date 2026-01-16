@@ -143,6 +143,10 @@ onMounted(() => {
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
+.profile-card.content-card{
+  padding: 0.8rem 2rem;
+}
+
 /* HEADER DO PERFIL */
 .profile-main {
   display: flex;
