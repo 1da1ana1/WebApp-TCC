@@ -36,45 +36,64 @@
       </div>
     </div>
 
-    <div class="results-header">
-      <h3>RESULTADOS ({{ usuariosFiltrados.length }})</h3>
-    </div>
-
-    <div class="cards-grid">
-      <div v-for="user in usuariosFiltrados" :key="user.id" class="user-card">
-        
-        <div class="card-avatar">
-          <img :src="user.avatar || 'https://via.placeholder.com/150'" alt="Foto">
+    <div class="split-layout">
+      
+      <section class="column-section">
+        <div class="column-header header-teacher">
+          <h3><i class="bi bi-briefcase"></i> Docentes ({{ listaDocentes.length }})</h3>
         </div>
 
-        <div class="card-info">
-          <h4 class="user-name">{{ user.nome }}</h4>
-          <span class="user-id">ID: {{ user.registro }}</span>
+        <div class="cards-list">
+          <div v-for="user in listaDocentes" :key="user.id" class="user-card card-teacher">
+            <div class="card-avatar">
+              <img :src="user.avatar || 'https://via.placeholder.com/150'" alt="Foto">
+            </div>
+            <div class="card-info">
+              <h4 class="user-name">{{ user.nome }}</h4>
+              <span class="user-id">ID: {{ user.registro }}</span>
+            </div>
+            <div class="card-tags">
+              <span class="tag" :class="user.temVagas ? 'status-open' : 'status-closed'">
+                {{ user.temVagas ? 'Vagas Abertas' : 'Lotado' }}
+              </span>
+            </div>
+          </div>
           
-          <p class="user-detail" v-if="user.type === 'student'">
-            <i class="bi bi-mortarboard"></i> Aluno
-          </p>
-          <p class="user-detail" v-else>
-            <i class="bi bi-briefcase"></i> Docente
-          </p>
+          <div v-if="listaDocentes.length === 0" class="empty-column">
+            <small>Nenhum docente encontrado.</small>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider-vertical"></div>
+
+      <section class="column-section">
+        <div class="column-header header-student">
+          <h3><i class="bi bi-mortarboard"></i> Alunos ({{ listaAlunos.length }})</h3>
         </div>
 
-        <div class="card-tags">
-          <span class="tag tag-type" :class="user.type">
-            {{ user.type === 'student' ? 'Aluno' : 'Docente' }}
-          </span>
+        <div class="cards-list">
+          <div v-for="user in listaAlunos" :key="user.id" class="user-card card-student">
+            <div class="card-avatar">
+              <img :src="user.avatar || 'https://via.placeholder.com/150'" alt="Foto">
+            </div>
+            <div class="card-info">
+              <h4 class="user-name">{{ user.nome }}</h4>
+              <span class="user-id">RA: {{ user.registro }}</span>
+            </div>
+            <div class="card-tags">
+              <span class="tag" :class="user.temOrientador ? 'status-ok' : 'status-warn'">
+                {{ user.temOrientador ? 'Com Orientador' : 'Sem Orientador' }}
+              </span>
+            </div>
+          </div>
 
-          <span class="tag tag-status" :class="getStatusClass(user)">
-            {{ getStatusLabel(user) }}
-          </span>
+          <div v-if="listaAlunos.length === 0" class="empty-column">
+            <small>Nenhum aluno encontrado.</small>
+          </div>
         </div>
+      </section>
 
-      </div>
-    </div>
-
-    <div v-if="usuariosFiltrados.length === 0" class="empty-state">
-      <i class="bi bi-emoji-frown"></i>
-      <p>Nenhum usuário encontrado com esses filtros.</p>
     </div>
 
   </div>
@@ -82,61 +101,42 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import SearchBar from '../components/SearchBar.vue'
+import SearchBar from '../components/SearchBar.vue';
 
 // --- ESTADO ---
-const termoPesquisa = ref('');
+const searchQuery = ref('');
 const mostrarFiltros = ref(false);
-const filtroTipo = ref('todos'); // 'todos', 'student', 'teacher'
-const filtroStatus = ref('todos'); // 'todos', 'pendente', 'ok'
+const filtroTipo = ref('todos'); 
+const filtroStatus = ref('todos');
 
-// --- MOCK DATA (Simulando o banco de dados misturado) ---
+// --- MOCK DATA ---
 const todosUsuarios = [
-  { 
-    id: 1, type: 'student', nome: 'João da Silva', registro: 'RA123456', 
-    temOrientador: false, avatar: 'https://i.pravatar.cc/150?u=1' 
-  },
-  { 
-    id: 2, type: 'teacher', nome: 'Prof. Carlos Mendes', registro: 'MAT9876', 
-    temVagas: true, avatar: 'https://i.pravatar.cc/150?u=2' 
-  },
-  { 
-    id: 3, type: 'student', nome: 'Ana Beatriz Souza', registro: 'RA654321', 
-    temOrientador: true, avatar: 'https://i.pravatar.cc/150?u=3' 
-  },
-  { 
-    id: 4, type: 'teacher', nome: 'Profa. Lucia Lima', registro: 'MAT5555', 
-    temVagas: false, avatar: 'https://i.pravatar.cc/150?u=4' 
-  },
-  { 
-    id: 5, type: 'student', nome: 'Marcos Vinicius', registro: 'RA112233', 
-    temOrientador: false, avatar: 'https://i.pravatar.cc/150?u=5' 
-  },
-  { 
-    id: 6, type: 'student', nome: 'Fernanda Torres', registro: 'RA998877', 
-    temOrientador: true, avatar: 'https://i.pravatar.cc/150?u=6' 
-  },
+  { id: 1, type: 'student', nome: 'João da Silva', registro: 'RA123456', temOrientador: false, avatar: 'https://i.pravatar.cc/150?u=1' },
+  { id: 2, type: 'teacher', nome: 'Prof. Carlos Mendes', registro: 'MAT9876', temVagas: true, avatar: 'https://i.pravatar.cc/150?u=2' },
+  { id: 3, type: 'student', nome: 'Ana Beatriz Souza', registro: 'RA654321', temOrientador: true, avatar: 'https://i.pravatar.cc/150?u=3' },
+  { id: 4, type: 'teacher', nome: 'Profa. Lucia Lima', registro: 'MAT5555', temVagas: false, avatar: 'https://i.pravatar.cc/150?u=4' },
+  { id: 5, type: 'student', nome: 'Marcos Vinicius', registro: 'RA112233', temOrientador: false, avatar: 'https://i.pravatar.cc/150?u=5' },
+  { id: 6, type: 'student', nome: 'Fernanda Torres', registro: 'RA998877', temOrientador: true, avatar: 'https://i.pravatar.cc/150?u=6' },
 ];
 
-// --- LÓGICA DE FILTRAGEM ---
-const usuariosFiltrados = computed(() => {
+// --- LÓGICA DE FILTRAGEM (Atualizada para suportar divisão) ---
+const usuariosFiltradosGlobalmente = computed(() => {
   return todosUsuarios.filter(user => {
     
-    // 1. Filtro de Texto (Nome ou Registro)
-    const matchTexto = user.nome.toLowerCase().includes(termoPesquisa.value.toLowerCase()) || 
-                       user.registro.toLowerCase().includes(termoPesquisa.value.toLowerCase());
+    // 1. Filtro Texto
+    const termo = searchQuery.value.toLowerCase();
+    const matchTexto = user.nome.toLowerCase().includes(termo) || 
+                       user.registro.toLowerCase().includes(termo);
 
-    // 2. Filtro de Tipo (Aluno/Docente)
+    // 2. Filtro Tipo (Ainda respeita o dropdown se o usuário quiser esconder uma coluna inteira)
     const matchTipo = filtroTipo.value === 'todos' ? true : user.type === filtroTipo.value;
 
-    // 3. Filtro de Status (Complexo)
+    // 3. Filtro Status
     let matchStatus = true;
     if (filtroStatus.value !== 'todos') {
       if (user.type === 'student') {
-        // Aluno Pendente = Sem Orientador
         matchStatus = filtroStatus.value === 'pendente' ? !user.temOrientador : user.temOrientador;
       } else {
-        // Docente Pendente = Com Vagas (está "procurando" alunos)
         matchStatus = filtroStatus.value === 'pendente' ? user.temVagas : !user.temVagas;
       }
     }
@@ -145,26 +145,21 @@ const usuariosFiltrados = computed(() => {
   });
 });
 
-// --- HELPER FUNCTIONS PARA UI ---
-function getStatusLabel(user) {
-  if (user.type === 'student') {
-    return user.temOrientador ? 'Com Orientador' : 'Sem Orientador';
-  }
-  return user.temVagas ? 'Vagas Abertas' : 'Lotado';
-}
+// Computed properties separadas para alimentar as duas colunas
+const listaDocentes = computed(() => 
+  usuariosFiltradosGlobalmente.value.filter(u => u.type === 'teacher')
+);
 
-function getStatusClass(user) {
-  if (user.type === 'student') {
-    return user.temOrientador ? 'status-ok' : 'status-warn';
-  }
-  return user.temVagas ? 'status-open' : 'status-closed';
-}
+const listaAlunos = computed(() => 
+  usuariosFiltradosGlobalmente.value.filter(u => u.type === 'student')
+);
+
 </script>
 
 <style scoped>
 .search-page {
   padding: 2rem 4rem;
-  background-color: #f4f4f4; /* Fundo cinza claro da imagem */
+  background-color: #f4f4f4;
   min-height: 100vh;
 }
 
@@ -190,6 +185,7 @@ function getStatusClass(user) {
   display: flex;
   justify-content: flex-end;
   position: relative;
+  margin-bottom: 2rem;
 }
 
 .btn-filter {
@@ -206,7 +202,6 @@ function getStatusClass(user) {
   gap: 0.5rem;
 }
 
-/* Dropdown de Filtros */
 .filter-dropdown {
   position: absolute;
   top: 110%;
@@ -218,7 +213,7 @@ function getStatusClass(user) {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   width: 250px;
   z-index: 10;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .filter-group {
@@ -240,39 +235,70 @@ function getStatusClass(user) {
   border-radius: 4px;
 }
 
-/* --- GRID DE RESULTADOS --- */
-.results-header h3 {
-  font-size: 1.1rem;
-  font-style: italic; /* Igual a imagem */
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.cards-grid {
+/* --- NOVO LAYOUT DIVIDIDO --- */
+.split-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
+  grid-template-columns: 1fr 1px 1fr; /* Coluna | Linha | Coluna */
+  gap: 2rem;
+  align-items: start;
 }
 
+.divider-vertical {
+  background-color: #ddd;
+  height: 100%;
+  min-height: 400px;
+  width: 1px;
+}
+
+.column-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid transparent;
+  display: inline-block;
+}
+
+/* Cores dos títulos das colunas */
+.header-teacher h3 { border-color: #7b1fa2; color: #4a148c; }
+.header-student h3 { border-color: #1565c0; color: #0d47a1; }
+
+.cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* CARDS */
 .user-card {
   background: white;
   border: 1px solid #e0e0e0;
-  padding: 1rem; /* Cards mais compactos como na imagem */
+  border-left: 4px solid transparent; /* Indicador lateral */
+  padding: 1rem; 
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 4px;
 }
 
 .user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
   border-color: #bbb;
 }
 
+/* Cores das bordas laterais */
+.card-teacher { border-left-color: #7b1fa2; }
+.card-student { border-left-color: #1565c0; }
+
 .card-avatar img {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: #000; /* Fundo preto para combinar com imagem */
+  background-color: #f0f0f0;
 }
 
 .card-info {
@@ -280,66 +306,52 @@ function getStatusClass(user) {
 }
 
 .user-name {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: bold;
   margin: 0;
   color: #222;
 }
 
 .user-id {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #666;
   display: block;
-  margin-bottom: 0.2rem;
 }
 
-.user-detail {
-  font-size: 0.8rem;
-  color: #888;
-  margin: 0;
-}
-
-/* Tags alinhadas a direita como na imagem */
 .card-tags {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.5rem;
 }
 
 .tag {
   font-size: 0.7rem;
-  padding: 0.3rem 0.8rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
 
-/* CORES DAS TAGS */
-.tag-type.student { background-color: #e3f2fd; color: #1565c0; }
-.tag-type.teacher { background-color: #f3e5f5; color: #7b1fa2; }
+/* TAG COLORS */
+.status-ok { background-color: #e8f5e9; color: #2e7d32; }
+.status-warn { background-color: #fff3e0; color: #ef6c00; }
+.status-open { background-color: #e1f5fe; color: #0288d1; }
+.status-closed { background-color: #ffebee; color: #c62828; }
 
-.status-ok { background-color: #e8f5e9; color: #2e7d32; } /* Verde suave */
-.status-warn { background-color: #fff3e0; color: #ef6c00; } /* Laranja suave */
-.status-open { background-color: #e1f5fe; color: #0288d1; } /* Azul suave */
-.status-closed { background-color: #ffebee; color: #c62828; } /* Vermelho suave */
-
-/* Estado Vazio */
-.empty-state {
+.empty-column {
   text-align: center;
-  padding: 4rem;
   color: #999;
-}
-.empty-state i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  display: block;
+  padding: 2rem;
+  background: rgba(0,0,0,0.02);
+  border-radius: 4px;
+  font-style: italic;
+  font-size: 0.85rem;
 }
 
-@media (max-width: 768px) {
-  .search-page { padding: 1rem; }
-  .cards-grid { grid-template-columns: 1fr; }
-  .search-container { flex-direction: column; }
+@media (max-width: 900px) {
+  .search-page { padding: 1.5rem; }
+  .split-layout { grid-template-columns: 1fr; gap: 3rem; }
+  .divider-vertical { display: none; }
   .filter-dropdown { position: static; width: 100%; margin-top: 1rem; }
 }
 </style>
