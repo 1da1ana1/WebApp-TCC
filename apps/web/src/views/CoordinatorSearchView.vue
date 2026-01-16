@@ -189,7 +189,6 @@ function getStatusClass(user) {
 .filter-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 2rem;
   position: relative;
 }
 
@@ -251,8 +250,7 @@ function getStatusClass(user) {
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* Grid responsivo */
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
 }
 
 .user-card {
@@ -262,7 +260,6 @@ function getStatusClass(user) {
   display: flex;
   align-items: center;
   gap: 1rem;
-  border-radius: 4px; /* Cantos levemente arredondados */
   transition: transform 0.2s;
 }
 
