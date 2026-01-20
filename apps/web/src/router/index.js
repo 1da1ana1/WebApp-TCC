@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
+import { useAuthStore } from '@/stores/auth'
 
 import SearchSupervisor from '../views/SearchProfessorView.vue'
 import CoordinatorUserDetailsView from '../views/CoordinatorUserDetailsView.vue';
@@ -10,7 +10,7 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/LoginViewTest.vue'),
+    component: () => import('@/views/LoginView.vue'),
     meta: { layout: 'public' }
   },
   
@@ -68,6 +68,29 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+// Navigation Guard - Verifica autenticação antes de acessar rotas protegidas
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // Rotas públicas que não precisam de autenticação
+  const publicRoutes = ['/login', '/', '/info']
+  const isPublicRoute = publicRoutes.includes(to.path)
+  
+  // Se é rota pública, deixa passar
+  if (isPublicRoute) {
+    next()
+    return
+  }
+  
+  // Se é rota protegida e não está autenticado
+  if (!isPublicRoute && !authStore.user) {
+    next('/login')
+    return
+  }
+  
+  next()
 })
 
 export default router
