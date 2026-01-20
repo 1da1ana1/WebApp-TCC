@@ -351,7 +351,6 @@ onMounted(() => {
   border: none;
   padding: 0.8rem 1rem;
   font-size: 1rem;
-  color: #666;
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: all 0.2s;
@@ -363,7 +362,6 @@ onMounted(() => {
 .tab-btn.active {
   color: var(--color-brand-primary, #004b86);
   border-bottom-color: var(--color-brand-primary, #004b86);
-  font-weight: 600;
 }
 
 /* CONTEÚDO DAS ABAS */
