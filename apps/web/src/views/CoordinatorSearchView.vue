@@ -273,6 +273,7 @@ const listaAlunos = computed(() =>
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-family: poppins, sans-serif;
 }
 
 /* --- NOVO ESTILO DO BOTÃO LIMPAR --- */
