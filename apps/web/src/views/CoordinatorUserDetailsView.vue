@@ -363,7 +363,6 @@ onMounted(() => {
   color: var(--color-brand-primary, #004b86);
   border-bottom-color: var(--color-brand-primary, #004b86);
 }
-
 /* CONTEÚDO DAS ABAS */
 .tab-header-info {
   margin-bottom: 1rem;
