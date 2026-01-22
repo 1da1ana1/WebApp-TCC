@@ -52,13 +52,23 @@
             </button>
           </div>
 
-          <div class="semester-filter">
-            <label>Filtrar por semestre:</label>
-            <select v-model="semestreSelecionado" @change="atualizarDados">
-              <option value="2025-1">1º Semestre 2025 (Atual)</option>
-              <option value="2024-2">2º Semestre 2024</option>
-              <option value="2024-1">1º Semestre 2024</option>
-            </select>
+          <div class="semester-filter-wrapper">
+            <button 
+              class="btn-filter-semester" 
+              @click="mostrarFiltroSemestre = !mostrarFiltroSemestre">
+              Semestre <i class="bi bi-funnel"></i>
+            </button>
+            
+            <div v-if="mostrarFiltroSemestre" class="filter-dropdown-semester">
+              <div class="filter-group">
+                <label>Selecione o semestre:</label>
+                <select v-model="semestreSelecionado" @change="atualizarDados">
+                  <option value="2025-1">1º Semestre 2025 (Atual)</option>
+                  <option value="2024-2">2º Semestre 2024</option>
+                  <option value="2024-1">1º Semestre 2024</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -155,6 +165,7 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 const activeTab = ref('logs');
 const semestreSelecionado = ref('2025-1');
+const mostrarFiltroSemestre = ref(false);
 const user = ref({}); // Será preenchido com dados mockados
 
 // MOCK DATA - Simulando banco de dados
@@ -315,25 +326,61 @@ onMounted(() => {
   gap: 2rem;
 }
 
-.semester-filter {
+.semester-filter-wrapper {
+  position: relative;
+}
+
+.btn-filter-semester {
+  background-color: var(--color-button-primary);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: poppins, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-filter-semester:hover {
+  opacity: 0.9;
+}
+
+.filter-dropdown-semester {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 250px;
+  z-index: 10;
+  margin-top: 0.5rem;
+}
+
+.filter-dropdown-semester .filter-group {
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  font-family: poppins, sans-serif;
 }
-.semester-filter label {
-  font-size: 0.8rem;
-  font-weight: 600;
+
+.filter-dropdown-semester label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
   color: #555;
 }
-.semester-filter select {
+
+.filter-dropdown-semester select {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 0.9rem;
-  background-color: #fff;
-  cursor: pointer;
   font-family: poppins, sans-serif;
+  font-size: 0.9rem;
 }
 
 /* ABAS */
