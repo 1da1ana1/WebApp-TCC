@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 
 import SearchSupervisor from '../views/SearchProfessorView.vue'
 import CoordinatorUserDetailsView from '../views/CoordinatorUserDetailsView.vue';
+import ProfessorDashboardView from '../views/ProfessorDashboardView.vue'
 
 
 const routes = [
@@ -46,6 +47,15 @@ const routes = [
     component: () => import('@/views/ProfessorProfileView.vue'),
   },
 
+  {
+    path: '/perfil/docente', 
+    name: 'ProfessorDashboard', 
+    component: ProfessorDashboardView, 
+    meta: { 
+      requiresAuth: true, 
+      type: 'teacher' 
+    }
+  },
   {
     path: '/painel/coordenador',
     name: 'CoordinatorDashboard',

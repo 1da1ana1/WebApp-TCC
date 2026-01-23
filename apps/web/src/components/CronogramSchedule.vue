@@ -7,25 +7,12 @@
         class="timeline-item" 
         :class="{ active: step.active }"
       >
-        <div class="icon-wrapper">
-          <div class="icon-box">
-            <i :class="['bi', step.icon]"></i>
-          </div>
-          <div class="connecting-line" v-if="index !== timelineSteps.length - 1"></div>
+        <div class="icon-box">
+          <i :class="['bi', step.icon]"></i>
         </div>
 
-        <div class="content-wrapper">
-          <div class="timeline-content">
-            <h4 class="timeline-title">{{ step.label }}</h4>
-            <span v-if="step.date" class="timeline-date">{{ step.date }}</span>
-          </div>
-
-          <div class="arrow">→</div>
-
-          <div class="info-box">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-          </div>
-        </div>
+        <h4 class="timeline-title">{{ step.label }}</h4>
+        <span v-if="step.date" class="timeline-date">{{ step.date }}</span>
       </div>
     </div>
   </section>
@@ -33,157 +20,95 @@
 
 <script setup>
 import { ref } from 'vue'
+import { steps } from '@/stores/timelineData' 
 
-const timelineSteps = ref([
-  { label: 'Definição de vagas', date: '01/02 a 10/02', icon: 'bi-paperclip', active: false },
-  { label: 'Cadastro de temas', date: '11/02 a 15/02', icon: 'bi-list-check', active: false },
-  { label: 'Período de busca', date: '16/02 a 25/02', icon: 'bi-chat-left-text', active: true }, // ITEM ATIVO
-  { label: 'Análise solicitações', date: '26/02 a 28/02', icon: 'bi-hourglass-split', active: false },
-  { label: 'Confirmação vínculo', date: '01/03', icon: 'bi-person-check', active: false },
-  { label: 'Encerramento', date: '05/03', icon: 'bi-lock', active: false },
-  { label: 'Início orientações', date: '10/03', icon: 'bi-pencil-square', active: false },
-  { label: 'Homologação', date: '15/03', icon: 'bi-graph-up', active: false },
-])
+const timelineSteps = ref(steps) 
 </script>
-
 <style scoped>
 .timeline-section {
-  padding: 3rem 1rem;
+  background-color: #d3d3d3; /* Fundo cinza */
+  padding: 2rem 0;
   border-bottom: 1px solid #bcbcbc;
   display: flex;
   justify-content: center;
   width: 100%;
+  overflow-x: auto; /* Garante scroll se a tela for pequena */
 }
 
 .timeline-grid {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between; /* Espalha horizontalmente */
+  align-items: flex-start;
   width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  gap: 1rem; /* Reduzi um pouco o gap pois o padding interno dos itens compensa */
+  max-width: 1200px;
+  padding: 0 1rem;
+  position: relative;
 }
 
 .timeline-item {
+  flex: 1;
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column; /* Ícone em cima, texto embaixo */
+  align-items: center;
+  text-align: center;
   position: relative;
-  gap: 1.5rem;
-  
-  /* NOVOS ESTILOS DE ESTRUTURA */
-  padding: 1.5rem; /* Espaçamento interno para o fundo não colar no texto */
-  border-radius: 12px; /* Bordas arredondadas */
-  transition: all 0.3s ease; /* Transição suave */
+  min-width: 100px; /* Largura mínima para não quebrar */
 }
 
-/* --- ESTADO ATIVO (Fundo Amarelo) --- */
-.timeline-item.active {
-  background-color: #fff9c4; /* Amarelo bem claro */
-  border: 1px solid #fff59d; /* Borda sutil opcional */
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Sombra leve para destacar */
+/* --- LINHA CONECTORA HORIZONTAL --- */
+.timeline-item::after {
+  content: '';
+  position: absolute;
+  top: 25px; /* Altura do centro do ícone (ajuste se mudar o tamanho do ícone) */
+  left: 50%; /* Começa no meio deste item */
+  width: 100%; /* Vai até o meio do próximo item */
+  height: 2px;
+  background-color: #000;
+  z-index: 0;
 }
 
-/* Ajuste do título no estado ativo */
-.timeline-item.active .timeline-title {
-  font-weight: 900;
-  color: #000;
+/* Remove a linha do último item */
+.timeline-item:last-child::after {
+  display: none;
 }
 
-/* Ajuste da caixa do ícone no estado ativo para combinar com o fundo */
-.timeline-item.active .icon-box {
-  background-color: #fff9c4; /* Mesma cor do fundo ativo */
-  border: 2px solid #000; /* Destaque opcional no ícone */
-}
-
-/* --- Coluna do Ícone e Linha --- */
-.icon-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 60px;
-  flex-shrink: 0;
-}
-
+/* --- ÍCONE --- */
 .icon-box {
-  background-color: #d3d3d3; /* Cor padrão */
-  z-index: 2;
-  padding: 5px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  transition: background-color 0.3s ease;
+  background-color: #d3d3d3; /* Fundo igual a section para "cortar" a linha */
+  z-index: 1;
+  padding: 0 10px;
+  margin-bottom: 10px;
+  display: inline-block;
+  position: relative;
 }
 
 .timeline-item .bi {
-  font-size: 1.8rem;
-  color: #000 !important;
-  display: block;
-}
-
-/* Linha Conectora Vertical */
-.connecting-line {
-  width: 2px;
-  background-color: #000;
-  min-height: 60px;
-  margin-top: 8px;
-  /* A linha se estende para conectar visualmente apesar do padding */
-  height: 100%; 
-}
-
-/* --- Coluna do Conteúdo --- */
-.content-wrapper {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-  padding-top: 5px;
-}
-
-.timeline-content {
-  display: flex;
-  flex-direction: column;
-  min-width: 150px;
-  flex-shrink: 0;
-}
-
-.timeline-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 2rem;
   color: #000;
-  margin: 0 0 4px 0;
+}
+
+/* --- TEXTO --- */
+.timeline-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #000;
+  margin: 0 0 5px 0;
   line-height: 1.2;
+  z-index: 1;
 }
 
 .timeline-date {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #333;
-  font-weight: normal;
 }
 
-.arrow {
-  font-size: 1.5rem;
-  color: #000;
-  flex-shrink: 0;
+/* --- ESTADO ATIVO (Horizontal) --- */
+.timeline-item.active .bi {
+  transform: scale(1.2);
+  font-weight: bold;
 }
 
-/* --- Caixa de Informação --- */
-.info-box {
-  background-color: rgba(255, 255, 255, 0.6); /* Mais transparente */
-  border: 1px solid #999;
-  border-radius: 4px;
-  padding: 1rem;
-  font-size: 0.85rem;
-  color: #333;
-  line-height: 1.4;
-  flex: 1;
-}
-
-.info-box p {
-  margin: 0;
+.timeline-item.active .timeline-title {
+  font-weight: 800;
 }
 </style>

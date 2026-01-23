@@ -1,51 +1,181 @@
 <template>
-  <div class="profile-container">
-    <div v-if="isLoading" class="loading-message">Carregando dados do docente...</div>
+  <CronogramSchedule />
+  <div class="page-wrapper">
+    <div class="main-layout">
+      <aside class="professor-sidebar">
+        <div class="profile-card">
+          <div class="sidebar-header">
+            <div class="avatar-circle">
+              <img :src="professor.photo || '/src/assets/img/default-avatar.png'" alt="Perfil" />
+            </div>
 
-    <div v-else-if="error" class="error-message">
-      {{ error }}
-    </div>
+            <div class="professor-identity">
+              <h2 class="professor-name">{{ professor.name }}</h2>
+              <p class="professor-id">ID: {{ professor.id }}</p>
+            </div>
+          </div>
 
-    <div v-else-if="docente" class="profile-content">
-      <div class="profile-header">
-        <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" />
-        <div class="profile-info">
-          <h1>{{ docente.name }}</h1>
-          <p>{{ docente.email }}</p>
-          <a :href="docente.lattes" target="_blank">Ver Currículo Lattes</a>
-        </div>
-      </div>
+          <div class="sidebar-menu">
+            <nav class="sidebar-nav">
+              <ul>
+                <li>
+                  <button 
+                    class="btn-menu" 
+                    :class="{ 'active-btn': currentView === 'home' }"
+                    @click="currentView = 'home'"
+                  >
+                    Início <i class="bi bi-chevron-right"></i>
+                  </button>
 
-      <div class="profile-body">
-        <div class="interests-content">
-          <h3>Temas de Interesse:</h3>
-          <div class="tags-container">
-            <span class="tag" v-for="tag in docente.tags" :key="tag">{{ tag }}</span>
+                  <button 
+                    class="btn-menu" 
+                    :class="{ 'active-btn': currentView === 'requests' }"
+                    @click="currentView = 'requests'"
+                  >
+                    Solicitações Recebidas <i class="bi bi-chevron-right"></i>
+                  </button>
+
+                  <button 
+                    class="btn-menu" 
+                    :class="{ 'active-btn': currentView === 'students' }"
+                    @click="currentView = 'students'"
+                  >
+                    Meus Alunos <i class="bi bi-chevron-right"></i>
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
+      </aside>
 
-        <button class="btn-send-request" @click="abrirModal">Enviar Solicitação</button>
-      </div>
-    </div>
+      <main class="content-panel">
+        
+        <div v-if="currentView === 'home'">
+          <section class="card-section themes-area">
+            <h3>Temas de Pesquisa:</h3>
+            <p class="instruction italic">Insira suas áreas de atuação:</p>
 
-    <div v-if="showModal" class="modal-overlay" @click.self="fecharModal">
-      <div class="modal-card">
-        <h3>Confirmar Envio</h3>
-        <p>
-          Você deseja enviar uma solicitação de orientação para <strong>{{ docente?.name }}</strong
-          >?
-        </p>
+            <div class="tags-control-container">
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  v-model="newTag"
+                  @keyup.enter="addTag"
+                  placeholder="Ex: Inteligência Artificial"
+                />
+                <button type="button" class="add-tag-btn" @click="addTag">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </div>
 
-        <div class="modal-actions">
-          <button class="btn-cancel" @click="fecharModal" :disabled="isSending">
-            Cancelar Envio
-          </button>
+              <div class="tags-display">
+                <span
+                  v-for="(tag, index) in tags"
+                  :key="index"
+                  class="tag"
+                  :class="getTagColor(index)"
+                >
+                  {{ tag }}
+                  <i class="bi bi-x" @click="removeTag(index)"></i>
+                </span>
+              </div>
+            </div>
+          </section>
 
-          <button class="btn-confirm" @click="confirmarEnvio" :disabled="isSending">
-            {{ isSending ? 'Enviando...' : 'Confirmar Solicitação' }}
-          </button>
+          <section class="card-section info-area">
+            <h3>Informações Adicionais:</h3>
+            <p class="instruction italic">Currículo Lattes:</p>
+            <input 
+              type="text" 
+              v-model="professor.lattes" 
+              placeholder="https://lattes.cnpq.br/..." 
+              class="info-input"
+            />
+          </section>
         </div>
-      </div>
+
+        <div v-if="currentView === 'requests'">
+          <section class="card-section requests-area">
+            <h3>Solicitações de Orientação Recebidas:</h3>
+
+            <div v-if="receivedRequests.length > 0">
+              <div v-for="req in receivedRequests" :key="req.id" class="request-item">
+                <div class="student-info">
+                  <div class="student-mini-card">
+                    <img src="/src/assets/img/foto-perfil.svg" class="mini-avatar" />
+                    <div class="student-details">
+                      <p class="student-name">{{ req.studentName }}</p>
+                      <span class="ra-badge">RA: {{ req.studentRa }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="vertical-divider"></div>
+
+                <div class="status-info">
+                  <div class="status-row">
+                    <p>Status:</p>
+                    <span :class="['status-btn', getStatusClass(req.status)]">
+                      {{ req.status }}
+                    </span>
+                  </div>
+                  <p v-if="req.denialReason" class="status-note">{{ req.denialReason }}</p>
+                </div>
+
+                <div class="request-actions">
+                  <button v-if="req.status === 'Pendente'" class="btn-accept" @click="acceptRequest(req.id)">
+                    Aceitar
+                  </button>
+                  <button v-if="req.status === 'Pendente'" class="btn-deny" @click="openDenyModal(req.id)">
+                    Recusar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="empty-state">
+              Nenhuma solicitação de orientação recebida.
+            </div>
+          </section>
+        </div>
+
+        <div v-if="currentView === 'students'">
+          <section class="card-section students-area">
+            <h3>Alunos em Orientação:</h3>
+
+            <div v-if="myStudents.length > 0">
+              <div v-for="student in myStudents" :key="student.id" class="student-item">
+                <div class="student-info">
+                  <div class="student-mini-card">
+                    <img src="/src/assets/img/foto-perfil.svg" class="mini-avatar" />
+                    <div class="student-details">
+                      <p class="student-name">{{ student.name }}</p>
+                      <span class="ra-badge">RA: {{ student.ra }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="vertical-divider"></div>
+
+                <div class="student-themes">
+                  <p class="theme-label">Temas:</p>
+                  <div class="mini-tags">
+                    <span v-for="tag in student.themes" :key="tag" class="mini-tag">
+                      {{ tag }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="empty-state">
+              Você não tem alunos em orientação no momento.
+            </div>
+          </section>
+        </div>
+
+      </main>
     </div>
   </div>
 </template>
@@ -53,313 +183,508 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import Swal from 'sweetalert2'
+import CronogramSchedule from '@/components/CronogramSchedule.vue'
 
-const docente = ref(null)
-const isLoading = ref(true)
-const error = ref(null)
 const route = useRoute()
-const docenteId = route.params.id
+const professorId = route.params.id
 
-const authUser = { id: 5, name: 'Aluno Exemplo' }
+const currentView = ref('home')
+const newTag = ref('')
+const tags = ref(['Inteligência Artificial', 'Machine Learning'])
 
-// --- LÓGICA DO MODAL E ENVIO ---
-const showModal = ref(false)
-const isSending = ref(false)
+const professor = ref({
+  id: professorId,
+  name: 'Prof. Carlos Mendes',
+  photo: 'https://i.pravatar.cc/150?u=' + professorId,
+  lattes: 'http://lattes.cnpq.br/example',
+})
 
-const abrirModal = () => {
-  showModal.value = true
+const receivedRequests = ref([
+  { id: 1, studentName: 'João da Silva', studentRa: 'RA123456', status: 'Pendente' },
+  { id: 2, studentName: 'Maria Santos', studentRa: 'RA654321', status: 'Aceito' },
+  { id: 3, studentName: 'Pedro Oliveira', studentRa: 'RA112233', status: 'Recusado', denialReason: 'Áreas de interesse incompatíveis' },
+])
+
+const myStudents = ref([
+  { id: 1, name: 'Ana Beatriz Souza', ra: 'RA654321', themes: ['IA', 'NLP'] },
+  { id: 2, name: 'Fernanda Torres', ra: 'RA998877', themes: ['Machine Learning', 'Visão Computacional'] },
+])
+
+const getTagColor = (index) => {
+  const colors = ['purple', 'yellow', 'blue']
+  return colors[index % colors.length]
 }
 
-const fecharModal = () => {
-  // Só fecha se NÃO estiver enviando (para evitar fechar no meio do loading)
-  if (!isSending.value) {
-    showModal.value = false
+const addTag = () => {
+  if (newTag.value.trim()) {
+    tags.value.push(newTag.value)
+    newTag.value = ''
   }
 }
 
-const confirmarEnvio = async () => {
-  isSending.value = true // 1. Começa o Loading
+const removeTag = (index) => {
+  tags.value.splice(index, 1)
+}
 
-  try {
-    // === SIMULAÇÃO BACK-END ===
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+const getStatusClass = (status) => {
+  if (status === 'Aceito') return 'success'
+  if (status === 'Recusado') return 'danger'
+  return 'pending'
+}
 
-    // === 2. FECHA O MODAL PRIMEIRO (SUCESSO) ===
-    // Forçamos o fechamento direto aqui, ignorando a função fecharModal
-    showModal.value = false
-
-    // === 3. MOSTRA O ALERTA COM PEQUENO DELAY ===
-    // O setTimeout permite que o modal suma visualmente antes do alerta aparecer
-    setTimeout(() => {
-      Swal.fire({
-        title: 'Sucesso!',
-        text: `Solicitação enviada para ${docente.value.name}.`,
-        icon: 'success',
-        confirmButtonColor: 'var(--color-status-success)',
-        timer: 3000,
-      })
-    }, 200) // 200ms de espera
-  } catch (err) {
-    console.error(err)
-
-    showModal.value = false
-
-    setTimeout(() => {
-      Swal.fire({
-        title: 'Erro!',
-        text: 'Não foi possível enviar a solicitação. Tente novamente.',
-        icon: 'error',
-        confirmButtonColor: 'var(--color-status-danger)',
-      })
-    }, 200)
-  } finally {
-    isSending.value = false
+const acceptRequest = (requestId) => {
+  const req = receivedRequests.value.find(r => r.id === requestId)
+  if (req) {
+    req.status = 'Aceito'
   }
 }
 
-onMounted(async () => {
-  try {
-    const mockDatabase = {
-      1: {
-        id: 1,
-        name: 'Prof. Mock 1 Detalhado',
-        email: 'mock1@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['IA', 'Redes Neurais'],
-      },
-      2: {
-        id: 2,
-        name: 'Prof. Mock 2 Detalhado',
-        email: 'mock2@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['Banco de Dados', 'Sistemas'],
-      },
-      3: {
-        id: 3,
-        name: 'Prof. Mock 3 Detalhado',
-        email: 'mock3@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['Engenharia de Software'],
-      },
-    }
+const openDenyModal = (requestId) => {
+  console.log('Abrir modal de recusa para:', requestId)
+}
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    const data = mockDatabase[docenteId]
-
-    if (data) {
-      docente.value = data
-    } else {
-      throw new Error('Docente não encontrado')
-    }
-  } catch (err) {
-    error.value = err.message
-  } finally {
-    isLoading.value = false
-  }
+onMounted(() => {
+  // Dados inicializados
 })
 </script>
 
 <style scoped>
-/* SEUS ESTILOS ORIGINAIS MANTIDOS */
+/* ESTRUTURA BÁSICA */
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
 
-.profile-container {
+.main-layout {
+  display: flex;
+  width: 100%;
+  gap: 2rem;
   padding: 2rem;
-  background-color: var(--white-color, #fff);
-  max-width: 68rem;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-.loading-message,
-.error-message {
-  font-size: 1.2rem;
-  color: var(--color-text-muted, #6c757d);
-  text-align: center;
-  padding: 2rem;
+/* SIDEBAR DO PROFESSOR */
+.professor-sidebar {
+  width: 300px;
+  flex-shrink: 0;
 }
 
-.error-message {
-  color: var(--color-status-danger, #dc3545);
+.profile-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem 1rem;
 }
 
-.profile-header {
+.sidebar-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  border-bottom: 2px solid var(--color-border-default, #ccc);
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #eee;
   padding-bottom: 1.5rem;
 }
 
-.profile-header img {
+.avatar-circle {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 2px solid var(--color-brand-primary, #065f8b);
+  overflow: hidden;
+  border: 3px solid var(--color-brand-primary);
 }
 
-.profile-info h1 {
+.avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.professor-identity {
+  text-align: center;
+}
+
+.professor-name {
   margin: 0;
-  color: var(--color-text-primary, #1e1e1e);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
 }
 
-.profile-info p {
-  margin: 0.25rem 0;
-  color: var(--color-text-muted, #6c757d);
+.professor-id {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.85rem;
+  color: #666;
 }
 
-.profile-info a {
-  color: var(--color-brand-primary, #065f8b);
-  text-decoration: none;
-  font-weight: bold;
+/* MENU DA SIDEBAR */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.profile-body {
-  padding-top: 1.5rem;
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn-menu {
+  width: 100%;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s;
 }
 
-.interests-content {
+.btn-menu:hover {
+  background-color: #f9f9f9;
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
+}
+
+.btn-menu.active-btn {
+  background-color: var(--color-brand-primary);
+  color: white;
+  border-color: var(--color-brand-primary);
+}
+
+/* CONTEÚDO PRINCIPAL */
+.content-panel {
   flex: 1;
 }
 
-.tags-container {
+.card-section {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.instruction {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.5rem 0 1rem 0;
+  font-style: italic;
+}
+
+/* CONTROLE DE TAGS */
+.tags-control-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.input-wrapper {
+  display: flex;
+  border: 1px solid #999;
+  border-radius: 4px;
+  padding: 5px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.input-wrapper input {
+  flex: 1;
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.add-tag-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.add-tag-btn:hover {
+  color: var(--color-brand-primary);
+}
+
+.tags-display {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding-top: 0.5rem;
 }
 
 .tag {
-  width: fit-content;
-  height: 32px;
-  border-radius: 1rem;
-  font-weight: bold;
-  font-style: italic;
-  font-size: 10px;
-  padding: 12px;
+  padding: 5px 15px;
+  border-radius: 15px;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background-color: var(--color-tag1, #eee);
-  color: var(--color-tag1-darker, #333);
-  border: 1px solid var(--color-tag1-darker, #333);
-}
-
-/* BOTÃO DE ENVIAR SOLICITAÇÃO */
-.btn-send-request {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 11.813rem;
-  height: 2.625rem;
-  flex-shrink: 0;
-  background-color: var(--color-button-primary);
-  border: 2px solid #0e4392;
-  color: #fff;
-  border-radius: 8px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.9rem;
+  gap: 5px;
   font-weight: 500;
-  font-style: italic;
+}
+
+.tag i {
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  font-size: 0.75rem;
 }
 
-.btn-send-request:hover {
-  opacity: 0.8;
+.tag.purple {
+  background-color: #d8b4fe;
+  color: #4c1d95;
 }
 
-/* MODAL */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+.tag.yellow {
+  background-color: #fef08a;
+  color: #854d0e;
+}
+
+.tag.blue {
+  background-color: #93c5fd;
+  color: #1e3a8a;
+}
+
+/* INPUT DE INFORMAÇÕES */
+.info-input {
+  width: 100%;
+  max-width: 500px;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+/* ITEMS DE SOLICITAÇÕES E ALUNOS */
+.request-item,
+.student-item {
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 9999;
-  backdrop-filter: blur(2px);
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 6px;
 }
 
-.modal-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  animation: fadeIn 0.3s ease;
+.student-info {
+  flex: 0 0 auto;
 }
 
-.modal-card h3 {
-  margin-top: 0;
-  color: var(--color-text-primary, #333);
-}
-
-.modal-card p {
-  color: var(--color-text-muted, #666);
-  margin-bottom: 1.5rem;
-}
-
-.modal-actions {
+.student-mini-card {
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 1rem;
 }
 
-.btn-cancel {
-  background-color: var(--color-status-danger);
-  border: 2px solid #971b27;
-  color: var(--color-text-secondary);
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-  font-style: italic;
+.mini-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #ddd;
+  object-fit: cover;
 }
 
-.btn-confirm {
+.student-name {
+  font-weight: 700;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.student-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ra-badge {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+  font-weight: 600;
+}
+
+/* DIVISOR VERTICAL */
+.vertical-divider {
+  width: 1px;
+  height: 60px;
+  background-color: #ccc;
+  margin: 0 1.5rem;
+  flex-shrink: 0;
+}
+
+/* STATUS INFO */
+.status-info {
+  flex: 1;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.status-row p {
+  font-style: italic;
+  font-size: 0.95rem;
+  margin: 0;
+  min-width: 60px;
+}
+
+.status-btn {
+  width: fit-content;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-style: italic;
+  color: white;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  border-radius: 4px;
+}
+
+.status-btn.pending {
+  background-color: var(--color-status-warning);
+}
+
+.status-btn.success {
   background-color: var(--color-status-success);
-  border: 2px solid #137c2c;
-  color: var(--color-text-secondary);
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  font-style: italic;
-  transition: opacity 0.2s ease;
-  min-width: 100px;
 }
 
-.btn-cancel:hover:not(:disabled),
-.btn-confirm:hover:not(:disabled) {
+.status-btn.danger {
+  background-color: var(--color-status-danger);
+}
+
+.status-note {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0.3rem 0 0 0;
+  font-style: italic;
+}
+
+/* AÇÕES DE SOLICITAÇÃO */
+.request-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-accept {
+  background-color: var(--color-status-success);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-deny {
+  background-color: var(--color-status-danger);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-accept:hover,
+.btn-deny:hover {
   opacity: 0.8;
 }
 
-.btn-cancel:disabled,
-.btn-confirm:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* TEMAS DO ALUNO */
+.student-themes {
+  flex: 1;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+.theme-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.mini-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.mini-tag {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  color: #999;
+  padding: 2rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+  .main-layout {
+    flex-direction: column;
+    gap: 1rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .professor-sidebar {
+    width: 100%;
+  }
+
+  .request-item,
+  .student-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .vertical-divider {
+    display: none;
   }
 }
 </style>

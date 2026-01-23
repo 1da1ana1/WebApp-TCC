@@ -37,7 +37,7 @@
           <h2>Cronograma de Buscas</h2>
           <p class="subtitle">Fique atento às datas e prazos do semestre atual.</p>
 
-          <CronogramSchedule />
+          <CronogramSchedulePublic />
         </div>
       </section>
 
@@ -68,7 +68,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
-import CronogramSchedule from '@/components/CronogramSchedule.vue'
+import CronogramSchedulePublic from '@/components/CronogramSchedulePublic.vue'
 
 const activeSectionId = ref('section-1')
 
