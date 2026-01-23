@@ -2,17 +2,17 @@
   <div class="page-container">
     <nav id="side-menu">
       <ul id="side-menu-ul">
-        <li class="side-menu-li" @click="scrollToSection('section-1')">
+        <li class="side-menu-li" :class="{ active: isActive('section-1') }" @click="scrollToSection('section-1')">
           <span>Vou fazer TCC, e agora?</span>
           <i class="bi bi-chevron-compact-right"></i>
         </li>
 
-        <li class="side-menu-li" @click="scrollToSection('section-2')">
+        <li class="side-menu-li" :class="{ active: isActive('section-2') }" @click="scrollToSection('section-2')">
           <span>Cronograma de buscas</span>
           <i class="bi bi-chevron-compact-right"></i>
         </li>
 
-        <li class="side-menu-li" @click="scrollToSection('section-3')">
+        <li class="side-menu-li" :class="{ active: isActive('section-3') }" @click="scrollToSection('section-3')">
           <span>Dúvidas frequentes</span>
           <i class="bi bi-chevron-compact-right"></i>
         </li>
@@ -66,9 +66,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
+
+const activeSectionId = ref('section-1')
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id)
@@ -83,12 +85,27 @@ const scrollToSection = (id) => {
 const showBackToTop = ref(false)
 
 const handleScroll = () => {
-
   showBackToTop.value = window.scrollY > 700
+
+  // Detecta qual seção está visível
+  const sections = ['section-1', 'section-2', 'section-3']
+  sections.forEach((id) => {
+    const element = document.getElementById(id)
+    if (element) {
+      const rect = element.getBoundingClientRect()
+      if (rect.top <= 150 && rect.bottom >= 150) {
+        activeSectionId.value = id
+      }
+    }
+  })
 }
 
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const isActive = (sectionId) => {
+  return activeSectionId.value === sectionId
 }
 
 onMounted(() => {
@@ -114,7 +131,7 @@ onUnmounted(() => {
 
 #side-menu {
   background-color: var(--color-brand-primary, #003366);
-  width: 22.813rem;
+  width: 18rem;
 
   position: fixed;
   left: 0;
@@ -144,20 +161,26 @@ onUnmounted(() => {
   padding: 0 2rem;
   text-decoration: none;
   list-style: none;
-  font-size: 20px;
+  font-size: 0.975rem;
   font-weight: 500;
   color: var(--color-text-secondary, #ccc);
   border-bottom: 2px solid #fff;
   cursor: pointer;
-  box-shadow: inset 0 0 0 0 #54b3d6;
-  transition:
-    color 0.4s ease-in-out,
-    box-shadow 0.4s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .side-menu-li:hover {
   color: #fff;
-  box-shadow: inset 23rem 0 0 0 #54b3d6;
+  font-size: 1rem;
+}
+
+.side-menu-li:hover i {
+  font-size: 1.165rem;
+}
+
+.side-menu-li.active {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #fff;
 }
 
 .content-area {
@@ -173,14 +196,12 @@ onUnmounted(() => {
 
 .glass-card {
   background: var(--color-background-card-default);
-  padding: 3rem;
-  border-radius: 8px;
+  padding: 1.85rem;
 }
 
 .fake-content {
   height: 400px;
 }
-
 
 #btn-back-to-top {
   position: fixed;
