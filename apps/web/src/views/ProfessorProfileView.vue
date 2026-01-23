@@ -1,53 +1,6 @@
 <template>
-  <CronogramSchedule />
   <div class="page-wrapper">
-    <div class="main-layout">
-      <aside class="professor-sidebar">
-        <div class="profile-card">
-          <div class="sidebar-header">
-            <div class="avatar-circle">
-              <img :src="professor.photo || '/src/assets/img/default-avatar.png'" alt="Perfil" />
-            </div>
 
-            <div class="professor-identity">
-              <h2 class="professor-name">{{ professor.name }}</h2>
-              <p class="professor-id">ID: {{ professor.id }}</p>
-            </div>
-          </div>
-
-          <div class="sidebar-menu">
-            <nav class="sidebar-nav">
-              <ul>
-                <li>
-                  <button 
-                    class="btn-menu" 
-                    :class="{ 'active-btn': currentView === 'home' }"
-                    @click="currentView = 'home'"
-                  >
-                    Início <i class="bi bi-chevron-right"></i>
-                  </button>
-
-                  <button 
-                    class="btn-menu" 
-                    :class="{ 'active-btn': currentView === 'requests' }"
-                    @click="currentView = 'requests'"
-                  >
-                    Solicitações Recebidas <i class="bi bi-chevron-right"></i>
-                  </button>
-
-                  <button 
-                    class="btn-menu" 
-                    :class="{ 'active-btn': currentView === 'students' }"
-                    @click="currentView = 'students'"
-                  >
-                    Meus Alunos <i class="bi bi-chevron-right"></i>
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </aside>
 
       <main class="content-panel">
         
@@ -177,13 +130,12 @@
 
       </main>
     </div>
-  </div>
+
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import CronogramSchedule from '@/components/CronogramSchedule.vue'
 
 const route = useRoute()
 const professorId = route.params.id
@@ -192,12 +144,6 @@ const currentView = ref('home')
 const newTag = ref('')
 const tags = ref(['Inteligência Artificial', 'Machine Learning'])
 
-const professor = ref({
-  id: professorId,
-  name: 'Prof. Carlos Mendes',
-  photo: 'https://i.pravatar.cc/150?u=' + professorId,
-  lattes: 'http://lattes.cnpq.br/example',
-})
 
 const receivedRequests = ref([
   { id: 1, studentName: 'João da Silva', studentRa: 'RA123456', status: 'Pendente' },
