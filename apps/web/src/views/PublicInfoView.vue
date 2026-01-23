@@ -114,7 +114,7 @@ onUnmounted(() => {
 
 #side-menu {
   background-color: var(--color-brand-primary, #003366);
-  width: 22.813rem;
+  width: 18.75rem;
 
   position: fixed;
   left: 0;
@@ -144,7 +144,7 @@ onUnmounted(() => {
   padding: 0 2rem;
   text-decoration: none;
   list-style: none;
-  font-size: 20px;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--color-text-secondary, #ccc);
   border-bottom: 2px solid #fff;
@@ -173,8 +173,7 @@ onUnmounted(() => {
 
 .glass-card {
   background: var(--color-background-card-default);
-  padding: 3rem;
-  border-radius: 8px;
+  padding: 1.85rem;
 }
 
 .fake-content {
