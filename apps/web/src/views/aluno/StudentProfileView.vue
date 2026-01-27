@@ -132,17 +132,19 @@ import { ref, onMounted } from 'vue'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import Swal from 'sweetalert2'
+// Importando a Fonte Única da Verdade
+import { getStudentById, mockRequests } from '@/services/mockData'
 
-// --- 1. DADOS DO ALUNO (MOCK) ---
+// --- 1. DADOS DO ALUNO ---
 const student = ref({
   name: 'Carregando...',
   ra: '...',
-  photo: '/src/assets/img/foto-perfil.svg', // Caminho da sua imagem
+  photo: '',
 })
 
 // --- 2. TAGS (TEMAS) ---
 const newTag = ref('')
-const tags = ref(['Machine Learning', 'Vue.js']) // Começa com alguns exemplos
+const tags = ref(['Machine Learning', 'Vue.js'])
 
 const addTag = () => {
   if (newTag.value.trim() !== '') {
@@ -155,54 +157,33 @@ const removeTag = (index) => {
   tags.value.splice(index, 1)
 }
 
-// Função auxiliar para dar cores aleatórias às tags (visual da imagem)
 const getTagColor = (index) => {
   const colors = ['purple', 'yellow', 'blue']
   return colors[index % colors.length]
 }
 
-// --- 3. DADOS DAS SOLICITAÇÕES (MOCK DO BANCO) ---
+// --- 3. DADOS DAS SOLICITAÇÕES ---
 const myRequests = ref([])
 const hasGuidance = ref(false)
 
-// Helpers de Status
+// Helpers de Status (Normaliza para maiúsculo para evitar erros de digitação no mock)
 const getStatusClass = (status) => {
-  if (status === 'PENDENTE') return 'pending'
-  if (status === 'ACEITO') return 'success'
-  if (status === 'RECUSADO') return 'danger'
+  const s = status ? status.toUpperCase() : ''
+  if (s === 'PENDENTE') return 'pending'
+  if (s === 'ACEITO') return 'success'
+  if (s === 'RECUSADO') return 'danger'
   return 'pending'
 }
 
 const getStatusMessage = (status) => {
-  if (status === 'PENDENTE') return 'Aguardando aceite do docente, você será notificado(a)'
-  if (status === 'ACEITO') return 'O docente aceitou sua solicitação! Verifique suas orientações.'
-  if (status === 'RECUSADO') return 'O docente não pôde aceitar no momento.'
+  const s = status ? status.toUpperCase() : ''
+  if (s === 'PENDENTE') return 'Aguardando aceite do docente, você será notificado(a)'
+  if (s === 'ACEITO') return 'O docente aceitou sua solicitação! Verifique suas orientações.'
+  if (s === 'RECUSADO') return 'O docente não pôde aceitar no momento.'
   return ''
 }
 
-// --- SIMULAÇÃO DE FETCH (API) ---
-onMounted(async () => {
-  // Simula delay de rede
-  setTimeout(() => {
-    // Popula dados do aluno
-    student.value = {
-      name: 'Lorem Ipsum Dolor', // Nome dinâmico
-      ra: '123456', // RA dinâmico
-      photo: '/src/assets/img/foto-perfil.svg',
-    }
-
-    // Popula solicitações
-    myRequests.value = [
-      {
-        id: 1,
-        professorName: 'Professor Dr. Lorem Ipsum', // Nome do Docente
-        availableSpots: '5/5', // Vagas
-        status: 'PENDENTE',
-      },
-    ]
-  }, 500)
-})
-
+// --- VIEW CONTROL ---
 const currentView = ref('home')
 
 const historyData = ref([
@@ -225,6 +206,35 @@ const showJustification = (msg) => {
     confirmButtonColor: 'var(--color-brand-primary)',
   })
 }
+
+// --- CARREGAMENTO DE DADOS (INTEGRAÇÃO) ---
+onMounted(async () => {
+  // Simula delay de rede
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  // 1. Buscar Aluno (Simulando login do ID 1 - Yasmim Daiana)
+  const studentData = getStudentById(1)
+  
+  if (studentData) {
+    student.value = {
+      name: studentData.nome,
+      ra: studentData.registro,
+      photo: studentData.avatar || '/src/assets/img/foto-perfil.svg'
+    }
+  }
+
+  // 2. Buscar Solicitações Ativas
+  // Filtramos apenas o que é relevante para exibir na "Home" (ex: Pendente/Aceito)
+  // Assumimos aqui que o campo 'envolvido' no mockRequests é o nome do Professor
+  const activeRequests = mockRequests.filter(r => ['Pendente', 'Aceito'].includes(r.status))
+
+  myRequests.value = activeRequests.map((req, index) => ({
+    id: index,
+    professorName: req.envolvido, // Mapeia o nome do 'envolvido' para o card
+    availableSpots: '2/5',        // Mock fixo (pois requests não tem dados de vaga no mock simples)
+    status: req.status.toUpperCase(),
+  }))
+})
 </script>
 
 <style scoped>

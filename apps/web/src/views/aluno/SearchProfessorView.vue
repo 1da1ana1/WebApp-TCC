@@ -32,33 +32,43 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import FilterBar from '../components/FilterBar.vue'
-import SearchBar from '../components/SearchBar.vue'
-import ProfessorCard from '../components/ProfessorCard.vue'
+import FilterBar from '@/components/FilterBar.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import ProfessorCard from '@/components/ProfessorCard.vue'
 
-// 1. Dados originais (Fonte de Verdade)
-const allProfessors = ref([
-  { id: 1, name: 'João Silva', themes: ['IA', 'Data Science'], availableSpots: 5, totalSpots: 5 },
-  { id: 2, name: 'Maria Souza', themes: ['Web', 'Design'], availableSpots: 2, totalSpots: 5 },
-])
+// 2. Importação dos Dados (Fonte Única da Verdade)
+// Certifique-se de que no mockData.js você exportou 'mockProfessors'
+import { mockProfessors } from '@/services/mockData' 
 
-const themesList = ['IA', 'Data Science', 'Web', 'Design', 'Engenharia de Software']
-
-// 2. Estados dos filtros
+// 3. Estados Locais
 const searchQuery = ref('')
 const selectedThemes = ref([])
 
-// 3. Lógica Única de Afunilamento
+// 4. Computed: Lista de temas disponíveis (Extraída automaticamente das tags dos professores)
+const availableThemes = computed(() => {
+  // Pega todas as tags de todos os professores, junta num array só, e remove duplicatas com Set
+  const allTags = mockProfessors.flatMap(p => p.tags || [])
+  return [...new Set(allTags)].sort()
+})
+
+// 5. Computed: Lógica de Filtragem
 const filteredProfessors = computed(() => {
-  return allProfessors.value.filter(prof => {
+  return mockProfessors.filter(prof => {
+    // A. Filtro por Nome (Case insensitive)
     const nameMatch = prof.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    
+    // B. Filtro por Tags/Temas
+    // Se não tiver tema selecionado (length 0), retorna true.
+    // Se tiver, verifica se o professor tem ALGUMA das tags selecionadas.
+    const profTags = prof.tags || []
     const themeMatch = selectedThemes.value.length === 0 || 
-                       selectedThemes.value.some(t => prof.themes.includes(t))
+                       selectedThemes.value.some(theme => profTags.includes(theme))
     
     return nameMatch && themeMatch
   })
 })
 
+// 6. Resetar Filtros
 const resetFilters = () => {
   searchQuery.value = ''
   selectedThemes.value = []
