@@ -246,7 +246,8 @@ const openContestModal = () => {
   display: flex;
   flex-direction: column;
   margin: 0 -2rem -2rem -2rem; /* Anula padding lateral do card-section */
-  max-height: 450px; 
+  max-height: 450px;
+  overflow-y: auto; /* Barra de rolagem vertical */
 }
 
 .request-item {
