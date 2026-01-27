@@ -112,7 +112,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import SearchBar from '../components/SearchBar.vue';
+import SearchBar from '@/components/SearchBar.vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 

@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-import SearchSupervisor from '../views/SearchProfessorView.vue'
-import CoordinatorUserDetailsView from '../views/CoordinatorUserDetailsView.vue';
-import ProfessorDashboardView from '../views/ProfessorDashboardView.vue'
+import SearchSupervisor from '@/views/aluno/SearchProfessorView.vue'
+import CoordinatorUserDetailsView from '@/views/coordenador/CoordinatorUserDetailsView.vue';
+import ProfessorDashboardView from '@/views/docente/ProfessorDashboardView.vue'
 
 
 const routes = [
@@ -38,13 +38,13 @@ const routes = [
   {
     path: '/perfil/aluno',
     name: 'StudentProfile',
-    component: () => import('@/views/StudentProfileView.vue'),
+    component: () => import('@/views/aluno/StudentProfileView.vue'),
   },
 
   {
     path: '/docente/:id',
     name: 'ProfessorProfile',
-    component: () => import('@/views/ProfessorProfileView.vue'),
+    component: () => import('@/views/aluno/ProfessorProfileView.vue'),
   },
 
   {
@@ -59,13 +59,13 @@ const routes = [
   {
     path: '/painel/coordenador',
     name: 'CoordinatorDashboard',
-    component: () => import('@/views/CoordinatorDashboardView.vue'),
+    component: () => import('@/views/coordenador/CoordinatorDashboardView.vue'),
   },
 
   {
     path: '/coordenador/buscar-usuario',
     name: 'CoordinatorSearch',
-    component: () => import('@/views/CoordinatorSearchView.vue'),
+    component: () => import('@/views/coordenador/CoordinatorSearchView.vue'),
   },
   {
     path: '/coordenador/usuario/:id', // :id é o parâmetro dinâmico

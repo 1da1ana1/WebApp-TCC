@@ -1,3 +1,4 @@
+<!-- Este arquivo é de quando o aluno logado clica no botão "ver perfil" no card do docente-->
 <template>
   <div class="profile-container">
     <div v-if="isLoading" class="loading-message">Carregando dados do docente...</div>
@@ -55,42 +56,26 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Swal from 'sweetalert2'
 
+// Importamos a função auxiliar que você criou no mockData.js
+import { getProfessorById } from '@/services/mockData' 
+
 const docente = ref(null)
 const isLoading = ref(true)
 const error = ref(null)
 const route = useRoute()
-const docenteId = route.params.id
 
-const authUser = { id: 5, name: 'Aluno Exemplo' }
-
-// --- LÓGICA DO MODAL E ENVIO ---
+// --- LÓGICA DO MODAL (Mantida igual) ---
 const showModal = ref(false)
 const isSending = ref(false)
 
-const abrirModal = () => {
-  showModal.value = true
-}
-
-const fecharModal = () => {
-  // Só fecha se NÃO estiver enviando (para evitar fechar no meio do loading)
-  if (!isSending.value) {
-    showModal.value = false
-  }
-}
+const abrirModal = () => { showModal.value = true }
+const fecharModal = () => { if (!isSending.value) showModal.value = false }
 
 const confirmarEnvio = async () => {
-  isSending.value = true // 1. Começa o Loading
-
+  isSending.value = true
   try {
-    // === SIMULAÇÃO BACK-END ===
     await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // === 2. FECHA O MODAL PRIMEIRO (SUCESSO) ===
-    // Forçamos o fechamento direto aqui, ignorando a função fecharModal
     showModal.value = false
-
-    // === 3. MOSTRA O ALERTA COM PEQUENO DELAY ===
-    // O setTimeout permite que o modal suma visualmente antes do alerta aparecer
     setTimeout(() => {
       Swal.fire({
         title: 'Sucesso!',
@@ -99,16 +84,13 @@ const confirmarEnvio = async () => {
         confirmButtonColor: 'var(--color-status-success)',
         timer: 3000,
       })
-    }, 200) // 200ms de espera
+    }, 200)
   } catch (err) {
-    console.error(err)
-
     showModal.value = false
-
     setTimeout(() => {
       Swal.fire({
         title: 'Erro!',
-        text: 'Não foi possível enviar a solicitação. Tente novamente.',
+        text: 'Não foi possível enviar a solicitação.',
         icon: 'error',
         confirmButtonColor: 'var(--color-status-danger)',
       })
@@ -118,43 +100,27 @@ const confirmarEnvio = async () => {
   }
 }
 
+// --- BUSCAR DADOS ---
 onMounted(async () => {
   try {
-    const mockDatabase = {
-      1: {
-        id: 1,
-        name: 'Prof. Mock 1 Detalhado',
-        email: 'mock1@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['IA', 'Redes Neurais'],
-      },
-      2: {
-        id: 2,
-        name: 'Prof. Mock 2 Detalhado',
-        email: 'mock2@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['Banco de Dados', 'Sistemas'],
-      },
-      3: {
-        id: 3,
-        name: 'Prof. Mock 3 Detalhado',
-        email: 'mock3@unicamp.br',
-        lattes: 'http://lattes...',
-        tags: ['Engenharia de Software'],
-      },
-    }
+    // Simula delay de rede
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // 1. Pegamos o ID da URL e convertemos para NÚMERO
+    // (Pois no seu mockData o id é: 1, e na rota vem: "1")
+    const idDaRota = Number(route.params.id)
 
-    const data = mockDatabase[docenteId]
+    // 2. Usamos sua função auxiliar para buscar
+    const foundDocente = getProfessorById(idDaRota)
 
-    if (data) {
-      docente.value = data
+    if (foundDocente) {
+      docente.value = foundDocente
     } else {
-      throw new Error('Docente não encontrado')
+      throw new Error('Docente não encontrado no sistema.')
     }
   } catch (err) {
     error.value = err.message
+    console.error(err)
   } finally {
     isLoading.value = false
   }

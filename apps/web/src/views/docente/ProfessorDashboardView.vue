@@ -325,6 +325,7 @@ const openContestModal = () => {
   height: 60px; /* Altura ajustada */
   border-bottom: 1px solid rgba(255,255,255,0.1);
   transition: filter 0.3s ease;
+  font-family: poppins;
 }
 
 .btn-menu:hover {
@@ -406,6 +407,7 @@ const openContestModal = () => {
   padding: 10px 20px;
   font-weight: bold;
   font-style: italic;
+  font-family: poppins;
   font-size: 1rem;
   border-radius: 5px;
   cursor: pointer;
@@ -422,7 +424,7 @@ const openContestModal = () => {
 /* --- TAGS (Reutilizado) --- */
 .tags-control-container { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
 .input-wrapper { display: flex; border: 1px solid #999; border-radius: 4px; padding: 5px; width: 100%; max-width: 300px; }
-.input-wrapper input { border: none; outline: none; flex: 1; padding: 5px; font-style: italic; }
+.input-wrapper input { border: none; outline: none; flex: 1; padding: 5px; font-style: italic; font-family:poppins; }
 .add-tag-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
 .tags-display { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .tag { padding: 5px 15px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; font-weight: 500; }
