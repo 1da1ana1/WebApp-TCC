@@ -103,10 +103,14 @@
                 </div>
 
                 <div class="request-actions">
-                  <button class="btn-action btn-accept">Aceitar</button>
-                  <button class="btn-action btn-reject">Recusar</button>
+                  <button class="btn-action btn-accept" @click="handleAccept(req)">Aceitar</button>
+                  <button class="btn-action btn-reject" @click="openRejectModal(req)">Recusar</button>
                 </div>
 
+              </div>
+              
+              <div v-if="requestsList.length === 0" class="empty-state">
+                <p>Não há solicitações pendentes.</p>
               </div>
             </div>
           </section>
@@ -138,6 +142,38 @@
 
       </main>
     </div>
+
+    <div v-if="showRejectModal" class="modal-overlay" @click.self="closeRejectModal">
+      <div class="modal-card">
+        <h3>Por favor, insira a justificativa da recusa:</h3>
+        
+        <div class="modal-form">
+          <label>Selecione um motivo:</label>
+          <select v-model="selectedReason" class="modal-select">
+            <option value="" disabled selected>Please select</option>
+            <option value="Sem vagas disponíveis">Sem vagas disponíveis</option>
+            <option value="Tema não compatível">Tema não compatível</option>
+            <option value="Falta de disponibilidade">Falta de disponibilidade</option>
+            <option value="Outro">Outro motivo não listado</option>
+          </select>
+
+          <div v-if="selectedReason === 'Outro'" class="textarea-container">
+            <label>Outro motivo não listado:</label>
+            <textarea 
+              v-model="customJustification" 
+              placeholder="Digite a justificativa..." 
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" @click="closeRejectModal">Cancelar</button>
+          <button class="btn-modal-confirm" @click="confirmReject">Enviar</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -148,7 +184,7 @@ import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import Swal from 'sweetalert2'
 
 // --- ESTADO DA VIEW ---
-const currentView = ref('requests') // Mudei para 'requests' para você visualizar direto
+const currentView = ref('requests')
 
 // --- DADOS DO DOCENTE ---
 const teacher = ref({
@@ -173,21 +209,115 @@ const addTag = () => {
 const removeTag = (index) => tags.value.splice(index, 1)
 const getTagColor = (index) => ['purple', 'yellow', 'blue'][index % 3]
 
-// --- DADOS MOCKADOS DAS SOLICITAÇÕES (NOVO) ---
+// --- DADOS DAS SOLICITAÇÕES ---
 const requestsList = ref([
   { id: 1, name: 'Lorem Ipsum Dolor Siamet', ra: '123456' },
-  { id: 2, name: 'Lorem Ipsum Dolor Siamet', ra: '123456' },
-  { id: 3, name: 'Lorem Ipsum Dolor Siamet', ra: '123456' },
-  { id: 4, name: 'Lorem Ipsum Dolor Siamet', ra: '123456' },
-  { id: 5, name: 'Lorem Ipsum Dolor Siamet', ra: '123456' },
+  { id: 2, name: 'João Silva', ra: '123457' },
+  { id: 3, name: 'Maria Souza', ra: '123458' },
+  { id: 4, name: 'Pedro Alvares', ra: '123459' },
+  { id: 5, name: 'Ana Costa', ra: '123460' },
 ])
 
 // --- HISTÓRICO ---
 const historyData = ref([
-  { id: 1, name: 'Aluno Exemplo', ra: '123123', status: 'Aceita', date: '10/02/2025' }
+  { id: 99, name: 'Aluno Exemplo', ra: '123123', status: 'Aceita', date: '10/02/2025' }
 ])
 
-// --- AÇÕES ---
+// --- VARIÁVEIS DO MODAL DE RECUSA ---
+const showRejectModal = ref(false)
+const requestToReject = ref(null)
+const selectedReason = ref('')
+const customJustification = ref('')
+
+// --- LÓGICA DE ACEITE ---
+const handleAccept = (req) => {
+  Swal.fire({
+    title: 'Deseja confirmar vínculo com o aluno?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#28a745',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Prosseguir',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // 1. Remove da lista de solicitações
+      requestsList.value = requestsList.value.filter(r => r.id !== req.id)
+      
+      // 2. Adiciona ao histórico
+      historyData.value.unshift({
+        id: req.id,
+        name: req.name,
+        ra: req.ra,
+        status: 'Aceita',
+        date: new Date().toLocaleDateString('pt-BR')
+      })
+
+      // 3. Feedback Sucesso
+      Swal.fire({
+        title: 'Solicitação aceita com sucesso',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      })
+    }
+  })
+}
+
+// --- LÓGICA DE RECUSA ---
+const openRejectModal = (req) => {
+  requestToReject.value = req
+  selectedReason.value = ''
+  customJustification.value = ''
+  showRejectModal.value = true
+}
+
+const closeRejectModal = () => {
+  showRejectModal.value = false
+  requestToReject.value = null
+}
+
+const confirmReject = () => {
+  // Validação simples
+  if (!selectedReason.value) {
+    Swal.fire('Erro', 'Por favor, selecione um motivo.', 'error')
+    return
+  }
+  
+  if (selectedReason.value === 'Outro' && !customJustification.value.trim()) {
+    Swal.fire('Erro', 'Por favor, escreva a justificativa.', 'error')
+    return
+  }
+
+  // Define a justificativa final
+  const finalJustification = selectedReason.value === 'Outro' ? customJustification.value : selectedReason.value
+
+  // 1. Remove da lista de solicitações
+  const req = requestToReject.value
+  requestsList.value = requestsList.value.filter(r => r.id !== req.id)
+
+  // 2. Adiciona ao histórico com status Recusada
+  historyData.value.unshift({
+    id: req.id,
+    name: req.name,
+    ra: req.ra,
+    status: 'Recusada',
+    justification: finalJustification,
+    date: new Date().toLocaleDateString('pt-BR')
+  })
+
+  // 3. Fecha modal e Feedback
+  closeRejectModal()
+  Swal.fire({
+    title: 'Solicitação recusada',
+    text: 'A justificativa foi enviada ao aluno.',
+    icon: 'success',
+    timer: 1500,
+    showConfirmButton: false
+  })
+}
+
+// --- OUTROS ---
 const openContestModal = () => {
   Swal.fire({
     title: 'Contestar Vagas',
@@ -241,7 +371,7 @@ const openContestModal = () => {
 .card-section h3 { margin-top: 0; font-weight: 400; font-size: 1.5rem; margin-bottom: 1rem; }
 .mb-4 { margin-bottom: 1.5rem; }
 
-/* --- ESTILOS DA LISTA DE SOLICITAÇÕES (NOVO) --- */
+/* --- ESTILOS DA LISTA DE SOLICITAÇÕES (MANTIDO INTACTO) --- */
 .requests-list {
   display: flex;
   flex-direction: column;
@@ -325,7 +455,7 @@ const openContestModal = () => {
   background-color: #dc3545; /* Vermelho */
 }
 
-/* --- OUTROS ESTILOS (VAGAS, TAGS, STATS) --- */
+/* --- OUTROS ESTILOS --- */
 .vacancies-layout { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; }
 .vacancies-status { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
 .vacancy-box {
@@ -364,7 +494,6 @@ const openContestModal = () => {
   background-color: #96f2b3; width: 100%; height: 120px; border-radius: 15px;
   display: flex; justify-content: center; align-items: center; font-size: 3rem; font-weight: 800; color: #000;
 }
-
 @media (max-width: 768px) {
   .main-layout { flex-direction: column; }
   .teacher-sidebar { width: 100%; }
@@ -374,4 +503,42 @@ const openContestModal = () => {
   .request-actions { border-left: none; padding-left: 0; width: 100%; justify-content: space-between; }
   .btn-action { flex: 1; }
 }
+
+/* --- ESTILIZAÇÃO DO MODAL DE RECUSA (NOVO) --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 1000;
+  display: flex; justify-content: center; align-items: center;
+}
+.modal-card {
+  background: white; padding: 2rem; border-radius: 8px;
+  width: 90%; max-width: 500px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.modal-card h3 {
+  font-family: 'Poppins', sans-serif; font-style: italic;
+  font-weight: 500; margin-bottom: 1.5rem; color: #333;
+}
+.modal-form {
+  display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;
+}
+.modal-select, textarea {
+  width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;
+  font-family: 'Poppins', sans-serif; box-sizing: border-box;
+}
+.textarea-container {
+  display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;
+}
+.modal-actions {
+  display: flex; justify-content: flex-end; gap: 1rem;
+}
+.btn-modal-confirm {
+  background-color: #007bff; color: white; border: none; padding: 10px 24px;
+  border-radius: 4px; font-weight: 600; cursor: pointer;
+}
+.btn-modal-cancel {
+  background-color: transparent; border: 1px solid #ccc; padding: 10px 24px;
+  border-radius: 4px; cursor: pointer; color: #666;
+}
+.empty-state { text-align: center; font-style: italic; color: #666; padding: 2rem; }
 </style>
