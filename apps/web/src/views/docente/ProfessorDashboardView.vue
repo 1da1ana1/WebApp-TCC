@@ -125,7 +125,24 @@
 
         <div v-else-if="currentView === 'stats'">
           <section class="card-section stats-area">
-            <h3>Estatísticas Pessoais</h3>
+            <div class="stats-header">
+              <h3>Estatísticas Pessoais</h3>
+              <div class="semester-filter-wrapper">
+                <button class="btn-filter-semester" @click="mostrarFiltroSemestre = !mostrarFiltroSemestre">
+                  Semestre <i class="bi bi-funnel"></i>
+                </button>
+                <div v-if="mostrarFiltroSemestre" class="filter-dropdown-semester">
+                  <div class="filter-group">
+                    <label>Selecione o semestre:</label>
+                    <select v-model="semestreSelecionado" @change="atualizarEstatisticas">
+                      <option value="2025-1">1º Semestre 2025 (Atual)</option>
+                      <option value="2024-2">2º Semestre 2024</option>
+                      <option value="2024-1">1º Semestre 2024</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="stats-grid">
               <StatisticCard 
                 label="Total de Solicitações Recebidas" 
@@ -193,7 +210,11 @@ import Swal from 'sweetalert2'
 const currentView = ref('requests')
 const teacher = ref({ name: 'Prof. Dr. Lorem Ipsum', id: '123456', photo: '/src/assets/img/foto-perfil.svg' })
 const vacancies = ref({ total: 5, filled: 0 })
-const newTag = ref(''); const tags = ref(['Machine Learning', 'Vue.js']) 
+const newTag = ref(''); const tags = ref(['Machine Learning', 'Vue.js'])
+
+// --- FILTRO DE SEMESTRE ---
+const semestreSelecionado = ref('2025-1')
+const mostrarFiltroSemestre = ref(false)
 
 const addTag = () => { if (newTag.value.trim()) { tags.value.push(newTag.value.trim()); newTag.value = '' } }
 const removeTag = (index) => tags.value.splice(index, 1)
@@ -262,6 +283,11 @@ const cancelGuidance = (guide) => {
   })
 }
 const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 'textarea', showCancelButton: true }) }
+
+const atualizarEstatisticas = () => {
+  console.log("Filtrando estatísticas para:", semestreSelecionado.value)
+  // Em um cenário real, aqui você faria um novo fetch na API passando o semestre
+}
 
 // --- ESTATÍSTICAS COM LÓGICA DE DESEMPENHO ---
 const statsData = ref({
@@ -373,6 +399,18 @@ const getPerformance = (metric, value) => {
 .tag.purple { background-color: #d8b4fe; color: #4c1d95; } .tag.yellow { background-color: #fef08a; color: #854d0e; } .tag.blue { background-color: #93c5fd; color: #1e3a8a; }
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
 .guidances-list { display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* --- FILTRO DE SEMESTRE (STATS) --- */
+.stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.stats-header h3 { margin: 0; }
+.semester-filter-wrapper { position: relative; }
+.btn-filter-semester { background-color: var(--color-button-primary); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; font-family: poppins, sans-serif; display: flex; align-items: center; gap: 0.5rem; }
+.btn-filter-semester:hover { opacity: 0.9; }
+.filter-dropdown-semester { position: absolute; top: 110%; right: 0; background: white; border: 1px solid #ddd; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 250px; z-index: 10; margin-top: 0.5rem; }
+.filter-dropdown-semester .filter-group { margin: 0; display: flex; flex-direction: column; }
+.filter-dropdown-semester label { font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem; color: #555; }
+.filter-dropdown-semester select { padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-family: poppins, sans-serif; font-size: 0.9rem; }
+
 .guidance-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background-color: #fff; transition: transform 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; position: relative; }
 .guidance-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .guidance-card.em-vigência { border-left: 5px solid #28a745; } .guidance-card.finalizada { border-left: 5px solid #6c757d; } .guidance-card.cancelada { border-left: 5px solid #dc3545; }

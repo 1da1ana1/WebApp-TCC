@@ -346,7 +346,6 @@ onMounted(() => {
 
 .semester-filter-wrapper {
   position: relative;
-  z-index: 100;
 }
 
 .btn-filter-semester {
@@ -361,8 +360,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  position: relative;
-  z-index: 101;
 }
 
 .btn-filter-semester:hover {
@@ -379,7 +376,7 @@ onMounted(() => {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   width: 250px;
-  z-index: 102;
+  z-index: 10;
   margin-top: 0.5rem;
 }
 
