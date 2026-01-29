@@ -35,7 +35,7 @@ import { ref, computed } from 'vue'
 import FilterBar from '@/components/FilterBar.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import ProfessorCard from '@/components/ProfessorCard.vue'
-import { useNotificationStore } from '@/stores/notification'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 // 2. Importação dos Dados (Fonte Única da Verdade)
 // Certifique-se de que no mockData.js você exportou 'mockProfessors'

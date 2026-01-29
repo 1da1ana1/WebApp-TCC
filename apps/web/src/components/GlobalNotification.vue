@@ -13,7 +13,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useNotificationStore } from '@/stores/notification'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 const store = useNotificationStore()
 const notifications = computed(() => store.notifications)

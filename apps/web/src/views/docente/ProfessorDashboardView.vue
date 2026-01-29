@@ -182,9 +182,12 @@ import { ref } from 'vue'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import Swal from 'sweetalert2'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 // --- ESTADO DA VIEW ---
 const currentView = ref('requests')
+
+const notify = useNotificationStore()
 
 // --- DADOS DO DOCENTE ---
 const teacher = ref({
@@ -253,13 +256,8 @@ const handleAccept = (req) => {
         date: new Date().toLocaleDateString('pt-BR')
       })
 
-      // 3. Feedback Sucesso
-      Swal.fire({
-        title: 'Solicitação aceita com sucesso',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false
-      })
+      // 3. Feedback Sucesso (snackbar)
+      notify.success('Solicitação aceita com sucesso.', 3000)
     }
   })
 }
@@ -306,15 +304,9 @@ const confirmReject = () => {
     date: new Date().toLocaleDateString('pt-BR')
   })
 
-  // 3. Fecha modal e Feedback
+  // 3. Fecha modal e Feedback (snackbar)
   closeRejectModal()
-  Swal.fire({
-    title: 'Solicitação recusada',
-    text: 'A justificativa foi enviada ao aluno.',
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false
-  })
+  notify.info('Solicitação recusada. A justificativa foi enviada ao aluno.', 3000)
 }
 
 // --- OUTROS ---
