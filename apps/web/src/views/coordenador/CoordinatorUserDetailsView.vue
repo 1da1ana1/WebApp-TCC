@@ -247,7 +247,7 @@ onMounted(() => {
 
 <style scoped>
 .profile-page {
-  background-color: #f4f4f4;
+  background-color: var(--color-background-light);
   min-height: 100vh;
   padding: 2rem;
   display: flex;
@@ -263,9 +263,9 @@ onMounted(() => {
 }
 
 .profile-card {
-  background: white;
+  background: var(--color-background-card-default);
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border-lighter);
   padding: 2rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
@@ -290,18 +290,18 @@ onMounted(() => {
   height: 90px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: #eee;
+  background-color: var(--color-background-light);
 }
 
 .profile-info h2 {
   margin: 0;
   font-size: 1.4rem;
-  color: #333;
+  color: var(--color-text-gray);
 }
 
 .user-ra {
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-light-gray);
   display: block;
   margin: 0.2rem 0;
   font-size: 0.9rem;
@@ -316,8 +316,8 @@ onMounted(() => {
   font-weight: bold;
   margin-bottom: 0.5rem;
 }
-.user-type-badge.student { background: #e3f2fd; color: #1565c0; }
-.user-type-badge.teacher { background: #f3e5f5; color: #7b1fa2; }
+.user-type-badge.student { background: var(--color-badge-student-bg); color: var(--color-badge-student-text); }
+.user-type-badge.teacher { background: var(--color-badge-teacher-bg); color: var(--color-badge-teacher-text); }
 
 .tags-container {
   display: flex;
@@ -331,9 +331,9 @@ onMounted(() => {
   font-size: 0.75rem;
   font-weight: 600;
 }
-.tag-purple { background-color: #d1c4e9; color: #512da8; }
-.tag-yellow { background-color: #fff9c4; color: #fbc02d; }
-.tag-blue   { background-color: #bbdefb; color: #1976d2; }
+.tag-purple { background-color: var(--color-tag-coord-purple); color: var(--color-tag-coord-purple-text); }
+.tag-yellow { background-color: var(--color-tag-coord-yellow); color: var(--color-tag-coord-yellow-text); }
+.tag-blue   { background-color: var(--color-tag-coord-blue); color: var(--color-tag-coord-blue-text); }
 
 /* FILTRO DE SEMESTRE */
 .tabs-header {
@@ -350,7 +350,7 @@ onMounted(() => {
 
 .btn-filter-semester {
   background-color: var(--color-button-primary);
-  color: white;
+  color: var(--color-icon-white);
   border: none;
   padding: 0.4rem 0.8rem;
   border-radius: 4px;
@@ -370,8 +370,8 @@ onMounted(() => {
   position: absolute;
   top: 110%;
   right: 0;
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--color-background-card-default);
+  border: 1px solid var(--color-border-lighter);
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -390,12 +390,12 @@ onMounted(() => {
   font-size: 0.85rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #555;
+  color: var(--color-text-subtle);
 }
 
 .filter-dropdown-semester select {
   padding: 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-light);
   border-radius: 4px;
   font-family: poppins, sans-serif;
   font-size: 0.9rem;
@@ -406,7 +406,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 2rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border-lightest);
   margin-bottom: 2.5rem;
   font-family: poppins, sans-serif;
 }
@@ -422,7 +422,7 @@ onMounted(() => {
   font-family: poppins, sans-serif;
 }
 
-.tab-btn:hover { color: #333; }
+.tab-btn:hover { color: var(--color-text-gray); }
 
 .tab-btn.active {
   color: var(--color-brand-primary, #004b86);
@@ -431,7 +431,7 @@ onMounted(() => {
 /* CONTEÚDO DAS ABAS */
 .tab-header-info {
   margin-bottom: 1rem;
-  color: #666;
+  color: var(--color-text-light-gray);
   font-size: 0.9rem;
 }
 
@@ -443,15 +443,15 @@ onMounted(() => {
 .custom-table th {
   text-align: left;
   padding: 1rem;
-  color: #333;
+  color: var(--color-text-gray);
   font-weight: 600;
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid var(--color-border-lightest);
 }
 
 .custom-table td {
   padding: 1rem;
-  border-bottom: 1px solid #eee;
-  color: #555;
+  border-bottom: 1px solid var(--color-border-lightest);
+  color: var(--color-text-subtle);
   font-size: 0.9rem;
 }
 
@@ -470,7 +470,7 @@ onMounted(() => {
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #999;
+  color: var(--color-text-lightest);
   font-style: italic;
 }
 
