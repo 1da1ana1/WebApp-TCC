@@ -134,21 +134,24 @@
 
         <div v-if="activeTab === 'stats' && user.type === 'teacher'" class="tab-content">
           <div class="stats-container">
-            <div class="stat-card">
-              <h3>Solicitações Recebidas</h3>
-              <div class="stat-value">{{ estatisticas.recebidas }}</div>
-              <small>Em {{ labelSemestre }}</small>
-            </div>
-            <div class="stat-card">
-              <h3>Taxa de Aceite</h3>
-              <div class="stat-value">{{ estatisticas.taxaAceite }}%</div>
-              <small>{{ estatisticas.aceitas }} aceitas / {{ estatisticas.recusadas }} recusadas</small>
-            </div>
-            <div class="stat-card">
-              <h3>Vagas Preenchidas</h3>
-              <div class="stat-value">{{ estatisticas.vagasOcupadas }}/{{ estatisticas.vagasTotais }}</div>
-              <progress :value="estatisticas.vagasOcupadas" :max="estatisticas.vagasTotais"></progress>
-            </div>
+            <StatisticCard 
+              label="Solicitações Recebidas" 
+              :value="estatisticas.recebidas"
+              :subtitle="'Em ' + labelSemestre"
+              :performance="getPerformance('requests', estatisticas.recebidas)"
+            />
+            <StatisticCard 
+              label="Taxa de Aceite" 
+              :value="estatisticas.taxaAceite + '%'"
+              :subtitle="estatisticas.aceitas + ' aceitas / ' + estatisticas.recusadas + ' recusadas'"
+              :performance="getPerformance('acceptRate', estatisticas.taxaAceite)"
+            />
+            <StatisticCard 
+              label="Vagas Preenchidas" 
+              :value="estatisticas.vagasOcupadas + '/' + estatisticas.vagasTotais"
+              :subtitle="((estatisticas.vagasOcupadas / estatisticas.vagasTotais) * 100).toFixed(0) + '% ocupadas'"
+              :performance="getPerformance('vacancies', (estatisticas.vagasOcupadas / estatisticas.vagasTotais) * 100)"
+            />
           </div>
         </div>
 
@@ -161,6 +164,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import StatisticCard from '@/components/StatisticCard.vue';
 
 const route = useRoute();
 const activeTab = ref('logs');
@@ -209,6 +213,19 @@ const estatisticas = computed(() => {
 function atualizarDados() {
   console.log("Filtrando dados para:", semestreSelecionado.value);
   // Em um cenário real, aqui você faria um novo fetch na API passando o semestre
+}
+
+const getPerformance = (metric, value) => {
+  if (metric === 'requests') {
+    return value >= 10 ? 'good' : value >= 5 ? 'alert' : 'danger'
+  }
+  if (metric === 'acceptRate') {
+    return value >= 70 ? 'good' : value >= 50 ? 'alert' : 'danger'
+  }
+  if (metric === 'vacancies') {
+    return value >= 80 ? 'good' : value >= 50 ? 'alert' : 'danger'
+  }
+  return 'good'
 }
 
 onMounted(() => {
@@ -462,18 +479,4 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
 }
-
-.stat-card {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  text-align: center;
-  border: 1px solid #eee;
-}
-
-.stat-card h3 { font-size: 0.9rem; color: #666; margin-bottom: 0.5rem; }
-.stat-value { font-size: 2rem; font-weight: bold; color: #004b86; margin-bottom: 0.5rem; }
-.stat-card small { color: #888; font-size: 0.8rem; }
-
-progress { width: 100%; height: 8px; border-radius: 4px; }
 </style>

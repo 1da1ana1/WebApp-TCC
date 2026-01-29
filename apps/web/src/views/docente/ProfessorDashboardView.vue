@@ -125,12 +125,30 @@
 
         <div v-else-if="currentView === 'stats'">
           <section class="card-section stats-area">
-            <h3>Estatísticas Gerais</h3>
+            <h3>Estatísticas Pessoais</h3>
             <div class="stats-grid">
-              <div class="stat-card"><h4>Total de Solicitações Recebidas:</h4><div class="stat-number">12</div></div>
-              <div class="stat-card"><h4>Total de Solicitações Recusadas:</h4><div class="stat-number">8</div></div>
-              <div class="stat-card"><h4>Total de Orientações Concluídas:</h4><div class="stat-number">4</div></div>
-              <div class="stat-card"><h4>Taxa de aceite</h4><div class="stat-number">80%</div></div>
+              <StatisticCard 
+                label="Total de Solicitações Recebidas" 
+                :value="statsData.recebidas"
+                :performance="getPerformance('requests', statsData.recebidas)"
+              />
+              <StatisticCard 
+                label="Taxa de Aceite" 
+                :value="statsData.taxaAceite + '%'"
+                :subtitle="statsData.aceitas + ' aceitas / ' + statsData.recusadas + ' recusadas'"
+                :performance="getPerformance('acceptRate', statsData.taxaAceite)"
+              />
+              <StatisticCard 
+                label="Orientações Concluídas" 
+                :value="statsData.concluidas"
+                :performance="getPerformance('completed', statsData.concluidas)"
+              />
+              <StatisticCard 
+                label="Vagas Preenchidas" 
+                :value="statsData.vagasOcupadas + '/' + statsData.vagasTotais"
+                :subtitle="((statsData.vagasOcupadas / statsData.vagasTotais) * 100).toFixed(0) + '% ocupadas'"
+                :performance="getPerformance('vacancies', (statsData.vagasOcupadas / statsData.vagasTotais) * 100)"
+              />
             </div>
           </section>
         </div>
@@ -169,6 +187,7 @@
 import { ref } from 'vue'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
+import StatisticCard from '@/components/StatisticCard.vue'
 import Swal from 'sweetalert2'
 
 const currentView = ref('requests')
@@ -243,6 +262,33 @@ const cancelGuidance = (guide) => {
   })
 }
 const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 'textarea', showCancelButton: true }) }
+
+// --- ESTATÍSTICAS COM LÓGICA DE DESEMPENHO ---
+const statsData = ref({
+  recebidas: 12,
+  aceitas: 10,
+  recusadas: 2,
+  taxaAceite: 83,
+  concluidas: 6,
+  vagasOcupadas: 4,
+  vagasTotais: 5
+})
+
+const getPerformance = (metric, value) => {
+  if (metric === 'requests') {
+    return value >= 10 ? 'good' : value >= 5 ? 'alert' : 'danger'
+  }
+  if (metric === 'acceptRate') {
+    return value >= 70 ? 'good' : value >= 50 ? 'alert' : 'danger'
+  }
+  if (metric === 'completed') {
+    return value >= 5 ? 'good' : value >= 2 ? 'alert' : 'danger'
+  }
+  if (metric === 'vacancies') {
+    return value >= 80 ? 'good' : value >= 50 ? 'alert' : 'danger'
+  }
+  return 'good'
+}
 </script>
 
 <style scoped>
@@ -275,25 +321,20 @@ const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 't
 
 .request-item {
   display: flex;
-  justify-content: flex-start; /* Alinhado à esquerda */
+  justify-content: space-between;
   align-items: center;
   background-color: #dcdcdc; 
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #a0a0a0;
-  gap: 2rem; /* Distância fixa padrão */
+  gap: 2rem;
 }
 
 .request-info {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  /* AQUI ESTÁ A MÁGICA:
-     Definimos uma largura fixa para a coluna de info.
-     Isso garante que os botões sempre comecem no mesmo ponto, 
-     independente do tamanho do nome do aluno.
-  */
-  width: 400px; 
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .avatar-placeholder { width: 50px; height: 50px; background-color: #1e1e1e; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; }
@@ -331,9 +372,6 @@ const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 't
 .tag { padding: 5px 15px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; font-weight: 500; }
 .tag.purple { background-color: #d8b4fe; color: #4c1d95; } .tag.yellow { background-color: #fef08a; color: #854d0e; } .tag.blue { background-color: #93c5fd; color: #1e3a8a; }
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
-.stat-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.stat-card h4 { font-style: italic; font-weight: bold; font-size: 0.9rem; margin-bottom: 0.5rem; min-height: 40px; }
-.stat-number { background-color: #96f2b3; width: 100%; height: 120px; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 3rem; font-weight: 800; color: #000; }
 .guidances-list { display: flex; flex-direction: column; gap: 1.5rem; }
 .guidance-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background-color: #fff; transition: transform 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; position: relative; }
 .guidance-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
