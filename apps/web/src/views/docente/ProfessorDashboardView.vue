@@ -7,12 +7,12 @@
         <div class="profile-card">
           <div class="sidebar-header">
             <div class="avatar-circle">
-              <img :src="teacher.photo || '/src/assets/img/default-avatar.png'" alt="Perfil" />
+              <img :src="professorStore.teacher.photo || '/src/assets/img/default-avatar.png'" alt="Perfil" />
             </div>
 
             <div class="teacher-identity">
-              <h2 class="teacher-name">{{ teacher.name }}</h2>
-              <p class="teacher-id">ID: {{ teacher.id }}</p>
+              <h2 class="teacher-name">{{ professorStore.teacher.name }}</h2>
+              <p class="teacher-id">ID: {{ professorStore.teacher.id }}</p>
             </div>
           </div>
 
@@ -20,27 +20,27 @@
             <nav class="sidebar-nav">
               <ul>
                 <li>
-                  <button class="btn-menu" :class="{ 'active-btn': currentView === 'home' }" @click="currentView = 'home'">
+                  <button class="btn-menu" :class="{ 'active-btn': professorStore.currentView === 'home' }" @click="professorStore.setCurrentView('home')">
                     Início <i class="bi bi-chevron-right"></i>
                   </button>
                 </li>
                 <li>
-                  <button class="btn-menu" :class="{ 'active-btn': currentView === 'requests' }" @click="currentView = 'requests'">
+                  <button class="btn-menu" :class="{ 'active-btn': professorStore.currentView === 'requests' }" @click="professorStore.setCurrentView('requests')">
                     Minhas solicitações <i class="bi bi-chevron-right"></i>
                   </button>
                 </li>
                 <li>
-                  <button class="btn-menu" :class="{ 'active-btn': currentView === 'history' }" @click="currentView = 'history'">
+                  <button class="btn-menu" :class="{ 'active-btn': professorStore.currentView === 'history' }" @click="professorStore.setCurrentView('history')">
                     Histórico de solicitações <i class="bi bi-chevron-right"></i>
                   </button>
                 </li>
                 <li>
-                  <button class="btn-menu" :class="{ 'active-btn': currentView === 'guidances' }" @click="currentView = 'guidances'">
+                  <button class="btn-menu" :class="{ 'active-btn': professorStore.currentView === 'guidances' }" @click="professorStore.setCurrentView('guidances')">
                     Orientações em vigência <i class="bi bi-chevron-right"></i>
                   </button>
                 </li>
                 <li>
-                  <button class="btn-menu" :class="{ 'active-btn': currentView === 'stats' }" @click="currentView = 'stats'">
+                  <button class="btn-menu" :class="{ 'active-btn': professorStore.currentView === 'stats' }" @click="professorStore.setCurrentView('stats')">
                     Estatísticas Pessoais <i class="bi bi-chevron-right"></i>
                   </button>
                 </li>
@@ -52,7 +52,7 @@
 
       <main class="content-panel">
         
-        <div v-if="currentView === 'home'">
+        <div v-if="professorStore.currentView === 'home'">
           <section class="card-section tags-input-area">
             <h3>Cadastrar temas:</h3>
             <p class="instruction italic">Insira palavras-chave aqui:</p>
@@ -62,7 +62,7 @@
                 <button type="button" class="add-tag-btn" @click="addTag"><i class="bi bi-plus-lg"></i></button>
               </div>
               <div class="tags-display">
-                <span v-for="(tag, index) in tags" :key="index" class="tag" :class="getTagColor(index)">
+                <span v-for="(tag, index) in professorStore.tags" :key="index" class="tag" :class="getTagColor(index)">
                   {{ tag }} <i class="bi bi-x" @click="removeTag(index)"></i>
                 </span>
               </div>
@@ -73,9 +73,9 @@
             <h3>Relação de vagas:</h3>
             <div class="vacancies-layout">
               <div class="vacancies-status">
-                <div class="vacancy-box green"><span>VAGAS DEFINIDAS PELA COORDENAÇÃO: {{ vacancies.total }}</span></div>
-                <div class="vacancy-box yellow"><span>VAGAS RESTANTES: {{ vacancies.total - vacancies.filled }}</span></div>
-                <div class="vacancy-box red"><span>VAGAS PREENCHIDAS: {{ vacancies.filled }}</span></div>
+                <div class="vacancy-box green"><span>VAGAS DEFINIDAS PELA COORDENAÇÃO: {{ professorStore.vacancies.total }}</span></div>
+                <div class="vacancy-box yellow"><span>VAGAS RESTANTES: {{ professorStore.vacancies.total - professorStore.vacancies.filled }}</span></div>
+                <div class="vacancy-box red"><span>VAGAS PREENCHIDAS: {{ professorStore.vacancies.filled }}</span></div>
               </div>
               <div class="contest-card">
                 <button class="btn-contest" @click="openContestModal">Contestar vagas</button>
@@ -85,12 +85,16 @@
           </section>
         </div>
 
-        <div v-else-if="currentView === 'requests'">
+        <div v-else-if="professorStore.currentView === 'requests'">
           <section class="card-section">
             <h3 class="mb-4">Minhas solicitações</h3>
             
             <div class="requests-list">
-              <div v-for="req in requestsList" :key="req.id" class="request-item">
+              <!-- SKELETONS DURANTE CARREGAMENTO -->
+              <ProfessorCardSkeleton v-for="n in 3" v-if="professorStore.isLoading" :key="'skeleton-' + n" />
+              
+              <!-- LISTA DE SOLICITAÇÕES -->
+              <div v-for="req in professorStore.requestsList" v-if="!professorStore.isLoading" :key="req.id" class="request-item">
                 
                 <div class="request-info">
                   <div class="avatar-placeholder">
@@ -109,18 +113,18 @@
 
               </div>
               
-              <div v-if="requestsList.length === 0" class="empty-state">
+              <div v-if="professorStore.requestsList.length === 0 && !professorStore.isLoading" class="empty-state">
                 <p>Não há solicitações pendentes.</p>
               </div>
             </div>
           </section>
         </div>
 
-        <div v-else-if="currentView === 'history'">
-           <RequestHistoryTable title="Histórico de solicitações" :data="historyData" />
+        <div v-else-if="professorStore.currentView === 'history'">
+           <RequestHistoryTable title="Histórico de solicitações" :data="professorStore.historyData" />
         </div>
 
-        <div v-else-if="currentView === 'guidances'">
+        <div v-else-if="professorStore.currentView === 'guidances'">
           <section class="card-section">
             <h3>Alunos em orientação:</h3>
             <p class="instruction">Semestre 1/2025</p>
@@ -128,7 +132,7 @@
           </section>
         </div>
 
-        <div v-else-if="currentView === 'stats'">
+        <div v-else-if="professorStore.currentView === 'stats'">
           <section class="card-section stats-area">
             <h3>Estatísticas Gerais</h3>
             <div class="stats-grid">
@@ -178,56 +182,44 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useProfessorStore } from '@/stores/professor'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
+import ProfessorCardSkeleton from '@/components/ProfessorCardSkeleton.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import Swal from 'sweetalert2'
 
+// --- STORE DO PROFESSOR ---
+const professorStore = useProfessorStore()
+
 // --- ESTADO DA VIEW ---
-const currentView = ref('requests')
-
-// --- DADOS DO DOCENTE ---
-const teacher = ref({
-  name: 'Prof. Dr. Lorem Ipsum',
-  id: '123456',
-  photo: '/src/assets/img/foto-perfil.svg',
-})
-
-// --- VAGAS ---
-const vacancies = ref({ total: 5, filled: 0 })
-
-// --- TAGS ---
 const newTag = ref('')
-const tags = ref(['Machine Learning', 'Vue.js']) 
-
-const addTag = () => {
-  if (newTag.value.trim() !== '') {
-    tags.value.push(newTag.value.trim())
-    newTag.value = ''
-  }
-}
-const removeTag = (index) => tags.value.splice(index, 1)
-const getTagColor = (index) => ['purple', 'yellow', 'blue'][index % 3]
-
-// --- DADOS DAS SOLICITAÇÕES ---
-const requestsList = ref([
-  { id: 1, name: 'Lorem Ipsum Dolor Siamet', ra: '123456' },
-  { id: 2, name: 'João Silva', ra: '123457' },
-  { id: 3, name: 'Maria Souza', ra: '123458' },
-  { id: 4, name: 'Pedro Alvares', ra: '123459' },
-  { id: 5, name: 'Ana Costa', ra: '123460' },
-])
-
-// --- HISTÓRICO ---
-const historyData = ref([
-  { id: 99, name: 'Aluno Exemplo', ra: '123123', status: 'Aceita', date: '10/02/2025' }
-])
 
 // --- VARIÁVEIS DO MODAL DE RECUSA ---
 const showRejectModal = ref(false)
 const requestToReject = ref(null)
 const selectedReason = ref('')
 const customJustification = ref('')
+
+// --- FUNÇÕES AUXILIARES ---
+const getTagColor = (index) => ['purple', 'yellow', 'blue'][index % 3]
+
+const addTag = () => {
+  if (newTag.value.trim() !== '') {
+    professorStore.addTag(newTag.value.trim())
+    newTag.value = ''
+  }
+}
+
+const removeTag = (index) => {
+  professorStore.removeTag(index)
+}
+
+// --- INICIALIZAÇÃO ---
+onMounted(async () => {
+  // Carrega dados do mock (com animação dos skeletons)
+  await professorStore.loadData()
+})
 
 // --- LÓGICA DE ACEITE ---
 const handleAccept = (req) => {
@@ -242,16 +234,10 @@ const handleAccept = (req) => {
   }).then((result) => {
     if (result.isConfirmed) {
       // 1. Remove da lista de solicitações
-      requestsList.value = requestsList.value.filter(r => r.id !== req.id)
+      professorStore.removeRequest(req.id)
       
       // 2. Adiciona ao histórico
-      historyData.value.unshift({
-        id: req.id,
-        name: req.name,
-        ra: req.ra,
-        status: 'Aceita',
-        date: new Date().toLocaleDateString('pt-BR')
-      })
+      professorStore.addToHistory(req, 'Aceita')
 
       // 3. Feedback Sucesso
       Swal.fire({
@@ -294,17 +280,10 @@ const confirmReject = () => {
 
   // 1. Remove da lista de solicitações
   const req = requestToReject.value
-  requestsList.value = requestsList.value.filter(r => r.id !== req.id)
+  professorStore.removeRequest(req.id)
 
   // 2. Adiciona ao histórico com status Recusada
-  historyData.value.unshift({
-    id: req.id,
-    name: req.name,
-    ra: req.ra,
-    status: 'Recusada',
-    justification: finalJustification,
-    date: new Date().toLocaleDateString('pt-BR')
-  })
+  professorStore.addToHistory(req, 'Recusada', finalJustification)
 
   // 3. Fecha modal e Feedback
   closeRejectModal()
