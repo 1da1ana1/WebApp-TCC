@@ -35,7 +35,7 @@
             </label>
           </div>
 
-          <button class="btn-clear" @click="$emit('clear')">Limpar seleção</button>
+          <button class="btn-clear" @click="handleClear">Limpar seleção</button>
         </div>
       </div>
     </div>
@@ -43,6 +43,8 @@
 </template>
 
 <script setup>
+import { useNotificationStore } from '@/stores/notification'
+
 // Definindo props claras para o pai preencher
 const props = defineProps({
   themes: {
@@ -67,6 +69,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:selectedThemes', 'clear'])
 
+const notification = useNotificationStore()
+
 const toggleTheme = (theme) => {
   const newSelection = [...props.selectedThemes]
   const index = newSelection.indexOf(theme)
@@ -76,6 +80,13 @@ const toggleTheme = (theme) => {
 
   // Envia a nova lista para o v-model:selectedThemes do pai
   emit('update:selectedThemes', newSelection)
+}
+
+const handleClear = () => {
+  // Emite evento para o pai manter comportamento atual
+  emit('clear')
+  // Mostra snackbar sutil
+  notification.success('Filtros limpos')
 }
 </script>
 
