@@ -35,6 +35,7 @@ import { ref, computed } from 'vue'
 import FilterBar from '@/components/FilterBar.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import ProfessorCard from '@/components/ProfessorCard.vue'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 // 2. Importação dos Dados (Fonte Única da Verdade)
 // Certifique-se de que no mockData.js você exportou 'mockProfessors'
@@ -69,9 +70,12 @@ const filteredProfessors = computed(() => {
 })
 
 // 6. Resetar Filtros
+const notification = useNotificationStore()
 const resetFilters = () => {
   searchQuery.value = ''
   selectedThemes.value = []
+  // Notificação sutil (snackbar)
+  notification.success('Filtros de busca foram limpos.')
 }
 </script>
 

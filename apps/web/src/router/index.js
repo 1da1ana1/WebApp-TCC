@@ -53,25 +53,43 @@ const routes = [
     component: ProfessorDashboardView, 
     meta: { 
       requiresAuth: true, 
-      type: 'teacher' 
+      requiredRole: 'teacher'
     }
   },
   {
     path: '/painel/coordenador',
     name: 'CoordinatorDashboard',
     component: () => import('@/views/coordenador/CoordinatorDashboardView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiredRole: 'coordinator'
+    }
   },
 
   {
     path: '/coordenador/buscar-usuario',
     name: 'CoordinatorSearch',
     component: () => import('@/views/coordenador/CoordinatorSearchView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiredRole: 'coordinator'
+    }
   },
   {
-    path: '/coordenador/usuario/:id', // :id é o parâmetro dinâmico
+    path: '/coordenador/usuario/:id',
     name: 'CoordinatorUserDetails',
     component: CoordinatorUserDetailsView,
-    meta: { layout: 'coordinator' } // Se usar layout system
+    meta: {
+      requiresAuth: true,
+      requiredRole: 'coordinator'
+    }
+  },
+
+  {
+    path: '/acesso-negado',
+    name: 'AccessDenied',
+    component: () => import('@/views/AccessDeniedView.vue'),
+    meta: { layout: 'public' }
   }
 ]
 
@@ -80,26 +98,45 @@ const router = createRouter({
   routes,
 })
 
-// Navigation Guard - Verifica autenticação antes de acessar rotas protegidas
+// ============================================
+// NAVIGATION GUARD - Proteção de Autenticação e Autorização
+// ============================================
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   
   // Rotas públicas que não precisam de autenticação
-  const publicRoutes = ['/login', '/', '/info']
+  const publicRoutes = ['/login', '/', '/info', '/acesso-negado']
   const isPublicRoute = publicRoutes.includes(to.path)
   
-  // Se é rota pública, deixa passar
+  // 1. Se é rota pública, deixa passar
   if (isPublicRoute) {
     next()
     return
   }
-  
-  // Se é rota protegida e não está autenticado
-  if (!isPublicRoute && !authStore.user) {
+
+  // 2. Se é rota protegida e não está autenticado, redireciona para login
+  if (!authStore.user) {
     next('/login')
     return
   }
-  
+
+  // 3. Verifica se a rota requer um role específico
+  if (to.meta.requiredRole) {
+    const userRole = authStore.user.type
+    const requiredRole = to.meta.requiredRole
+
+    // Se o role do usuário não bate com o requerido, acesso negado
+    if (userRole !== requiredRole) {
+      console.warn(
+        `❌ Acesso Negado: Usuário com role '${userRole}' tentou acessar rota que requer '${requiredRole}'`,
+        `Rota: ${to.path}`
+      )
+      next('/acesso-negado')
+      return
+    }
+  }
+
+  // 4. Deixa a navegação acontecer
   next()
 })
 

@@ -35,7 +35,7 @@
             </label>
           </div>
 
-          <button class="btn-clear" @click="$emit('clear')">Limpar seleção</button>
+          <button class="btn-clear" @click="handleClear">Limpar seleção</button>
         </div>
       </div>
     </div>
@@ -76,6 +76,12 @@ const toggleTheme = (theme) => {
 
   // Envia a nova lista para o v-model:selectedThemes do pai
   emit('update:selectedThemes', newSelection)
+}
+
+const handleClear = () => {
+  // Emite evento para o pai manter comportamento atual
+  // A notificação deve ser disparada pelo componente pai para evitar duplicatas
+  emit('clear')
 }
 </script>
 
