@@ -19,6 +19,21 @@ export const useProfessorStore = defineStore('professor', {
     historyData: [
       { id: 99, name: 'Aluno Exemplo', ra: '123123', status: 'Aceita', date: '10/02/2025' }
     ],
+    guidancesList: [
+      { id: 101, studentName: 'Maria Clara', project: 'IA na Medicina', startDate: '15/02/2025', semester: '2025-1', status: 'Em vigência' },
+      { id: 102, studentName: 'Roberto Carlos', project: 'Sistemas Distribuídos', startDate: '10/08/2024', semester: '2024-2', status: 'Finalizada', endDate: '10/12/2024' },
+    ],
+    statsData: {
+      recebidas: 12,
+      aceitas: 10,
+      recusadas: 2,
+      taxaAceite: 83,
+      concluidas: 6,
+      vagasOcupadas: 4,
+      vagasTotais: 5
+    },
+    semestreSelecionado: '2025-1',
+    mostrarFiltroSemestre: false,
     isLoading: true, // Controla exibição dos skeletons
     currentView: 'requests', // Mantém a view selecionada
   }),
@@ -63,6 +78,28 @@ export const useProfessorStore = defineStore('professor', {
         justification,
         date: new Date().toLocaleDateString('pt-BR')
       });
+    },
+
+    updateGuidanceStatus(guideId, status, endDate = null) {
+      const guidance = this.guidancesList.find(g => g.id === guideId);
+      if (guidance) {
+        guidance.status = status;
+        if (endDate) {
+          guidance.endDate = endDate;
+        }
+      }
+    },
+
+    addGuidance(guidance) {
+      this.guidancesList.unshift(guidance);
+    },
+
+    setSemestre(semestre) {
+      this.semestreSelecionado = semestre;
+    },
+
+    toggleFiltroSemestre() {
+      this.mostrarFiltroSemestre = !this.mostrarFiltroSemestre;
     },
 
     setCurrentView(view) {

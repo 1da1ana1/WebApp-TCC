@@ -201,41 +201,56 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useProfessorStore } from '@/stores/professor'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import StatisticCard from '@/components/StatisticCard.vue'
 import Swal from 'sweetalert2'
 
-const currentView = ref('requests')
-const teacher = ref({ name: 'Prof. Dr. Lorem Ipsum', id: '123456', photo: '/src/assets/img/foto-perfil.svg' })
-const vacancies = ref({ total: 5, filled: 0 })
-const newTag = ref(''); const tags = ref(['Machine Learning', 'Vue.js'])
+const professorStore = useProfessorStore()
 
-// --- FILTRO DE SEMESTRE ---
-const semestreSelecionado = ref('2025-1')
-const mostrarFiltroSemestre = ref(false)
+// Computed properties para acessar os dados do store
+const currentView = computed({
+  get: () => professorStore.currentView,
+  set: (value) => professorStore.setCurrentView(value)
+})
 
-const addTag = () => { if (newTag.value.trim()) { tags.value.push(newTag.value.trim()); newTag.value = '' } }
-const removeTag = (index) => tags.value.splice(index, 1)
+const teacher = computed(() => professorStore.teacher)
+const vacancies = computed(() => professorStore.vacancies)
+const tags = computed(() => professorStore.tags)
+const requestsList = computed(() => professorStore.requestsList)
+const historyData = computed(() => professorStore.historyData)
+const guidancesList = computed(() => professorStore.guidancesList)
+const statsData = computed(() => professorStore.statsData)
+
+const semestreSelecionado = computed({
+  get: () => professorStore.semestreSelecionado,
+  set: (value) => professorStore.setSemestre(value)
+})
+
+const mostrarFiltroSemestre = computed({
+  get: () => professorStore.mostrarFiltroSemestre,
+  set: (value) => professorStore.mostrarFiltroSemestre = value
+})
+
+const newTag = ref('')
+
+// Lógica de tags
+const addTag = () => { 
+  if (newTag.value.trim()) { 
+    professorStore.addTag(newTag.value.trim())
+    newTag.value = '' 
+  } 
+}
+const removeTag = (index) => professorStore.removeTag(index)
 const getTagColor = (index) => ['purple', 'yellow', 'blue'][index % 3]
 
-// --- DADOS ---
-const requestsList = ref([
-  { id: 1, name: 'Lorem Ipsum Dolor Siamet', ra: '123456' },
-  { id: 2, name: 'João Silva', ra: '123457' },
-  { id: 3, name: 'Maria Souza', ra: '123458' },
-  { id: 4, name: 'Pedro Alvares', ra: '123459' },
-  { id: 5, name: 'Ana Costa', ra: '123460' },
-])
-const historyData = ref([{ id: 99, name: 'Aluno Exemplo', ra: '123123', status: 'Aceita', date: '10/02/2025' }])
-const guidancesList = ref([
-  { id: 101, studentName: 'Maria Clara', project: 'IA na Medicina', startDate: '15/02/2025', semester: '2025-1', status: 'Em vigência' },
-  { id: 102, studentName: 'Roberto Carlos', project: 'Sistemas Distribuídos', startDate: '10/08/2024', semester: '2024-2', status: 'Finalizada', endDate: '10/12/2024' },
-])
-
 // --- LÓGICA DE SOLICITAÇÕES ---
-const showRejectModal = ref(false); const requestToReject = ref(null); const selectedReason = ref(''); const customJustification = ref('')
+const showRejectModal = ref(false)
+const requestToReject = ref(null)
+const selectedReason = ref('')
+const customJustification = ref('')
 
 const handleAccept = (req) => {
   Swal.fire({
@@ -247,20 +262,37 @@ const handleAccept = (req) => {
     confirmButtonText: 'Sim, confirmar'
   }).then((result) => {
     if (result.isConfirmed) {
-      requestsList.value = requestsList.value.filter(r => r.id !== req.id)
-      historyData.value.unshift({ id: req.id, name: req.name, ra: req.ra, status: 'Aceita', date: new Date().toLocaleDateString('pt-BR') })
-      guidancesList.value.unshift({ id: Date.now(), studentName: req.name, project: 'Novo Projeto (TCC)', startDate: new Date().toLocaleDateString('pt-BR'), semester: '2025-1', status: 'Em vigência' })
+      professorStore.removeRequest(req.id)
+      professorStore.addToHistory(req, 'Aceita')
+      professorStore.addGuidance({ 
+        id: Date.now(), 
+        studentName: req.name, 
+        project: 'Novo Projeto (TCC)', 
+        startDate: new Date().toLocaleDateString('pt-BR'), 
+        semester: '2025-1', 
+        status: 'Em vigência' 
+      })
       Swal.fire('Sucesso', 'Orientação iniciada!', 'success')
     }
   })
 }
 
-const openRejectModal = (req) => { requestToReject.value = req; selectedReason.value = ''; customJustification.value = ''; showRejectModal.value = true }
-const closeRejectModal = () => { showRejectModal.value = false; requestToReject.value = null }
+const openRejectModal = (req) => { 
+  requestToReject.value = req
+  selectedReason.value = ''
+  customJustification.value = ''
+  showRejectModal.value = true 
+}
+
+const closeRejectModal = () => { 
+  showRejectModal.value = false
+  requestToReject.value = null 
+}
+
 const confirmReject = () => {
   const justification = selectedReason.value === 'Outro' ? customJustification.value : selectedReason.value
-  requestsList.value = requestsList.value.filter(r => r.id !== requestToReject.value.id)
-  historyData.value.unshift({ id: requestToReject.value.id, name: requestToReject.value.name, ra: requestToReject.value.ra, status: 'Recusada', justification, date: new Date().toLocaleDateString('pt-BR') })
+  professorStore.removeRequest(requestToReject.value.id)
+  professorStore.addToHistory(requestToReject.value, 'Recusada', justification)
   closeRejectModal()
   Swal.fire('Recusada', 'Justificativa enviada.', 'info')
 }
@@ -272,17 +304,41 @@ const getStatusClass = (status) => {
   if (status === 'Cancelada') return 'bg-danger'
   return ''
 }
+
 const finalizeGuidance = (guide) => {
-  Swal.fire({ title: 'Finalizar Orientação?', icon: 'question', showCancelButton: true, confirmButtonColor: '#28a745', confirmButtonText: 'Finalizar' }).then((result) => {
-    if(result.isConfirmed) { guide.status = 'Finalizada'; guide.endDate = new Date().toLocaleDateString('pt-BR'); Swal.fire('Parabéns!', 'Orientação finalizada.', 'success') }
+  Swal.fire({ 
+    title: 'Finalizar Orientação?', 
+    icon: 'question', 
+    showCancelButton: true, 
+    confirmButtonColor: '#28a745', 
+    confirmButtonText: 'Finalizar' 
+  }).then((result) => {
+    if(result.isConfirmed) { 
+      professorStore.updateGuidanceStatus(guide.id, 'Finalizada', new Date().toLocaleDateString('pt-BR'))
+      Swal.fire('Parabéns!', 'Orientação finalizada.', 'success') 
+    }
   })
 }
+
 const cancelGuidance = (guide) => {
-  Swal.fire({ title: 'Cancelar Orientação?', input: 'text', inputLabel: 'Motivo', showCancelButton: true, confirmButtonColor: '#dc3545', confirmButtonText: 'Cancelar Vínculo' }).then((result) => {
-    if(result.isConfirmed && result.value) { guide.status = 'Cancelada'; guide.endDate = new Date().toLocaleDateString('pt-BR'); Swal.fire('Cancelado', 'A orientação foi encerrada.', 'warning') }
+  Swal.fire({ 
+    title: 'Cancelar Orientação?', 
+    input: 'text', 
+    inputLabel: 'Motivo', 
+    showCancelButton: true, 
+    confirmButtonColor: '#dc3545', 
+    confirmButtonText: 'Cancelar Vínculo' 
+  }).then((result) => {
+    if(result.isConfirmed && result.value) { 
+      professorStore.updateGuidanceStatus(guide.id, 'Cancelada', new Date().toLocaleDateString('pt-BR'))
+      Swal.fire('Cancelado', 'A orientação foi encerrada.', 'warning') 
+    }
   })
 }
-const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 'textarea', showCancelButton: true }) }
+
+const openContestModal = () => { 
+  Swal.fire({ title: 'Contestar Vagas', input: 'textarea', showCancelButton: true }) 
+}
 
 const atualizarEstatisticas = () => {
   console.log("Filtrando estatísticas para:", semestreSelecionado.value)
@@ -290,16 +346,6 @@ const atualizarEstatisticas = () => {
 }
 
 // --- ESTATÍSTICAS COM LÓGICA DE DESEMPENHO ---
-const statsData = ref({
-  recebidas: 12,
-  aceitas: 10,
-  recusadas: 2,
-  taxaAceite: 83,
-  concluidas: 6,
-  vagasOcupadas: 4,
-  vagasTotais: 5
-})
-
 const getPerformance = (metric, value) => {
   if (metric === 'requests') {
     return value >= 10 ? 'good' : value >= 5 ? 'alert' : 'danger'
