@@ -43,8 +43,6 @@
 </template>
 
 <script setup>
-import { useNotificationStore } from '@/stores/notification'
-
 // Definindo props claras para o pai preencher
 const props = defineProps({
   themes: {
@@ -69,8 +67,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:selectedThemes', 'clear'])
 
-const notification = useNotificationStore()
-
 const toggleTheme = (theme) => {
   const newSelection = [...props.selectedThemes]
   const index = newSelection.indexOf(theme)
@@ -84,9 +80,8 @@ const toggleTheme = (theme) => {
 
 const handleClear = () => {
   // Emite evento para o pai manter comportamento atual
+  // A notificação deve ser disparada pelo componente pai para evitar duplicatas
   emit('clear')
-  // Mostra snackbar sutil
-  notification.success('Filtros limpos')
 }
 </script>
 
