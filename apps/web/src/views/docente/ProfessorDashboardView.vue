@@ -424,8 +424,8 @@ const getPerformance = (metric, value) => {
 .guide-actions { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
 .btn-tool { border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
 .btn-tool:hover { opacity: 0.8; }
-.btn-finish { background-color: #e9ecef; color: #28a745; border: 1px solid #28a745; } .btn-finish:hover { background-color: #28a745; color: white; }
-.btn-cancel { background-color: #e9ecef; color: #dc3545; border: 1px solid #dc3545; } .btn-cancel:hover { background-color: #dc3545; color: white; }
+.btn-finish { background-color: #e9ecef; color: #28a745; border: 1px solid #28a745; font-family: poppins; } .btn-finish:hover { background-color: #28a745; color: white; }
+.btn-cancel { background-color: #e9ecef; color: #dc3545; border: 1px solid #dc3545; font-family: poppins; } .btn-cancel:hover { background-color: #dc3545; color: white; }
 .end-date-info { margin-top: 1rem; font-size: 0.85rem; color: #888; font-style: italic; border-top: 1px solid #eee; padding-top: 0.5rem; }
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
 .modal-card { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
