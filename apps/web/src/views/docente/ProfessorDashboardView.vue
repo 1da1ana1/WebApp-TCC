@@ -67,6 +67,7 @@
         <div v-else-if="currentView === 'requests'">
           <section class="card-section">
             <h3 class="mb-4">Minhas solicitações</h3>
+            
             <div class="requests-list">
               <div v-for="req in requestsList" :key="req.id" class="request-item">
                 <div class="request-info">
@@ -76,12 +77,16 @@
                     <span class="student-ra">{{ req.ra }}</span>
                   </div>
                 </div>
+
                 <div class="request-actions">
                   <button class="btn-action btn-accept" @click="handleAccept(req)">Aceitar</button>
                   <button class="btn-action btn-reject" @click="openRejectModal(req)">Recusar</button>
                 </div>
               </div>
-              <div v-if="requestsList.length === 0" class="empty-state"><p>Nenhuma solicitação pendente.</p></div>
+
+              <div v-if="requestsList.length === 0" class="empty-state">
+                <p>Nenhuma solicitação pendente.</p>
+              </div>
             </div>
           </section>
         </div>
@@ -93,45 +98,27 @@
         <div v-else-if="currentView === 'guidances'">
           <section class="card-section">
             <h3 class="mb-4">Gestão de Orientações</h3>
-            
             <div class="guidances-list">
-              <div 
-                v-for="guide in guidancesList" 
-                :key="guide.id" 
-                class="guidance-card"
-                :class="guide.status.toLowerCase().replace(' ', '-')"
-              >
+              <div v-for="guide in guidancesList" :key="guide.id" class="guidance-card" :class="guide.status.toLowerCase().replace(' ', '-')">
                 <div class="status-indicator">
-                  <span class="badge" :class="getStatusClass(guide.status)">
-                    {{ guide.status }}
-                  </span>
+                  <span class="badge" :class="getStatusClass(guide.status)">{{ guide.status }}</span>
                 </div>
-
                 <div class="guide-content">
                   <div class="guide-info">
                     <h4>{{ guide.studentName }}</h4>
                     <p class="project-title"><strong>Projeto:</strong> {{ guide.project }}</p>
                     <p class="meta-info">Início: {{ guide.startDate }} • Semestre: {{ guide.semester }}</p>
                   </div>
-
                   <div class="guide-actions" v-if="guide.status === 'Em vigência'">
-                    <button class="btn-tool btn-finish" @click="finalizeGuidance(guide)" title="Finalizar Orientação">
-                      <i class="bi bi-check-circle"></i> Finalizar
-                    </button>
-                    <button class="btn-tool btn-cancel" @click="cancelGuidance(guide)" title="Cancelar Orientação">
-                      <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
+                    <button class="btn-tool btn-finish" @click="finalizeGuidance(guide)" title="Finalizar Orientação"><i class="bi bi-check-circle"></i> Finalizar</button>
+                    <button class="btn-tool btn-cancel" @click="cancelGuidance(guide)" title="Cancelar Orientação"><i class="bi bi-x-circle"></i> Cancelar</button>
                   </div>
-                  
                   <div class="end-date-info" v-else>
                     <p>Encerrado em: {{ guide.endDate || 'Data não informada' }}</p>
                   </div>
                 </div>
               </div>
-
-              <div v-if="guidancesList.length === 0" class="empty-state">
-                <p>Nenhuma orientação encontrada.</p>
-              </div>
+              <div v-if="guidancesList.length === 0" class="empty-state"><p>Nenhuma orientação encontrada.</p></div>
             </div>
           </section>
         </div>
@@ -197,10 +184,11 @@ const getTagColor = (index) => ['purple', 'yellow', 'blue'][index % 3]
 const requestsList = ref([
   { id: 1, name: 'Lorem Ipsum Dolor Siamet', ra: '123456' },
   { id: 2, name: 'João Silva', ra: '123457' },
+  { id: 3, name: 'Maria Souza', ra: '123458' },
+  { id: 4, name: 'Pedro Alvares', ra: '123459' },
+  { id: 5, name: 'Ana Costa', ra: '123460' },
 ])
 const historyData = ref([{ id: 99, name: 'Aluno Exemplo', ra: '123123', status: 'Aceita', date: '10/02/2025' }])
-
-// --- LISTA DE ORIENTAÇÕES (NOVO) ---
 const guidancesList = ref([
   { id: 101, studentName: 'Maria Clara', project: 'IA na Medicina', startDate: '15/02/2025', semester: '2025-1', status: 'Em vigência' },
   { id: 102, studentName: 'Roberto Carlos', project: 'Sistemas Distribuídos', startDate: '10/08/2024', semester: '2024-2', status: 'Finalizada', endDate: '10/12/2024' },
@@ -220,17 +208,8 @@ const handleAccept = (req) => {
   }).then((result) => {
     if (result.isConfirmed) {
       requestsList.value = requestsList.value.filter(r => r.id !== req.id)
-      // Adiciona ao histórico
       historyData.value.unshift({ id: req.id, name: req.name, ra: req.ra, status: 'Aceita', date: new Date().toLocaleDateString('pt-BR') })
-      // Adiciona às orientações (Simulação)
-      guidancesList.value.unshift({ 
-        id: Date.now(), 
-        studentName: req.name, 
-        project: 'Novo Projeto (TCC)', 
-        startDate: new Date().toLocaleDateString('pt-BR'), 
-        semester: '2025-1', 
-        status: 'Em vigência' 
-      })
+      guidancesList.value.unshift({ id: Date.now(), studentName: req.name, project: 'Novo Projeto (TCC)', startDate: new Date().toLocaleDateString('pt-BR'), semester: '2025-1', status: 'Em vigência' })
       Swal.fire('Sucesso', 'Orientação iniciada!', 'success')
     }
   })
@@ -246,54 +225,28 @@ const confirmReject = () => {
   Swal.fire('Recusada', 'Justificativa enviada.', 'info')
 }
 
-// --- LÓGICA DE ORIENTAÇÕES (NOVO) ---
+// --- LÓGICA DE ORIENTAÇÕES ---
 const getStatusClass = (status) => {
   if (status === 'Em vigência') return 'bg-success'
   if (status === 'Finalizada') return 'bg-secondary'
   if (status === 'Cancelada') return 'bg-danger'
   return ''
 }
-
 const finalizeGuidance = (guide) => {
-  Swal.fire({
-    title: 'Finalizar Orientação?',
-    text: "Isso marcará o projeto como concluído com sucesso.",
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#28a745',
-    confirmButtonText: 'Finalizar'
-  }).then((result) => {
-    if(result.isConfirmed) {
-      guide.status = 'Finalizada'
-      guide.endDate = new Date().toLocaleDateString('pt-BR')
-      Swal.fire('Parabéns!', 'Orientação finalizada.', 'success')
-    }
+  Swal.fire({ title: 'Finalizar Orientação?', icon: 'question', showCancelButton: true, confirmButtonColor: '#28a745', confirmButtonText: 'Finalizar' }).then((result) => {
+    if(result.isConfirmed) { guide.status = 'Finalizada'; guide.endDate = new Date().toLocaleDateString('pt-BR'); Swal.fire('Parabéns!', 'Orientação finalizada.', 'success') }
   })
 }
-
 const cancelGuidance = (guide) => {
-  Swal.fire({
-    title: 'Cancelar Orientação?',
-    input: 'text',
-    inputLabel: 'Motivo do cancelamento',
-    inputPlaceholder: 'Ex: Trancamento de matrícula',
-    showCancelButton: true,
-    confirmButtonColor: '#dc3545',
-    confirmButtonText: 'Cancelar Vínculo'
-  }).then((result) => {
-    if(result.isConfirmed && result.value) {
-      guide.status = 'Cancelada'
-      guide.endDate = new Date().toLocaleDateString('pt-BR')
-      Swal.fire('Cancelado', 'A orientação foi encerrada.', 'warning')
-    }
+  Swal.fire({ title: 'Cancelar Orientação?', input: 'text', inputLabel: 'Motivo', showCancelButton: true, confirmButtonColor: '#dc3545', confirmButtonText: 'Cancelar Vínculo' }).then((result) => {
+    if(result.isConfirmed && result.value) { guide.status = 'Cancelada'; guide.endDate = new Date().toLocaleDateString('pt-BR'); Swal.fire('Cancelado', 'A orientação foi encerrada.', 'warning') }
   })
 }
-
 const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 'textarea', showCancelButton: true }) }
 </script>
 
 <style scoped>
-/* --- ESTILOS PADRÃO MANTIDOS --- */
+/* --- ESTILOS PRINCIPAIS --- */
 .page-wrapper { background-color: #e0e0e0; min-height: 100vh; }
 .main-layout { background-color: #fff; display: flex; max-width: 1200px; margin: 1.7rem auto; padding: 1.2rem; gap: 1.3rem; }
 .teacher-sidebar { width: 300px; flex-shrink: 0; }
@@ -310,17 +263,59 @@ const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 't
 .card-section { background: white; border: 1px solid #ccc; padding: 2rem; margin-bottom: 1.5rem; }
 .card-section h3 { margin-top: 0; font-weight: 400; font-size: 1.5rem; margin-bottom: 1rem; }
 .mb-4 { margin-bottom: 1.5rem; }
-.requests-list { display: flex; flex-direction: column; margin: 0 -2rem -2rem -2rem; max-height: 450px; overflow-y: auto; }
-.request-item { display: flex; justify-content: flex-start; gap: 3rem; align-items: center; background-color: #dcdcdc; padding: 1.5rem 2rem; border-bottom: 1px solid #a0a0a0; }
-.request-info { display: flex; align-items: center; gap: 1.5rem; flex: 0 0 auto; }
+
+/* --- CORREÇÃO DO GAP/ALINHAMENTO (REQUESTS) --- */
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0 -2rem -2rem -2rem; 
+  max-height: 450px;
+  overflow-y: auto; 
+}
+
+.request-item {
+  display: flex;
+  justify-content: flex-start; /* Alinhado à esquerda */
+  align-items: center;
+  background-color: #dcdcdc; 
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #a0a0a0;
+  gap: 2rem; /* Distância fixa padrão */
+}
+
+.request-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  /* AQUI ESTÁ A MÁGICA:
+     Definimos uma largura fixa para a coluna de info.
+     Isso garante que os botões sempre comecem no mesmo ponto, 
+     independente do tamanho do nome do aluno.
+  */
+  width: 400px; 
+  flex-shrink: 0;
+}
+
 .avatar-placeholder { width: 50px; height: 50px; background-color: #1e1e1e; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; }
 .student-details { display: flex; flex-direction: column; }
 .student-name { font-weight: 600; font-size: 0.95rem; color: #000; }
 .student-ra { font-size: 0.85rem; color: #333; }
-.request-actions { display: flex; align-items: center; gap: 1rem; padding-left: 2rem; border-left: 2px solid #a0a0a0; height: 40px; }
+
+.request-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 2rem;
+  border-left: 2px solid #a0a0a0;
+  height: 40px;
+}
+
 .btn-action { padding: 8px 24px; border: none; border-radius: 4px; font-weight: 600; font-size: 1rem; cursor: pointer; color: white; font-family: 'Poppins', sans-serif; transition: opacity 0.2s; }
+.btn-action:hover { opacity: 0.9; }
 .btn-accept { background-color: #28a745; }
 .btn-reject { background-color: #dc3545; }
+
+/* --- OUTROS ESTILOS MANTIDOS --- */
 .vacancies-layout { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; }
 .vacancies-status { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
 .vacancy-box { border-radius: 20px; padding: 12px 20px; font-weight: bold; font-style: italic; font-size: 0.85rem; text-transform: uppercase; border: 1px solid #333; display: flex; align-items: center; color: #000; }
@@ -339,6 +334,23 @@ const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 't
 .stat-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .stat-card h4 { font-style: italic; font-weight: bold; font-size: 0.9rem; margin-bottom: 0.5rem; min-height: 40px; }
 .stat-number { background-color: #96f2b3; width: 100%; height: 120px; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 3rem; font-weight: 800; color: #000; }
+.guidances-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.guidance-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background-color: #fff; transition: transform 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; position: relative; }
+.guidance-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.guidance-card.em-vigência { border-left: 5px solid #28a745; } .guidance-card.finalizada { border-left: 5px solid #6c757d; } .guidance-card.cancelada { border-left: 5px solid #dc3545; }
+.status-indicator { position: absolute; top: 1rem; right: 1rem; }
+.badge { padding: 4px 12px; border-radius: 20px; color: white; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+.bg-success { background-color: #28a745; } .bg-secondary { background-color: #6c757d; } .bg-danger { background-color: #dc3545; }
+.guide-content { padding: 1.5rem; }
+.guide-info h4 { margin: 0 0 0.5rem 0; font-size: 1.1rem; color: #000; padding-right: 80px; }
+.project-title { color: #333; margin-bottom: 0.5rem; }
+.meta-info { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
+.guide-actions { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
+.btn-tool { border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+.btn-tool:hover { opacity: 0.8; }
+.btn-finish { background-color: #e9ecef; color: #28a745; border: 1px solid #28a745; } .btn-finish:hover { background-color: #28a745; color: white; }
+.btn-cancel { background-color: #e9ecef; color: #dc3545; border: 1px solid #dc3545; } .btn-cancel:hover { background-color: #dc3545; color: white; }
+.end-date-info { margin-top: 1rem; font-size: 0.85rem; color: #888; font-style: italic; border-top: 1px solid #eee; padding-top: 0.5rem; }
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
 .modal-card { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 .modal-card h3 { font-family: 'Poppins', sans-serif; font-style: italic; font-weight: 500; margin-bottom: 1.5rem; color: #333; }
@@ -352,112 +364,7 @@ const openContestModal = () => { Swal.fire({ title: 'Contestar Vagas', input: 't
 @media (max-width: 768px) {
   .main-layout { flex-direction: column; } .teacher-sidebar { width: 100%; } .vacancies-layout { flex-direction: column; }
   .contest-card { width: 100%; } .request-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .request-info { width: 100%; }
   .request-actions { border-left: none; padding-left: 0; width: 100%; justify-content: space-between; } .btn-action { flex: 1; }
-}
-
-/* --- NOVOS ESTILOS PARA ORIENTAÇÕES --- */
-.guidances-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.guidance-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #fff;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.guidance-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-/* Borda colorida baseada no status */
-.guidance-card.em-vigência { border-left: 5px solid #28a745; }
-.guidance-card.finalizada { border-left: 5px solid #6c757d; }
-.guidance-card.cancelada { border-left: 5px solid #dc3545; }
-
-.status-indicator {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-}
-
-.badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-.bg-success { background-color: #28a745; }
-.bg-secondary { background-color: #6c757d; }
-.bg-danger { background-color: #dc3545; }
-
-.guide-content {
-  padding: 1.5rem;
-}
-
-.guide-info h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-  color: #000;
-  padding-right: 80px; /* Espaço para o badge */
-}
-
-.project-title {
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.meta-info {
-  font-size: 0.85rem;
-  color: #666;
-  margin-bottom: 1rem;
-}
-
-.guide-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
-}
-
-.btn-tool {
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: opacity 0.2s;
-}
-
-.btn-tool:hover { opacity: 0.8; }
-
-.btn-finish { background-color: #e9ecef; color: #28a745; border: 1px solid #28a745; }
-.btn-finish:hover { background-color: #28a745; color: white; }
-
-.btn-cancel { background-color: #e9ecef; color: #dc3545; border: 1px solid #dc3545; }
-.btn-cancel:hover { background-color: #dc3545; color: white; }
-
-.end-date-info {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: #888;
-  font-style: italic;
-  border-top: 1px solid #eee;
-  padding-top: 0.5rem;
 }
 </style>
