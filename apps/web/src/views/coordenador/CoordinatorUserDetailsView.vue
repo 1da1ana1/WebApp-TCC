@@ -341,10 +341,12 @@ onMounted(() => {
   justify-content: space-between;
   align-items: flex-end;
   gap: 2rem;
+  margin-bottom: 1rem;
 }
 
 .semester-filter-wrapper {
   position: relative;
+  z-index: 100;
 }
 
 .btn-filter-semester {
@@ -359,6 +361,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
+  z-index: 101;
 }
 
 .btn-filter-semester:hover {
@@ -375,7 +379,7 @@ onMounted(() => {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   width: 250px;
-  z-index: 10;
+  z-index: 102;
   margin-top: 0.5rem;
 }
 
@@ -406,7 +410,7 @@ onMounted(() => {
   justify-content: center;
   gap: 2rem;
   border-bottom: 1px solid #eee;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
   font-family: poppins, sans-serif;
 }
 
