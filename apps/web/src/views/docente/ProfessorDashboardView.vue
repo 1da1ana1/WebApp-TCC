@@ -124,7 +124,31 @@
           <section class="card-section">
             <h3>Alunos em orientação:</h3>
             <p class="instruction">Semestre 1/2025</p>
-            <ul><li>João da Silva - TCC 1</li></ul>
+
+            <div v-if="guidancesList.length === 0" class="empty-state">Nenhuma orientação em vigência.</div>
+
+            <div class="guidance-list">
+              <div v-for="g in guidancesList" :key="g.id" class="guidance-item">
+                <div class="guidance-main">
+                  <div class="avatar-placeholder small"><i class="bi bi-person-fill"></i></div>
+                  <div class="guidance-info">
+                    <div class="student-name">{{ g.studentName }}</div>
+                    <div class="project-title">{{ g.projectTitle }}</div>
+                    <div class="meta">Iniciado em: {{ g.startDate }}</div>
+                  </div>
+                </div>
+
+                <div class="guidance-controls">
+                  <span class="status-badge" :class="g.status">{{ statusLabel(g.status) }}</span>
+
+                  <div class="controls">
+                    <button v-if="g.status !== 'em_vigencia'" class="btn-action btn-accept" @click="markAsInProgress(g.id)">Marcar como em vigência</button>
+                    <button v-if="g.status === 'em_vigencia'" class="btn-action btn-accept" @click="finalizeOrientation(g.id)">Marcar como finalizada</button>
+                    <button v-if="g.status !== 'cancelada'" class="btn-action btn-reject" @click="cancelOrientation(g.id)">Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
         </div>
 
@@ -220,6 +244,89 @@ const requestsList = ref([
   { id: 4, name: 'Pedro Alvares', ra: '123459' },
   { id: 5, name: 'Ana Costa', ra: '123460' },
 ])
+
+// --- ORIENTAÇÕES (GUIDANCES) ---
+const guidancesList = ref([
+  { id: 1, studentName: 'João da Silva', projectTitle: 'TCC 1', status: 'em_vigencia', startDate: '01/02/2025' },
+  { id: 2, studentName: 'Mariana Costa', projectTitle: 'TCC 2', status: 'finalizada', startDate: '01/01/2024', endDate: '30/09/2024' },
+])
+
+const statusLabel = (s) => {
+  if (s === 'em_vigencia') return 'Em vigência'
+  if (s === 'finalizada') return 'Finalizada'
+  if (s === 'cancelada') return 'Cancelada'
+  return s
+}
+
+const findGuidanceIndex = (id) => guidancesList.value.findIndex(g => g.id === id)
+
+const markAsInProgress = (id) => {
+  const idx = findGuidanceIndex(id)
+  if (idx === -1) return
+  guidancesList.value[idx].status = 'em_vigencia'
+  guidancesList.value[idx].startDate = new Date().toLocaleDateString('pt-BR')
+  notify.success('Orientação marcada como em vigência.')
+}
+
+const finalizeOrientation = async (id) => {
+  const idx = findGuidanceIndex(id)
+  if (idx === -1) return
+
+  const result = await Swal.fire({
+    title: 'Confirmar finalização',
+    text: 'Deseja marcar esta orientação como finalizada? Essa ação registrará a data de conclusão.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sim, finalizar',
+    cancelButtonText: 'Cancelar'
+  })
+
+  if (result.isConfirmed) {
+    guidancesList.value[idx].status = 'finalizada'
+    guidancesList.value[idx].endDate = new Date().toLocaleDateString('pt-BR')
+
+    // Add to history for record
+    historyData.value.unshift({
+      id: guidancesList.value[idx].id,
+      name: guidancesList.value[idx].studentName,
+      ra: '',
+      status: 'Finalizada',
+      date: guidancesList.value[idx].endDate
+    })
+
+    notify.success('Orientação finalizada com sucesso.')
+  }
+}
+
+const cancelOrientation = async (id) => {
+  const idx = findGuidanceIndex(id)
+  if (idx === -1) return
+
+  const result = await Swal.fire({
+    title: 'Confirmar cancelamento',
+    text: 'Deseja cancelar esta orientação? Esta ação será registrada no histórico.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sim, cancelar',
+    cancelButtonText: 'Voltar'
+  })
+
+  if (result.isConfirmed) {
+    guidancesList.value[idx].status = 'cancelada'
+    guidancesList.value[idx].endDate = new Date().toLocaleDateString('pt-BR')
+
+    historyData.value.unshift({
+      id: guidancesList.value[idx].id,
+      name: guidancesList.value[idx].studentName,
+      ra: '',
+      status: 'Cancelada',
+      date: guidancesList.value[idx].endDate,
+      justification: 'Cancelada pelo docente'
+    })
+
+    notify.info('Orientação cancelada.')
+  }
+}
 
 // --- HISTÓRICO ---
 const historyData = ref([
@@ -533,4 +640,19 @@ const openContestModal = () => {
   border-radius: 4px; cursor: pointer; color: #666;
 }
 .empty-state { text-align: center; font-style: italic; color: #666; padding: 2rem; }
+
+/* --- ESTILOS PARA ORIENTAÇÕES --- */
+.guidance-list { display:flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
+.guidance-item { display:flex; justify-content:space-between; align-items:center; padding: 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+.guidance-main { display:flex; align-items:center; gap: 1rem; }
+.avatar-placeholder.small { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#1e293b; color:white; }
+.guidance-info .project-title { font-size: 0.9rem; color:#374151; }
+.guidance-info .meta { font-size: 0.8rem; color:#6b7280; }
+.guidance-controls { display:flex; align-items:center; gap:1rem; }
+.status-badge { padding:6px 10px; border-radius:999px; font-weight:700; font-size:0.85rem; text-transform:capitalize; }
+.status-badge.em_vigencia { background: #ecfdf5; color:#065f46; border: 1px solid #bbf7d0; }
+.status-badge.finalizada { background: #f1f5f9; color:#0f172a; border: 1px solid #cbd5e1; }
+.status-badge.cancelada { background: #fff1f2; color:#991b1b; border: 1px solid #fecaca; }
+.guidance-controls .controls { display:flex; gap:0.5rem; }
+.guidance-controls .btn-action { padding:6px 12px; font-size:0.9rem; }
 </style>
