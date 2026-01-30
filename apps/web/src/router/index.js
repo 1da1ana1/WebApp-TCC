@@ -57,7 +57,7 @@ const routes = [
     }
   },
   {
-    path: '/painel/coordenador',
+    path: '/perfil-coordenador',
     name: 'CoordinatorDashboard',
     component: () => import('@/views/coordenador/CoordinatorDashboardView.vue'),
     meta: {
