@@ -154,7 +154,7 @@ const removeContest = (id) => {
 .contest-id { font-size: 0.75rem; color: #555; }
 .reason-box { border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; color: #555; background: #fff; min-height: 40px; display: flex; align-items: center; }
 .contest-actions { display: flex; gap: 0.8rem; }
-.btn-contest-action { border: none; padding: 6px 16px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; color: white; flex: 1; transition: opacity 0.2s; }
+.btn-contest-action { border: none; padding: 6px 16px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; color: white; flex: 1; transition: opacity 0.2s; font-family: 'Poppins', sans-serif; }
 .btn-contest-action:hover { opacity: 0.9; }
 .btn-accept { background-color: #28a745; }
 .btn-reject { background-color: #dc3545; }

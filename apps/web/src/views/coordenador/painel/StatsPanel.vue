@@ -252,6 +252,7 @@ const currentStatsTab = ref('overview')
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: color 0.2s;
+  font-family: 'Poppins', sans-serif;
 }
 
 .sub-tabs-nav button.active {
@@ -328,11 +329,13 @@ const currentStatsTab = ref('overview')
   border: none; padding: 10px; border-radius: 6px;
   font-weight: 600; cursor: pointer; width: 100%;
   margin-top: 1rem; color: #000;
+  font-family: 'Poppins', sans-serif;
 }
 .btn-action-outline {
   background: transparent; border: 1px solid #065f8b;
   color: #065f8b; padding: 8px; border-radius: 6px;
   cursor: pointer; width: 100%; font-weight: 500;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Calendário Miniatura */

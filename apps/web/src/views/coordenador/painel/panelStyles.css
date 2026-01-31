@@ -530,6 +530,7 @@ textarea {
   border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
+  font-family: 'Poppins', sans-serif;
 }
 
 .btn-modal-cancel {
@@ -539,6 +540,7 @@ textarea {
   border-radius: 4px;
   cursor: pointer;
   color: #666;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* --- PLACEHOLDER --- */
