@@ -14,22 +14,32 @@
           
           <div v-if="currentTab === 'calendar'" class="view-calendar">
             <h2 class="view-title">Gerenciamento do Cronograma do Processo de TCC</h2>
+            
             <div class="calendar-grid">
               <div class="date-group" v-for="item in cronogramaItems" :key="item.label">
                 <label>{{ item.label }}</label>
                 <div class="date-inputs">
                   <div class="input-wrapper">
-                    <input type="date" v-model="item.startDate" class="date-input" />
+                    <input 
+                      type="date" 
+                      v-model="item.startDate"
+                      class="date-input"
+                    />
                     <i class="bi bi-calendar"></i>
                   </div>
                   <span class="arrow">➝</span>
                   <div class="input-wrapper">
-                    <input type="date" v-model="item.endDate" class="date-input" />
+                    <input 
+                      type="date" 
+                      v-model="item.endDate"
+                      class="date-input"
+                    />
                     <i class="bi bi-calendar"></i>
                   </div>
                 </div>
               </div>
             </div>
+
             <div class="action-footer">
               <button class="btn-action btn-blue" @click="limparDatas">Limpar</button>
               <button class="btn-action btn-gray" @click="editarDatas">Editar</button>
@@ -39,72 +49,111 @@
 
           <div v-else-if="currentTab === 'vacancies'" class="view-vacancies">
             <h2 class="view-title">Definição de vagas</h2>
+
             <div class="vacancies-board">
+              
               <div class="section-global">
                 <h3 class="section-subtitle">Configuração Global</h3>
                 <div class="controls-row-global">
+                  
                   <div class="control-group">
                     <label>Quantidade padrão de vagas</label>
                     <div class="modern-stepper">
-                      <button class="stepper-btn minus" @click="globalCount > 0 ? globalCount-- : 0"><i class="bi bi-dash-lg"></i></button>
+                      <button class="stepper-btn minus" @click="globalCount > 0 ? globalCount-- : 0">
+                        <i class="bi bi-dash-lg"></i>
+                      </button>
                       <input type="number" v-model="globalCount" readonly class="stepper-input">
-                      <button class="stepper-btn plus" @click="globalCount++"><i class="bi bi-plus-lg"></i></button>
+                      <button class="stepper-btn plus" @click="globalCount++">
+                        <i class="bi bi-plus-lg"></i>
+                      </button>
                     </div>
                   </div>
+
                   <label class="checkbox-container">
                     <input type="checkbox" v-model="applyAll">
                     <span class="checkmark"></span>
                     <span class="label-text">Aplicar esta quantidade para <strong>todos</strong> os docentes inicialmente</span>
                   </label>
                 </div>
+
                 <div class="action-row right mt-3">
-                  <button class="btn-confirm" @click="saveGlobal"><i class="bi bi-check2-circle"></i> Aplicar Globalmente</button>
+                  <button class="btn-confirm" @click="saveGlobal">
+                    <i class="bi bi-check2-circle"></i> Aplicar Globalmente
+                  </button>
                 </div>
               </div>
+
               <div class="section-divider"></div>
+
               <div class="section-specific">
                 <div class="specific-layout">
+                  
                   <div class="specific-left">
                     <h3 class="section-subtitle mb-4">Ajuste Específico por Docente</h3>
+                    
                     <div class="form-group mb-4">
                       <label class="field-label">Buscar docente</label>
                       <div class="modern-search-wrapper">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" placeholder="Digite o nome ou ID..." v-model="searchQuery">
-                        <button class="btn-search-action" title="Adicionar à lista"><i class="bi bi-arrow-right-short"></i></button>
+                        <button class="btn-search-action" title="Adicionar à lista">
+                          <i class="bi bi-arrow-right-short"></i>
+                        </button>
                       </div>
                     </div>
+
                     <div class="form-group">
                       <label class="field-label">Quantidade de vagas para os selecionados</label>
                       <div class="modern-stepper mr-auto">
-                        <button class="stepper-btn minus" @click="specificCount > 0 ? specificCount-- : 0"><i class="bi bi-dash-lg"></i></button>
+                        <button class="stepper-btn minus" @click="specificCount > 0 ? specificCount-- : 0">
+                          <i class="bi bi-dash-lg"></i>
+                        </button>
                         <input type="number" v-model="specificCount" readonly class="stepper-input">
-                        <button class="stepper-btn plus" @click="specificCount++"><i class="bi bi-plus-lg"></i></button>
+                        <button class="stepper-btn plus" @click="specificCount++">
+                          <i class="bi bi-plus-lg"></i>
+                        </button>
                       </div>
                     </div>
                   </div>
+
                   <div class="specific-right">
                     <div class="list-header">
                       <span class="list-title">Docentes Selecionados ({{ selectedProfessors.length }})</span>
                       <button class="btn-clear-all" v-if="selectedProfessors.length > 0" @click="selectedProfessors = []">Limpar tudo</button>
                     </div>
+                    
                     <div class="selected-professors-list custom-scrollbar">
                       <div v-for="prof in selectedProfessors" :key="prof.id" class="prof-card-item">
-                        <div class="prof-avatar-container"><i class="bi bi-person-circle prof-avatar-icon"></i></div>
+                        <div class="prof-avatar-container">
+                           <i class="bi bi-person-circle prof-avatar-icon"></i>
+                        </div>
+                        
                         <div class="prof-info">
                           <span class="prof-name">{{ prof.name }}</span>
                           <span class="prof-details">{{ prof.area }} • ID: {{ prof.id }}</span>
                         </div>
-                        <button class="btn-remove-card" @click="removeProf(prof.id)" title="Remover da lista"><i class="bi bi-x-lg"></i></button>
+                        
+                        <button class="btn-remove-card" @click="removeProf(prof.id)" title="Remover da lista">
+                          <i class="bi bi-x-lg"></i>
+                        </button>
                       </div>
-                      <div v-if="selectedProfessors.length === 0" class="empty-list-state"><i class="bi bi-people"></i><p>Nenhum docente selecionado.</p></div>
+
+                      <div v-if="selectedProfessors.length === 0" class="empty-list-state">
+                        <i class="bi bi-people"></i>
+                        <p>Nenhum docente selecionado.</p>
+                      </div>
                     </div>
+                    
                     <div class="action-row right mt-3">
-                       <button class="btn-confirm btn-confirm-specific" :disabled="selectedProfessors.length === 0" @click="saveSpecific">Atualizar Selecionados</button>
+                       <button class="btn-confirm btn-confirm-specific" :disabled="selectedProfessors.length === 0" @click="saveSpecific">
+                        Atualizar Selecionados
+                       </button>
                     </div>
                   </div>
+
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -199,22 +248,81 @@
 import { ref } from 'vue'
 import Swal from 'sweetalert2'
 
-const currentTab = ref('contests') // Inicializando em contests para visualização
+const currentTab = ref('calendar') // Inicializando em CALENDAR para ver os itens
 
-// --- CALENDÁRIO & VAGAS (Estado mantido) ---
-const cronogramaItems = ref([{ label: 'Definição de vagas' }, { label: 'Início orientações' }])
+// --- LÓGICA DO CALENDÁRIO (ITENS RESTAURADOS) ---
+const cronogramaItems = ref([
+  { label: 'Definição de vagas', startDate: '', endDate: '' },
+  { label: 'Início das orientações', startDate: '', endDate: '' },
+  { label: 'Homologação e análise', startDate: '', endDate: '' },
+  { label: 'Análise das solicitações', startDate: '', endDate: '' },
+  { label: 'Encerramento do período de buscas', startDate: '', endDate: '' },
+  { label: 'Período de busca e solicitação', startDate: '', endDate: '' },
+  { label: 'Confirmação do vínculo', startDate: '', endDate: '' },
+])
+
+const limparDatas = () => {
+  cronogramaItems.value.forEach(item => { item.startDate = ''; item.endDate = '' })
+  Swal.fire({ icon: 'success', title: 'Datas limpas', timer: 1500, showConfirmButton: false })
+}
+
+const editarDatas = () => {
+  Swal.fire({ icon: 'info', title: 'Modo de edição', text: 'Você pode editar as datas diretamente nos campos.', confirmButtonColor: '#065f8b' })
+}
+
+const confirmarDatas = () => {
+  const algumVazio = cronogramaItems.value.some(i => !i.startDate || !i.endDate)
+  if (algumVazio) {
+    Swal.fire({ icon: 'warning', title: 'Atenção', text: 'Preencha todas as datas antes de confirmar.' })
+    return
+  }
+  Swal.fire({ icon: 'success', title: 'Cronograma Salvo', confirmButtonColor: '#53b57c' })
+}
+
+// --- LÓGICA DE DEFINIÇÃO DE VAGAS ---
 const globalCount = ref(5)
 const applyAll = ref(true)
 const specificCount = ref(3)
 const searchQuery = ref('')
-const selectedProfessors = ref([{ id: '123456', name: 'Prof. Ana', area: 'IA' }])
 
-// --- VAGAS CONTESTADAS (NOVO) ---
+const selectedProfessors = ref([
+  { id: '123456', name: 'Prof. Dr. Ana Souza', area: 'Inteligência Artificial' },
+  { id: '789012', name: 'Prof. Carlos Oliveira', area: 'Engenharia de Software' },
+  { id: '345678', name: 'Profa. Mariana Lima', area: 'Redes de Computadores' },
+])
+
+const removeProf = (id) => {
+  const index = selectedProfessors.value.findIndex(p => p.id === id)
+  if (index !== -1) selectedProfessors.value.splice(index, 1)
+}
+
+const saveGlobal = () => {
+  Swal.fire({
+    icon: 'success',
+    title: 'Aplicado Globalmente',
+    text: `Todas as vagas foram redefinidas para ${globalCount.value}.`,
+    confirmButtonColor: '#53b57c',
+    timer: 2000
+  })
+}
+
+const saveSpecific = () => {
+  if (selectedProfessors.value.length === 0) return;
+  Swal.fire({
+    icon: 'success',
+    title: 'Atualização Específica',
+    text: `Vagas atualizadas para ${selectedProfessors.value.length} docentes.`,
+    confirmButtonColor: '#065f8b',
+    timer: 2000
+  })
+}
+
+// --- LÓGICA VAGAS CONTESTADAS ---
 const contestsList = ref([
   { id: '123456', name: 'Lorem Ipsum Dolor Siamet', reason: 'Necessito de mais 2 vagas pois tenho alunos de IC iniciando.', status: 'pending' },
   { id: '123457', name: 'Lorem Ipsum Dolor Siamet', reason: 'Erro na contagem inicial, preciso de correção.', status: 'pending' },
   { id: '123458', name: 'Lorem Ipsum Dolor Siamet', reason: 'Solicito aumento de cota.', status: 'pending' },
-  { id: '123459', name: 'Lorem Ipsum Dolor Siamet', reason: 'Vagas preenchidas, solicito extra.', status: 'accepted' }, // Exemplo de item já processado
+  { id: '123459', name: 'Lorem Ipsum Dolor Siamet', reason: 'Vagas preenchidas, solicito extra.', status: 'accepted' },
   { id: '123460', name: 'Lorem Ipsum Dolor Siamet', reason: 'Sem justificativa plausível.', status: 'rejected' }
 ])
 
@@ -223,20 +331,7 @@ const activeContestItem = ref(null)
 const rejectReason = ref('')
 const rejectCustomReason = ref('')
 
-// Ações do Calendário
-const limparDatas = () => Swal.fire({ icon: 'info', title: 'Limpar', showConfirmButton: false, timer: 1000 })
-const editarDatas = () => Swal.fire({ icon: 'info', title: 'Editar', showConfirmButton: false, timer: 1000 })
-const confirmarDatas = () => Swal.fire({ icon: 'success', title: 'Salvo', showConfirmButton: false, timer: 1000 })
-
-// Ações de Vagas
-const saveGlobal = () => Swal.fire({ icon: 'success', title: 'Global salvo', timer: 1000, showConfirmButton: false })
-const saveSpecific = () => Swal.fire({ icon: 'success', title: 'Específico salvo', timer: 1000, showConfirmButton: false })
-const removeProf = (id) => selectedProfessors.value = selectedProfessors.value.filter(p => p.id !== id)
-
-// --- AÇÕES CONTESTAÇÃO ---
-
 const openAcceptContest = (contest) => {
-  // Simula o comportamento do terceiro print (Redirecionamento)
   Swal.fire({
     title: 'Solicitação aceita com sucesso!',
     text: 'Você está sendo redirecionado para a página de Definição de vagas para realizar o ajuste.',
@@ -245,11 +340,8 @@ const openAcceptContest = (contest) => {
     timerProgressBar: true,
     showConfirmButton: false,
     willClose: () => {
-      // Muda o status visualmente
       contest.status = 'accepted'
-      // Redireciona para a aba de vagas
       currentTab.value = 'vacancies'
-      // Opcional: Adiciona o professor na lista de edição da outra aba
       const exists = selectedProfessors.value.find(p => p.id === contest.id)
       if (!exists) {
         selectedProfessors.value.unshift({ id: contest.id, name: contest.name, area: 'Contestação Aceita' })
@@ -287,7 +379,6 @@ const confirmRejectAction = () => {
 const removeContest = (id) => {
   contestsList.value = contestsList.value.filter(c => c.id !== id)
 }
-
 </script>
 
 <style scoped>
@@ -309,6 +400,7 @@ const removeContest = (id) => {
 .date-inputs { display: flex; align-items: center; gap: 1rem; }
 .input-wrapper { border: 2px solid #aabcfc; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; width: 180px; color: #666; font-size: 0.9rem; background: #fff; position: relative; }
 .date-input { border: none; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; color: #333; width: 100%; background: transparent; cursor: pointer; }
+.date-input::-webkit-calendar-picker-indicator { position: absolute; left: 0; right: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .input-wrapper i { pointer-events: none; color: #aabcfc; }
 .arrow { color: #666; font-weight: bold; }
 .action-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee; }
@@ -327,6 +419,7 @@ const removeContest = (id) => {
 .stepper-btn:hover { background-color: #f0f7ff; }
 .stepper-btn.minus { border-right: 1px solid #e0e0e0; } .stepper-btn.plus { border-left: 1px solid #e0e0e0; }
 .stepper-input { width: 60px; height: 40px; text-align: center; border: none; font-weight: 600; font-size: 1.1rem; color: #333; outline: none; background: transparent; -moz-appearance: textfield; }
+.stepper-input::-webkit-outer-spin-button, .stepper-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .checkbox-container { display: flex; align-items: center; position: relative; padding-left: 32px; margin-bottom: 0; cursor: pointer; font-size: 0.95rem; user-select: none; color: #555; }
 .checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
 .checkmark { position: absolute; top: 50%; transform: translateY(-50%); left: 0; height: 22px; width: 22px; background-color: #fff; border: 2px solid #d0d0d0; border-radius: 6px; transition: all 0.2s ease; }
@@ -341,6 +434,7 @@ const removeContest = (id) => {
 .mt-3 { margin-top: 1.5rem; } .mb-4 { margin-bottom: 1.5rem; }
 .btn-confirm { background-color: #53b57c; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(83, 181, 124, 0.2); }
 .btn-confirm:hover { background-color: #46a06c; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(83, 181, 124, 0.3); }
+.btn-confirm:active { transform: translateY(0); }
 .btn-confirm-specific { background-color: var(--color-brand-primary, #065f8b); box-shadow: 0 2px 4px rgba(6, 95, 139, 0.2); }
 .btn-confirm-specific:hover { background-color: #004b75; box-shadow: 0 4px 8px rgba(6, 95, 139, 0.3); }
 .btn-confirm:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
@@ -376,7 +470,7 @@ const removeContest = (id) => {
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #bbb; }
 
-/* --- ESTILOS VAGAS CONTESTADAS (NOVO) --- */
+/* --- ESTILOS VAGAS CONTESTADAS --- */
 .contests-table-container { margin-top: 1rem; }
 .contest-header-row { display: grid; grid-template-columns: 3fr 4fr 2fr; gap: 2rem; padding: 0 1rem 1rem 1rem; border-bottom: 2px solid #000; font-weight: 800; font-style: italic; color: #000; font-size: 0.95rem; }
 .contest-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; max-height: 450px; overflow-y: auto; }
