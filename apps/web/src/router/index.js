@@ -48,6 +48,16 @@ const routes = [
   },
 
   {
+    path: '/docente/orientandos',
+    name: 'StudentSearch',
+    component: () => import('@/views/docente/StudentSearch.vue'),
+    meta: {
+      requiresAuth: true,
+      requiredRole: 'teacher'
+    }
+  },
+
+  {
     path: '/perfil/docente', 
     name: 'ProfessorDashboard', 
     component: ProfessorDashboardView, 
@@ -87,7 +97,7 @@ const routes = [
 
   {
     path: '/acesso-negado',
-    name: 'AccessDenied',
+    name: 'Access Denied',
     component: () => import('@/views/AccessDeniedView.vue'),
     meta: { layout: 'public' }
   }
