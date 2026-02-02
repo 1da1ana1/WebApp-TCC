@@ -58,7 +58,7 @@ const isCompleted = (index) => {
 <style scoped>
 .timeline-section-coordinator {
   background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
-  padding: 2.5rem 1rem;
+  padding: 1.2rem 1rem;
   border-bottom: 2px solid #e0e0e0;
   display: flex;
   justify-content: center;
@@ -73,11 +73,11 @@ const isCompleted = (index) => {
 
 /* --- BARRA DE PROGRESSO --- */
 .timeline-progress-bar {
-  height: 6px;
+  height: 4px;
   background-color: #e0e0e0;
   border-radius: 3px;
   overflow: hidden;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.2rem;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -124,15 +124,15 @@ const isCompleted = (index) => {
 /* --- ÍCONE --- */
 .icon-wrapper {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .icon-box {
   background-color: #ffffff;
   border: 2px solid #ddd;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -142,7 +142,7 @@ const isCompleted = (index) => {
 }
 
 .icon-box i {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   color: #666;
   transition: all 0.3s ease;
 }
@@ -151,14 +151,14 @@ const isCompleted = (index) => {
 .timeline-item.active .icon-box {
   background: linear-gradient(135deg, #0892d5 0%, #065f8b 100%);
   border-color: #0892d5;
-  width: 70px;
-  height: 70px;
+  width: 55px;
+  height: 55px;
   box-shadow: 0 4px 12px rgba(8, 146, 213, 0.3);
-  transform: scale(1.15);
+  transform: scale(1.1);
 }
 
 .timeline-item.active .icon-box i {
-  font-size: 2.4rem;
+  font-size: 1.9rem;
   color: #ffffff;
 }
 
@@ -167,8 +167,8 @@ const isCompleted = (index) => {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 70px;
-  height: 70px;
+  width: 55px;
+  height: 55px;
   background: transparent;
   border: 2px solid rgba(8, 146, 213, 0.6);
   border-radius: 50%;
@@ -178,13 +178,13 @@ const isCompleted = (index) => {
 
 @keyframes pulse {
   0% {
-    width: 70px;
-    height: 70px;
+    width: 55px;
+    height: 55px;
     opacity: 1;
   }
   100% {
-    width: 100px;
-    height: 100px;
+    width: 85px;
+    height: 85px;
     opacity: 0;
   }
 }
@@ -211,25 +211,25 @@ const isCompleted = (index) => {
 
 /* --- TEXTO --- */
 .timeline-title {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #333;
-  margin: 0 0 0.3rem 0;
-  line-height: 1.3;
-  max-width: 90px;
+  margin: 0 0 0.2rem 0;
+  line-height: 1.2;
+  max-width: 80px;
   transition: all 0.3s ease;
 }
 
 .timeline-item.active .timeline-title {
-  font-weight: 800;
+  font-weight: 700;
   color: #0892d5;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
 }
 
 .timeline-date {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #666;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
   transition: all 0.3s ease;
 }
 
@@ -243,13 +243,13 @@ const isCompleted = (index) => {
   display: inline-block;
   background: linear-gradient(135deg, #0892d5 0%, #065f8b 100%);
   color: #ffffff;
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 10px;
-  margin-top: 0.3rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-top: 0.2rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 /* --- RESPONSIVIDADE --- */
