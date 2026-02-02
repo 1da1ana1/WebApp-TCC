@@ -1,4 +1,5 @@
 <template>
+  <CronogramScheduleCoordinator />
   <div class="page-wrapper">
     <div class="main-container">
       <div class="content-card">
@@ -27,6 +28,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import CronogramScheduleCoordinator from '@/components/CronogramScheduleCoordinator.vue'
 import CalendarPanel from './painel/CalendarPanel.vue'
 import VacanciesPanel from './painel/VacanciesPanel.vue'
 import ContestsPanel from './painel/ContestsPanel.vue'
