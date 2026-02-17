@@ -7,22 +7,42 @@
   --color-background-default: #d9d9d9;
   --color-background-card-highlight: #fbf9c5;
   --color-background-card-default: #ffffff;
+  --color-background-light: #f4f4f4;
+  --color-background-light-gray: #e0e0e0;
+  --color-background-gray: #dcdcdc;
 
   --color-text-primary: #1e1e1e;
   --color-text-secondary: #ffffff;
   --color-text-muted: #6c757d;
   --color-text-link: #065f8b;
+  --color-text-dark: #000;
+  --color-text-gray: #333;
+  --color-text-light-gray: #666;
+  --color-text-subtle: #555;
+  --color-text-lightest: #999;
 
   --color-status-success: #28a745;
   --color-status-danger: #dc3545;
   --color-status-warning: #ff9500;
   --color-status-neutral: #cacad8;
   --color-text-neutral: #494965;
+  --color-status-secondary: #6c757d;
 
   --color-button-primary: #0d6efd;
   --color-button-warning: #ffc107;
+  --color-button-contest: #ffcc00;
+  --color-button-menu: #005b8e;
+  --color-button-menu-active: #004b75;
+
   --color-border-default: #818181;
   --color-border-subtle: #ced4da;
+  --color-border-light: #ccc;
+  --color-border-lighter: #ddd;
+  --color-border-lightest: #eee;
+  --color-border-dark: #a0a0a0;
+  --color-border-very-dark: #333;
+  --color-border-white-opacity: rgba(255, 255, 255, 0.1);
+  --color-border-black-opacity: rgba(0, 0, 0, 0.3);
 
   --color-tag1: #FFFCB3;
   --color-tag1-darker: #807a00;
@@ -32,6 +52,43 @@
 
   --color-tag3: #87B1FF;
   --color-tag3-darker: #005580;
+
+  /* Tags - Professor Dashboard */
+  --color-tag-purple: #d8b4fe;
+  --color-tag-purple-text: #4c1d95;
+  --color-tag-yellow: #fef08a;
+  --color-tag-yellow-text: #854d0e;
+  --color-tag-blue: #93c5fd;
+  --color-tag-blue-text: #1e3a8a;
+
+  /* Tags - Coordinator */
+  --color-tag-coord-purple: #d1c4e9;
+  --color-tag-coord-purple-text: #512da8;
+  --color-tag-coord-yellow: #fff9c4;
+  --color-tag-coord-yellow-text: #fbc02d;
+  --color-tag-coord-blue: #bbdefb;
+  --color-tag-coord-blue-text: #1976d2;
+
+  /* User Type Badges */
+  --color-badge-student-bg: #e3f2fd;
+  --color-badge-student-text: #1565c0;
+  --color-badge-teacher-bg: #f3e5f5;
+  --color-badge-teacher-text: #7b1fa2;
+
+  /* Vacancy Box Colors */
+  --color-vacancy-green: #96f2b3;
+  --color-vacancy-yellow: #fff9c4;
+  --color-vacancy-red: #ffcccb;
+
+  /* Login View */
+  --color-gradient-start: #667eea;
+  --color-gradient-end: #764ba2;
+  --color-login-error: #e74c3c;
+
+  /* Avatar & Icons */
+  --color-avatar-bg: #000;
+  --color-avatar-placeholder-bg: #1e1e1e;
+  --color-icon-white: #ffffff;
 
   --header-height: 4.325rem;
   --side-bar-width: 6.25rem;
