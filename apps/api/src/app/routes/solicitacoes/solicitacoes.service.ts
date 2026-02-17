@@ -11,7 +11,7 @@ export class SolicitacoesService {
             data: {
                 studentId: createSolicitacaoDto.studentId,
                 teacherId: createSolicitacaoDto.teacherId,
-                status: 'pending', // ou o que for padrão
+                status: 'pending', 
             },
         });
     }
