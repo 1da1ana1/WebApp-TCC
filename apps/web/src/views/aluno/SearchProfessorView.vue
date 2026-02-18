@@ -83,12 +83,8 @@ const resetFilters = () => {
 /* 1. CONTAINER PRINCIPAL: Organiza a Sidebar e o Conteúdo lado a lado */
 .search-page-layout {
   display: flex;
-  align-items: flex-start; /* Garante que o filtro comece no topo */        /* Espaço generoso entre o filtro e os resultados */
-  max-width: 1400px;       /* Limita a largura em telas muito grandes */
-  margin: 0 auto;          /* Centraliza a página horizontalmente */
-  background-color: #e0e0e0; /* Fundo cinza claro para combinar com o Perfil */
-  min-height: 100vh;
-  box-sizing: border-box;
+  align-items: flex-start;
+
 }
 
 /* 2. BARRA LATERAL: Mantém a largura fixa para o FilterBar */

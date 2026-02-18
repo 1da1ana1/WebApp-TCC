@@ -8,13 +8,15 @@
     />
 
     <main class="content-area">
+      <!-- Search Container - SEM PADDING LATERAL -->
       <div class="search-container">
-         <SearchBar 
-           v-model="searchQuery" 
-           placeholder="ex: João da Silva junior"
-         />
-         </div>
+        <SearchBar 
+          v-model="searchQuery" 
+          placeholder="ex: João da Silva junior"
+        />
+      </div>
 
+      <!-- Results Grid - SEM ESPAÇOS LATERAIS -->
       <div class="results-grid">
         <StudentCard 
           v-for="student in filteredStudents" 
@@ -34,10 +36,10 @@
 import { ref, computed } from 'vue'
 import FilterBar from '@/components/FilterBar.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import StudentCard from '@/components/StudentCard.vue' // Componente novo sugerido abaixo
+import StudentCard from '@/components/StudentCard.vue'
 import { useNotificationStore } from '@/stores/notificationStore'
 
-// --- MOCK DATA (Simulando alunos para o exemplo) ---
+// --- MOCK DATA ---
 const mockStudents = [
   { id: '123456', name: 'Lorem Ipsum Dolor Sit', tags: ['Lorem', 'Lorem ipsum dolor sit amet'] },
   { id: '123457', name: 'João da Silva', tags: ['Inteligência Artificial', 'Python'] },
@@ -76,17 +78,14 @@ const resetFilters = () => {
 </script>
 
 <style scoped>
-/* Layout Macro */
+/* Layout Principal */
 .search-page-layout {
   display: flex;
   align-items: flex-start;
-  max-width: 1400px;
-  margin: 0 auto;
-  background-color: #e0e0e0; /* Fundo cinza da página */
-  min-height: 100vh;
+
 }
 
-/* Sidebar Fixa */
+
 .search-page-layout > :first-child {
   width: 280px;
   flex-shrink: 0;
@@ -94,43 +93,39 @@ const resetFilters = () => {
   top: 6.5rem;
 }
 
-/* Área Direita */
+/* Área de Conteúdo - SEM PADDING LATERAL DESNECESSÁRIO */
 .content-area {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 2rem 0;
+  padding: 2rem 0; 
   gap: 1.5rem;
+
 }
 
+/* Search Container - COM PADDING APENAS PARA O INPUT */
 .search-container {
   width: 100%;
-  padding: 0 2rem;
+  padding: 0 2rem; /* Padding apenas para o input não grudar nas bordas */
 }
 
-/* --- GRID DE 2 COLUNAS (A Mudança Principal) --- */
+/* Grid de Resultados - SEM PADDING LATERAL */
 .results-grid {
   display: grid;
-  /* Cria exatamente 2 colunas de larguras iguais */
-  grid-template-columns: 1fr 1fr; 
-  
-  /* Truque para criar as bordas internas perfeitas (estilo planilha):
-     Define o fundo container como cinza (cor da borda) e dá um gap de 1px.
-     Os cards terão fundo branco. */
-  background-color: #ccc; 
+  grid-template-columns: 1fr 1fr;
+  background-color: #ccc;
   gap: 1px;
-  border: 1px solid #ccc; /* Borda externa */
-
-  overflow: hidden; /* Para arredondar as bordas do grid */
+  border: 1px solid #ccc;
+  /* CRÍTICO: Sem padding lateral aqui! */
 }
 
-/* Ajuste para o componente StudentCard preencher o espaço */
+/* Cards preenchem o grid completamente */
 :deep(.student-card) {
-  background-color: white; /* Garante que o card seja branco */
-  height: 100%; /* Garante altura igual na linha */
+  background-color: white;
+  height: 100%;
 }
 
-/* Sem Resultados (ocupa as duas colunas) */
+/* Mensagem sem resultados */
 .no-results {
   grid-column: 1 / -1;
   padding: 3rem;
@@ -138,6 +133,7 @@ const resetFilters = () => {
   background: white;
   color: #666;
   font-style: italic;
+  font-size: 1rem;
 }
 
 /* Responsividade */
@@ -145,16 +141,30 @@ const resetFilters = () => {
   .search-page-layout {
     flex-direction: column;
   }
+  
   .search-page-layout > :first-child {
     width: 100%;
     position: static;
   }
+  
+  .content-area {
+    padding: 1.5rem 0;
+  }
 }
 
 @media (max-width: 768px) {
-  /* Em telas pequenas, volta para 1 coluna */
   .results-grid {
     grid-template-columns: 1fr;
   }
+  
+  .search-container {
+    padding: 0 1rem;
+  }
+}
+
+
+.content-area,
+.results-grid {
+  box-sizing: border-box;
 }
 </style>
