@@ -71,9 +71,9 @@ const handleLogin = async () => {
       if (userType === 'student') {
         router.push('/perfil/aluno')
       } else if (userType === 'teacher') {
-        router.push('/docente/1')
+        router.push('/perfil/docente')
       } else if (userType === 'coordinator') {
-        router.push('/painel/coordenador')
+        router.push('/perfil-coordenador')
       }
     } else {
       error.value = 'Email ou senha inválidos'
