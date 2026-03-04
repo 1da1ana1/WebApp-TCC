@@ -6,7 +6,22 @@ export class TeachersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.teacher.findMany();
+    return this.prisma.teacher.findMany({
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+            keywords: {
+              include: {
+                keyword: true,
+              },
+            },
+          },
+        },
+        vacancies: true,
+      },
+    });
   }
 
   async findOne(id: string) {
@@ -14,6 +29,20 @@ export class TeachersService {
 
     const teacher = await this.prisma.teacher.findUnique({
       where: { id: teacherId },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+            keywords: {
+              include: {
+                keyword: true,
+              },
+            },
+          },
+        },
+        vacancies: true,
+      },
     });
 
     if (!teacher) {

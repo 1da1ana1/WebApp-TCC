@@ -7,6 +7,7 @@ export class TeachersController {
 
   @Get()
   async findAll() {
+    console.log('👉 CHEGOU NO CONTROLLER NOVO!');
     return this.teachersService.findAll();
   }
 
