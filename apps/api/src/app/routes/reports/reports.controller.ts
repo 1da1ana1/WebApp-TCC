@@ -12,4 +12,11 @@ export class ReportsController {
 		const userIdLogado = req.user.sub;
 		return this.reportsService.getTeacherStats(userIdLogado);
 	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('coordinator-stats')
+	async getCoordinatorStats(@Request() req: { user: { sub: number } }) {
+		const userIdLogado = req.user.sub;
+		return this.reportsService.getCoordinatorStats(userIdLogado);
+	}
 }

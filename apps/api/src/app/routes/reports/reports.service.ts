@@ -45,4 +45,49 @@ export class ReportsService {
 			completedOrientations,
 		};
 	}
+
+	async getCoordinatorStats(userId: number) {
+		const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+		if (user?.typeUser !== 'COORDINATOR') {
+			throw new ForbiddenException(
+				'Apenas coordenadores podem acessar os relatórios gerais.',
+			);
+		}
+
+		const totalStudents = await this.prisma.student.count();
+
+		const studentsWithOrientation = await this.prisma.orientation.count({
+			where: { status: 'ACTIVE' },
+		});
+
+		const studentsWithoutOrientation = totalStudents - studentsWithOrientation;
+
+		const overloadedTeachers = await this.prisma.teacher.findMany({
+			include: {
+				user: { select: { name: true } },
+				_count: {
+					select: {
+						attendedRequests: {
+							where: { status: 'REJECTED' },
+						},
+					},
+				},
+			},
+			orderBy: {
+				attendedRequests: { _count: 'desc' },
+			},
+			take: 5,
+		});
+
+		return {
+			totalStudents,
+			studentsWithOrientation,
+			studentsWithoutOrientation,
+			overloadedTeachers: overloadedTeachers.map((teacher) => ({
+				name: teacher.user.name,
+				rejections: teacher._count.attendedRequests,
+			})),
+		};
+	}
 }

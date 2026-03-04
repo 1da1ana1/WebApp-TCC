@@ -1,4 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../../prisma/prisma.service';
+import { CreateSemesterDto } from './dto/create-semester.dto';
 
 @Injectable()
-export class SemestersService {}
+export class SemestersService {
+	constructor(private readonly prisma: PrismaService) {}
+
+	async createSemester(userId: number, data: CreateSemesterDto) {
+		const user = await this.prisma.user.findUnique({
+			where: { id: userId },
+		});
+
+		if (user?.typeUser !== 'COORDINATOR') {
+			throw new ForbiddenException(
+				'Apenas coordenadores podem gerenciar semestres.',
+			);
+		}
+
+		if (data.isActive) {
+			await this.prisma.semester.updateMany({
+				data: { isActive: false },
+			});
+		}
+
+		return this.prisma.semester.create({
+			data: {
+				...data,
+				vacancyDefStartDate: data.vacancyDefStartDate
+					? new Date(data.vacancyDefStartDate)
+					: undefined,
+				vacancyDefEndDate: data.vacancyDefEndDate
+					? new Date(data.vacancyDefEndDate)
+					: undefined,
+				searchStartDate: data.searchStartDate
+					? new Date(data.searchStartDate)
+					: undefined,
+				searchEndDate: data.searchEndDate ? new Date(data.searchEndDate) : undefined,
+			},
+		});
+	}
+
+	async getActiveSemester() {
+		return this.prisma.semester.findFirst({
+			where: { isActive: true },
+		});
+	}
+}
