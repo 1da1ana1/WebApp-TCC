@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class CreateSolicitacaoDto {
+export class CreateRequestDto {
     @IsNumber()
     @IsNotEmpty()
     teacherId: number;

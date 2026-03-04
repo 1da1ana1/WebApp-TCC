@@ -202,36 +202,36 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useProfessorStore } from '@/stores/professor'
+import { useTeacherStore } from '@/stores/teacher'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import StatisticCard from '@/components/StatisticCard.vue'
 import Swal from 'sweetalert2'
 
-const professorStore = useProfessorStore()
+const teacherStore = useTeacherStore()
 
 // Computed properties para acessar os dados do store
 const currentView = computed({
-  get: () => professorStore.currentView,
-  set: (value) => professorStore.setCurrentView(value)
+  get: () => teacherStore.currentView,
+  set: (value) => teacherStore.setCurrentView(value)
 })
 
-const teacher = computed(() => professorStore.teacher)
-const vacancies = computed(() => professorStore.vacancies)
-const tags = computed(() => professorStore.tags)
-const requestsList = computed(() => professorStore.requestsList)
-const historyData = computed(() => professorStore.historyData)
-const guidancesList = computed(() => professorStore.guidancesList)
-const statsData = computed(() => professorStore.statsData)
+const teacher = computed(() => teacherStore.teacher)
+const vacancies = computed(() => teacherStore.vacancies)
+const tags = computed(() => teacherStore.tags)
+const requestsList = computed(() => teacherStore.requestsList)
+const historyData = computed(() => teacherStore.historyData)
+const guidancesList = computed(() => teacherStore.guidancesList)
+const statsData = computed(() => teacherStore.statsData)
 
 const semestreSelecionado = computed({
-  get: () => professorStore.semestreSelecionado,
-  set: (value) => professorStore.setSemestre(value)
+  get: () => teacherStore.semestreSelecionado,
+  set: (value) => teacherStore.setSemestre(value)
 })
 
 const mostrarFiltroSemestre = computed({
-  get: () => professorStore.mostrarFiltroSemestre,
-  set: (value) => professorStore.mostrarFiltroSemestre = value
+  get: () => teacherStore.mostrarFiltroSemestre,
+  set: (value) => teacherStore.mostrarFiltroSemestre = value
 })
 
 const newTag = ref('')
@@ -239,11 +239,11 @@ const newTag = ref('')
 // Lógica de tags
 const addTag = () => { 
   if (newTag.value.trim()) { 
-    professorStore.addTag(newTag.value.trim())
+    teacherStore.addTag(newTag.value.trim())
     newTag.value = '' 
   } 
 }
-const removeTag = (index) => professorStore.removeTag(index)
+const removeTag = (index) => teacherStore.removeTag(index)
 const getTagColor = (index) => ['purple', 'yellow', 'blue'][index % 3]
 
 // --- LÓGICA DE SOLICITAÇÕES ---
@@ -262,9 +262,9 @@ const handleAccept = (req) => {
     confirmButtonText: 'Sim, confirmar'
   }).then((result) => {
     if (result.isConfirmed) {
-      professorStore.removeRequest(req.id)
-      professorStore.addToHistory(req, 'Aceita')
-      professorStore.addGuidance({ 
+      teacherStore.removeRequest(req.id)
+      teacherStore.addToHistory(req, 'Aceita')
+      teacherStore.addGuidance({ 
         id: Date.now(), 
         studentName: req.name, 
         project: 'Novo Projeto (TCC)', 
@@ -291,8 +291,8 @@ const closeRejectModal = () => {
 
 const confirmReject = () => {
   const justification = selectedReason.value === 'Outro' ? customJustification.value : selectedReason.value
-  professorStore.removeRequest(requestToReject.value.id)
-  professorStore.addToHistory(requestToReject.value, 'Recusada', justification)
+  teacherStore.removeRequest(requestToReject.value.id)
+  teacherStore.addToHistory(requestToReject.value, 'Recusada', justification)
   closeRejectModal()
   Swal.fire('Recusada', 'Justificativa enviada.', 'info')
 }
@@ -314,7 +314,7 @@ const finalizeGuidance = (guide) => {
     confirmButtonText: 'Finalizar' 
   }).then((result) => {
     if(result.isConfirmed) { 
-      professorStore.updateGuidanceStatus(guide.id, 'Finalizada', new Date().toLocaleDateString('pt-BR'))
+      teacherStore.updateGuidanceStatus(guide.id, 'Finalizada', new Date().toLocaleDateString('pt-BR'))
       Swal.fire('Parabéns!', 'Orientação finalizada.', 'success') 
     }
   })
@@ -330,7 +330,7 @@ const cancelGuidance = (guide) => {
     confirmButtonText: 'Cancelar Vínculo' 
   }).then((result) => {
     if(result.isConfirmed && result.value) { 
-      professorStore.updateGuidanceStatus(guide.id, 'Cancelada', new Date().toLocaleDateString('pt-BR'))
+      teacherStore.updateGuidanceStatus(guide.id, 'Cancelada', new Date().toLocaleDateString('pt-BR'))
       Swal.fire('Cancelado', 'A orientação foi encerrada.', 'warning') 
     }
   })

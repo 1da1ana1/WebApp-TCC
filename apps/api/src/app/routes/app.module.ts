@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
-import { TeachersService } from '../services/app.service';
+import { AppService } from '../services/app.service';
 import { TeachersModule } from './teachers/teachers.module';
 import { PrismaModule } from '../../../prisma/prisma.module';
 import { AuthModule } from '../../auth/auth.module';
-import { SolicitacoesModule } from './solicitacoes/solicitacoes.module';
+import { RequestsModule } from './requests/requests.module';
 import { StudentsModule } from './students/students.module';
 import { KeywordsModule } from './keywords/keywords.module';
 import { OrientationsModule } from './orientations/orientations.module';
@@ -21,7 +21,7 @@ import { LogsModule } from './logs/logs.module';
       isGlobal: true,
     }),
     TeachersModule,
-    SolicitacoesModule,
+    RequestsModule,
     StudentsModule,
     KeywordsModule,
     OrientationsModule,
@@ -34,7 +34,6 @@ import { LogsModule } from './logs/logs.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [TeachersService],
+  providers: [AppService],
 })
-export class AppModule { }
-
+export class AppModule {}

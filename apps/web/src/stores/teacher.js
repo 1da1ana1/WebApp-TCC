@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-export const useProfessorStore = defineStore('professor', {
+export const useTeacherStore = defineStore('teacher', {
   state: () => ({
     teacher: {
       name: 'Prof. Dr. Lorem Ipsum',

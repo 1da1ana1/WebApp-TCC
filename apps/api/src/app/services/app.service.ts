@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class TeachersService {
+export class AppService {
   private mockTeachers = [
-    { id: 1, name: "Mock Silva", email: "silva@teste.com" },
-    { id: 2, name: "Mock Souza", email: "souza@teste.com" },
-    { id: 3, name: "Mock Pereira", email: "pereira@teste.com" },
+    { id: 1, name: 'Mock Silva', email: 'silva@teste.com' },
+    { id: 2, name: 'Mock Souza', email: 'souza@teste.com' },
+    { id: 3, name: 'Mock Pereira', email: 'pereira@teste.com' },
   ];
 
   findAll() {
@@ -13,7 +13,7 @@ export class TeachersService {
   }
 
   findOne(id: string) {
-    return this.mockTeachers.find(t => t.id === Number(id));
+    return this.mockTeachers.find((t) => t.id === Number(id));
   }
 
   getHello(): string {

@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-import SearchSupervisor from '@/views/aluno/SearchProfessorView.vue'
-import CoordinatorUserDetailsView from '@/views/coordenador/CoordinatorUserDetailsView.vue';
-import ProfessorDashboardView from '@/views/docente/ProfessorDashboardView.vue'
+import SearchSupervisor from '@/views/student/SearchTeacherView.vue'
+import CoordinatorUserDetailsView from '@/views/coordinator/CoordinatorUserDetailsView.vue';
+import TeacherDashboardView from '@/views/teacher/TeacherDashboardView.vue'
 
 
 const routes = [
@@ -38,19 +38,19 @@ const routes = [
   {
     path: '/perfil/aluno',
     name: 'StudentProfile',
-    component: () => import('@/views/aluno/StudentProfileView.vue'),
+    component: () => import('@/views/student/StudentProfileView.vue'),
   },
 
   {
     path: '/docente/:id',
     name: 'ProfessorProfile',
-    component: () => import('@/views/aluno/ProfessorProfileView.vue'),
+    component: () => import('@/views/student/TeacherProfileView.vue'),
   },
 
   {
     path: '/docente/orientandos',
     name: 'StudentSearch',
-    component: () => import('@/views/docente/StudentSearch.vue'),
+    component: () => import('@/views/teacher/StudentSearch.vue'),
     meta: {
       requiresAuth: true,
       requiredRole: 'teacher'
@@ -60,7 +60,7 @@ const routes = [
   {
     path: '/perfil/docente', 
     name: 'ProfessorDashboard', 
-    component: ProfessorDashboardView, 
+    component: TeacherDashboardView, 
     meta: { 
       requiresAuth: true, 
       requiredRole: 'teacher'
@@ -69,7 +69,7 @@ const routes = [
   {
     path: '/perfil-coordenador',
     name: 'CoordinatorDashboard',
-    component: () => import('@/views/coordenador/CoordinatorDashboardView.vue'),
+    component: () => import('@/views/coordinator/CoordinatorDashboardView.vue'),
     meta: {
       requiresAuth: true,
       requiredRole: 'coordinator'
@@ -79,7 +79,7 @@ const routes = [
   {
     path: '/coordenador/buscar-usuario',
     name: 'CoordinatorSearch',
-    component: () => import('@/views/coordenador/CoordinatorSearchView.vue'),
+    component: () => import('@/views/coordinator/CoordinatorSearchView.vue'),
     meta: {
       requiresAuth: true,
       requiredRole: 'coordinator'

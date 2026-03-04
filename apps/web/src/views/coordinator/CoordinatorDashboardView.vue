@@ -29,10 +29,10 @@
 <script setup>
 import { ref } from 'vue'
 import CronogramScheduleCoordinator from '@/components/CronogramScheduleCoordinator.vue'
-import CalendarPanel from './painel/CalendarPanel.vue'
-import VacanciesPanel from './painel/VacanciesPanel.vue'
-import ContestsPanel from './painel/ContestsPanel.vue'
-import StatsPanel from './painel/StatsPanel.vue'
+import CalendarPanel from './panel/CalendarPanel.vue'
+import VacanciesPanel from './panel/VacanciesPanel.vue'
+import ContestsPanel from './panel/ContestsPanel.vue'
+import StatsPanel from './panel/StatsPanel.vue'
 
 const currentTab = ref('calendar')
 const selectedProfessors = ref([
