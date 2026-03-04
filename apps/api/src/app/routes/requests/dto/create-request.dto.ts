@@ -1,11 +1,7 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsInt, IsNotEmpty } from 'class-validator';
 
 export class CreateRequestDto {
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty()
     teacherId: number;
-
-    @IsNumber()
-    @IsNotEmpty()
-    studentId: number;
 }
