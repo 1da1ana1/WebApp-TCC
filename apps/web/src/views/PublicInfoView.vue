@@ -372,6 +372,7 @@ onUnmounted(() => {
   justify-content: space-between;
   background: linear-gradient(135deg, #003366 0%, #005b9f 100%);
   padding: 1.5rem;
+  margin: 1.2rem 0 1.2rem 0;
   border-radius: 10px;
   color: #fff;
 }
