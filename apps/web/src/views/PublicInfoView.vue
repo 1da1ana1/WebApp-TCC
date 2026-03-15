@@ -3,7 +3,7 @@
     <nav id="side-menu">
       <ul id="side-menu-ul">
         <li class="side-menu-li" :class="{ active: isActive('section-1') }" @click="scrollToSection('section-1')">
-          <span>O que é o TCC (BSI e TADS)</span>
+          <span>TCC para BSI e TADS</span>
           <i class="bi bi-chevron-compact-right"></i>
         </li>
 
