@@ -1,22 +1,26 @@
 <template>
   <div class="professor-card">
     <div class="professor-info">
-      <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" />
+      <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" class="profile-img" />
 
-      <p>{{ professor.name }}</p>
-      <div class="available-spots">{{ professor.vagas }} vagas disponíveis</div>
-      <div class="registered-tags">
-        <span class="tag">Inteligência Artificial</span>
-        <span class="tag">Machine Learning</span>
-        <span class="tag">Mineração de Dados</span>
+      <div class="details-column">
+        <p class="professor-name">{{ professor.name }}</p>
+        <div class="available-spots">{{ professor.vagas }} vagas disponíveis</div>
+      </div>
+
+      <div class="tags-column">
+        <div class="registered-tags">
+          <span class="tag">Inteligência Artificial</span>
+          <span class="tag">Machine Learning</span>
+          <span class="tag">Mineração de Dados</span>
+        </div>
       </div>
     </div>
     
-    <div class="send-request">
+    <div class="action-column">
       <router-link
         :to="{ name: 'ProfessorProfile', params: { id: professor.id } }"
         class="send-request-btn"
-        style="text-decoration: none; color: inherit; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"
       >
         Ver Perfil
       </router-link>
@@ -35,146 +39,170 @@ defineProps({
 </script>
 
 <style scoped>
+/* Container Principal */
 .professor-card {
   background-color: var(--white-color);
-  max-width: 68.313rem;
   width: 100%;
-  height: 9.125rem;
-
+  /* Usa min-height em vez de height fixo para não quebrar no zoom */
+  min-height: 7rem;
   border-bottom: 2px solid var(--color-border-default);
-
+  padding: 1.5rem 2rem;
+  
+  display: flex;
   justify-content: space-between;
   align-items: center;
-
-  right: var(--side-bar-width);
-  top: var(--header-height);
-  padding: 0 2rem 0 2rem;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  box-sizing: border-box;
 }
 
+/* Container de Informações (Foto + Nome/Vagas + Tags) */
 .professor-info {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-}
-
-.professor-info > img {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-}
-
-.professor-info > p {
-  grid-column: 1;
-  grid-row: 1;
-  margin: 0 0 0 6rem;
-}
-
-.professor-info > .available-spots {
-  grid-column: 1;
-  grid-row: 2;
-  margin-left: 6rem;
-  align-self: start;
-}
-
-.professor-info > .registered-tags {
-  grid-row: 1 / span 2;
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem;
+  flex: 1; /* Ocupa todo o espaço disponível à esquerda do botão */
+}
+
+.profile-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Coluna de Nome e Vagas */
+.details-column {
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
-  justify-content: flex-start;
+  min-width: 180px; /* Evita que o nome fique muito espremido */
+}
+
+.professor-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
 }
 
 .available-spots {
   background-color: var(--color-status-success);
-  width: 8rem;
-  height: 1.438rem;
-  font-size: 0.625rem;
+  width: fit-content;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.7rem;
   font-weight: 500;
   color: var(--white-color);
-  align-content: center;
   border-radius: 4px;
+  display: flex;
   justify-content: center;
   align-items: center;
+  white-space: nowrap;
+}
+
+/* Coluna de Tags */
+.tags-column {
+  flex: 1;
   display: flex;
+  align-items: center;
 }
 
 .registered-tags {
   display: flex;
+  flex-wrap: wrap; /* Permite que as tags quebrem de linha se não houver espaço */
+  gap: 0.5rem;
 }
 
 .tag {
-  width: fit-content;
-  height: 32px;
+  height: 28px;
   border-radius: 1rem;
   font-weight: bold;
   font-style: italic;
-  font-size: 10px;
-  display: block;
-  padding: 12px;
+  font-size: 0.65rem;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
 }
 
-.tag:nth-last-child(1) {
-  background-color: var(--color-tag1);
-  color: var(--color-tag1-darker);
-  border: 1px solid var(--color-tag1-darker);
+/* Cores das tags (mantidas do seu original) */
+.tag:nth-child(3n+1) {
+  background-color: var(--color-tag1, #e3f2fd);
+  color: var(--color-tag1-darker, #1565c0);
+  border: 1px solid var(--color-tag1-darker, #1565c0);
 }
 
-.tag:nth-last-child(2) {
-  background-color: var(--color-tag2);
-  color: var(--color-tag2-darker);
-  border: 1px solid var(--color-tag2-darker);
+.tag:nth-child(3n+2) {
+  background-color: var(--color-tag2, #f3e5f5);
+  color: var(--color-tag2-darker, #6a1b9a);
+  border: 1px solid var(--color-tag2-darker, #6a1b9a);
 }
 
-.tag:nth-last-child(3) {
-  background-color: var(--color-tag3);
-  color: var(--color-tag3-darker);
-  border: 1px solid var(--color-tag3-darker);
+.tag:nth-child(3n) {
+  background-color: var(--color-tag3, #e8f5e9);
+  color: var(--color-tag3-darker, #2e7d32);
+  border: 1px solid var(--color-tag3-darker, #2e7d32);
 }
 
-.send-request {
-  justify-self: center;
+/* Coluna do Botão de Ação */
+.action-column {
+  flex-shrink: 0; /* Impede que o botão encolha */
 }
 
-.send-request {
-  display:flex;
-  width: 11.813rem;
+.send-request-btn {
+  display: flex;
+  width: 10rem;
   height: 2.625rem;
-  background-color: var(--color-status-neutral);
-  color: var(--color-text-neutral);
-  border: 2px solid var(--color-border-default);
+  background-color: var(--color-status-neutral, #f5f5f5);
+  color: var(--color-text-neutral, #333);
+  border: 2px solid var(--color-border-default, #ccc);
   border-radius: 8px;
   font-family: 'Poppins', sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
   justify-content: center;
   align-items: center;
-  text-align: center;
+  text-decoration: none;
 }
 
-.send-request:hover {
+.send-request-btn:hover {
   opacity: 0.8;
+  background-color: #e0e0e0; /* Um leve feedback visual além da opacidade */
 }
 
-.professor-card {
-  background-color: var(--white-color);
-  max-width: 68.313rem;
-  width: 100%;
-  height: 9.125rem;
-  border-bottom: 2px solid var(--color-border-default);
-  padding: 0 2rem;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  align-items: center;
+/* ==========================================================================
+   RESPONSIVIDADE
+   ========================================================================== */
+@media (max-width: 900px) {
+  .professor-info {
+    flex-wrap: wrap; /* Permite que as tags caiam para a linha de baixo */
+    gap: 1rem;
+  }
+  .tags-column {
+    min-width: 100%; /* Força as tags a ocuparem a largura total abaixo do nome */
+  }
 }
 
-.card-action {
-  justify-self: center;
-}
+@media (max-width: 600px) {
+  .professor-card {
+    flex-direction: column; /* Empilha tudo: Foto/Nome -> Tags -> Botão */
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
 
+  .professor-info {
+    width: 100%;
+  }
+
+  .action-column {
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .send-request-btn {
+    width: 100%; /* Botão ocupa toda a largura no celular */
+  }
+}
 </style>
