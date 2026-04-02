@@ -47,7 +47,23 @@ describe('TeachersService', () => {
 
     const result = await service.findOne('1');
     expect(result).toEqual(mock);
-    expect(prisma.teacher.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+    expect(prisma.teacher.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+            keywords: {
+              include: {
+                keyword: true,
+              },
+            },
+          },
+        },
+        vacancies: true,
+      },
+    });
   });
 
   it('should throw NotFoundException when teacher does not exist', async () => {
