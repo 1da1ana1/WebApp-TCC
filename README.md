@@ -1,10 +1,8 @@
 # WebApp Project
 
-## 💻 Sobre o projeto
 
 Este projeto é uma aplicação web responsiva desenvolvida para proporcionar uma experiência de usuário fluida e moderna. O foco principal da aplicação é a entrega de uma interface intuitiva, utilizando práticas modernas de desenvolvimento web para garantir performance, acessibilidade e um design adaptável a diferentes tamanhos de tela.
 
-## 🛠️ Tecnologias e Ferramentas
 
 Abaixo estão as tecnologias utilizadas no desenvolvimento do projeto e o papel de cada uma:
 
