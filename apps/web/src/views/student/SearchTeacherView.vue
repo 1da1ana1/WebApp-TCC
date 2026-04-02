@@ -2,7 +2,8 @@
   
   <div class="search-page-layout">
     <FilterBar 
-      :themes="themesList" 
+      title="Filtrar professor por temas"
+      :themes="availableThemes" 
       v-model:selectedThemes="selectedThemes"
       @clear="resetFilters"
     />
@@ -22,7 +23,7 @@
           :professor="prof" 
         />
         
-        <p v-if="filteredProfessors.length === 0" class="no-results">
+        <p v-if="hasLoadedTeachers && filteredProfessors.length === 0" class="no-results">
           Nenhum orientador encontrado.
         </p>
       </div>
@@ -31,36 +32,61 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import FilterBar from '@/components/FilterBar.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import ProfessorCard from '@/components/ProfessorCard.vue'
 import { useNotificationStore } from '@/stores/notificationStore'
+import { getTeachers } from '@/services/api'
 
-// 2. Importação dos Dados (Fonte Única da Verdade)
-// Certifique-se de que no mockData.js você exportou 'mockProfessors'
 import { mockProfessors } from '@/services/mockData' 
 
-// 3. Estados Locais
 const searchQuery = ref('')
 const selectedThemes = ref([])
+const teachers = ref([])
+const hasLoadedTeachers = ref(false)
 
-// 4. Computed: Lista de temas disponíveis (Extraída automaticamente das tags dos professores)
+const normalizeTeacher = (teacher) => {
+  const tagsFromKeywords =
+    teacher?.user?.keywords?.map((item) => item.keyword?.name).filter(Boolean) || []
+
+  const tags = teacher?.tags || teacher?.themes || tagsFromKeywords
+
+  return {
+    id: teacher.id,
+    name: teacher.name || teacher?.user?.name || 'Professor sem nome',
+    tags,
+    vagas:
+      teacher.vagas ??
+      teacher.availableSpots ??
+      teacher?.vacancies?.available_spots ??
+      teacher?.vacancies?.total_spots ??
+      0,
+  }
+}
+
+onMounted(async () => {
+  try {
+    const response = await getTeachers()
+    teachers.value = Array.isArray(response)
+      ? response.map(normalizeTeacher)
+      : mockProfessors.map(normalizeTeacher)
+  } catch {
+    teachers.value = mockProfessors.map(normalizeTeacher)
+  } finally {
+    hasLoadedTeachers.value = true
+  }
+})
+
 const availableThemes = computed(() => {
-  // Pega todas as tags de todos os professores, junta num array só, e remove duplicatas com Set
-  const allTags = mockProfessors.flatMap(p => p.tags || [])
+  const allTags = teachers.value.flatMap(p => p.tags || [])
   return [...new Set(allTags)].sort()
 })
 
-// 5. Computed: Lógica de Filtragem
 const filteredProfessors = computed(() => {
-  return mockProfessors.filter(prof => {
-    // A. Filtro por Nome (Case insensitive)
+  return teachers.value.filter(prof => {
     const nameMatch = prof.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    
-    // B. Filtro por Tags/Temas
-    // Se não tiver tema selecionado (length 0), retorna true.
-    // Se tiver, verifica se o professor tem ALGUMA das tags selecionadas.
+
     const profTags = prof.tags || []
     const themeMatch = selectedThemes.value.length === 0 || 
                        selectedThemes.value.some(theme => profTags.includes(theme))
@@ -69,12 +95,10 @@ const filteredProfessors = computed(() => {
   })
 })
 
-// 6. Resetar Filtros
 const notification = useNotificationStore()
 const resetFilters = () => {
   searchQuery.value = ''
   selectedThemes.value = []
-  // Notificação sutil (snackbar)
   notification.success('Filtros de busca foram limpos.')
 }
 </script>

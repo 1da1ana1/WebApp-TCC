@@ -24,7 +24,7 @@
           :student="student" 
         />
         
-        <div v-if="filteredStudents.length === 0" class="no-results">
+        <div v-if="hasLoadedStudents && filteredStudents.length === 0" class="no-results">
           Nenhum aluno encontrado com esses critérios.
         </div>
       </div>
@@ -33,35 +33,53 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import FilterBar from '@/components/FilterBar.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import StudentCard from '@/components/StudentCard.vue'
 import { useNotificationStore } from '@/stores/notificationStore'
+import api from '@/services/api'
+import { mockStudents } from '@/services/mockData'
 
-// --- MOCK DATA ---
-const mockStudents = [
-  { id: '123456', name: 'Lorem Ipsum Dolor Sit', tags: ['Lorem', 'Lorem ipsum dolor sit amet'] },
-  { id: '123457', name: 'João da Silva', tags: ['Inteligência Artificial', 'Python'] },
-  { id: '123458', name: 'Maria Souza', tags: ['Engenharia de Software', 'Java'] },
-  { id: '123459', name: 'Pedro Alvares', tags: ['Banco de Dados', 'SQL'] },
-  { id: '123460', name: 'Ana Costa', tags: ['Lorem', 'Design'] },
-  { id: '123461', name: 'Lucas Pereira', tags: ['Lorem ipsum dolor sit amet'] },
-]
-
-// --- ESTADOS ---
 const searchQuery = ref('')
 const selectedThemes = ref([])
 const notification = useNotificationStore()
+const students = ref([])
+const hasLoadedStudents = ref(false)
 
-// --- LÓGICA ---
+const normalizeStudent = (student) => {
+  const tagsFromKeywords =
+    student?.user?.keywords?.map((item) => item.keyword?.name).filter(Boolean) || []
+
+  const tags = student?.tags || student?.themes || tagsFromKeywords
+
+  return {
+    id: student.id || student.registro,
+    name: student.name || student.nome || student?.user?.name || 'Aluno sem nome',
+    tags,
+  }
+}
+
+onMounted(async () => {
+  try {
+    const { data } = await api.get('/students')
+    students.value = Array.isArray(data)
+      ? data.map(normalizeStudent)
+      : mockStudents.map(normalizeStudent)
+  } catch {
+    students.value = mockStudents.map(normalizeStudent)
+  } finally {
+    hasLoadedStudents.value = true
+  }
+})
+
 const availableThemes = computed(() => {
-  const allTags = mockStudents.flatMap(s => s.tags || [])
+  const allTags = students.value.flatMap(s => s.tags || [])
   return [...new Set(allTags)].sort()
 })
 
 const filteredStudents = computed(() => {
-  return mockStudents.filter(student => {
+  return students.value.filter(student => {
     const nameMatch = student.name.toLowerCase().includes(searchQuery.value.toLowerCase())
     const studentTags = student.tags || []
     const themeMatch = selectedThemes.value.length === 0 || 
