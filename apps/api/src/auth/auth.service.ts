@@ -21,12 +21,16 @@ export class AuthService {
 
   // No arquivo auth.service.ts
   async login(user: any) {
-    // Verificação de segurança: Se o 'user' não vier ou não tiver 'email', retorne erro
-    if (!user || !user.email) {
-      throw new Error('Email e senha são obrigatórios');
+    if (!user?.email || !user?.password) {
+      throw new UnauthorizedException('Email e senha são obrigatórios.');
     }
 
-    const payload = { email: user.email, sub: user.id };
+    const validatedUser = await this.validateUser(user.email, user.password);
+    if (!validatedUser) {
+      throw new UnauthorizedException('Credenciais inválidas.');
+    }
+
+    const payload = { email: validatedUser.email, sub: validatedUser.id };
     return {
       access_token: this.jwtService.sign(payload),
     };
