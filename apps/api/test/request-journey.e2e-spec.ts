@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from '../src/app/routes/app.module';
+import { AppModule } from '../src/app.module';
 
 describe('Request Journey (e2e)', () => {
   let app: INestApplication<App>;

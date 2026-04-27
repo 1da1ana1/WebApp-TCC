@@ -6,7 +6,7 @@ import {
 	Request,
 	UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CreateSemesterDto } from './dto/create-semester.dto';
 import { SemestersService } from './semesters.service';
 import {
