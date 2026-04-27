@@ -1,16 +1,81 @@
-# WebApp Project
+# WebAppTCC
 
+Monorepo da plataforma de gestao de TCC com duas aplicacoes independentes:
 
-Este projeto é uma aplicação web responsiva desenvolvida para proporcionar uma experiência de usuário fluida e moderna. O foco principal da aplicação é a entrega de uma interface intuitiva, utilizando práticas modernas de desenvolvimento web para garantir performance, acessibilidade e um design adaptável a diferentes tamanhos de tela.
+- `apps/api`: backend NestJS + Prisma
+- `apps/web`: frontend Vue 3 + Vite
 
+Este projeto foi desenvolvido para oferecer uma experiencia de uso fluida e responsiva, com foco em organizacao do codigo, manutencao e evolucao do sistema.
 
-Abaixo estão as tecnologias utilizadas no desenvolvimento do projeto e o papel de cada uma:
+## Stack
 
-* **HTML5:** Utilizado para a estruturação semântica de todo o conteúdo da página, garantindo que a aplicação seja acessível e bem interpretada pelos motores de busca.
-* **CSS3:** Responsável por toda a parte visual e estilização. Foram aplicados conceitos de Flexbox e Grid Layout para criar uma interface responsiva que se ajusta perfeitamente a dispositivos móveis e desktops.
-* **JavaScript:** Implementado para adicionar interatividade e lógica à aplicação, manipulando o DOM e gerenciando o comportamento dinâmico do usuário.
-* **Vue.js:** Framework progressivo utilizado para a construção da interface. Sua arquitetura baseada em componentes permitiu a criação de um código mais organizado, reutilizável e com uma gestão de estado reativa e eficiente.
-* **Git:** Utilizado como sistema de controle de versão, permitindo o rastreamento de alterações, o gerenciamento de ramificações (branches) e a manutenção da integridade do código durante todo o ciclo de desenvolvimento.
+- **Frontend:** Vue.js, JavaScript, CSS3, HTML5
+- **Backend:** NestJS, Prisma
+- **Versionamento:** Git
+
+## Requisitos
+
+- Node.js 20+
+- npm instalado
+- Banco de dados configurado para a API via `DATABASE_URL`
+
+## Instalacao
+
+Instale as dependencias em cada aplicacao:
+
+```bash
+cd apps/api
+npm install
+
+cd ../web
+npm install
+```
+
+## Executar em desenvolvimento
+
+Backend:
+
+```bash
+cd apps/api
+npm run start:dev
+```
+
+Frontend:
+
+```bash
+cd apps/web
+npm run dev
+```
+
+## Testes automatizados
+
+### Backend
+
+Execute os testes da API dentro de `apps/api`:
+
+```bash
+cd apps/api
+npm run test
+npm run test:watch
+npm run test:cov
+npm run test:e2e
+```
+
+### Frontend
+
+Execute os testes da interface dentro de `apps/web`:
+
+```bash
+cd apps/web
+npm run test:unit
+npm run test:e2e
+```
+
+### Observacoes
+
+- Os testes do backend usam Jest.
+- Os testes unitarios do frontend usam Vitest.
+- Os testes end-to-end do frontend usam Playwright; na primeira execucao, pode ser necessario instalar os navegadores com `npx playwright install` dentro de `apps/web`.
 
 ---
 Desenvolvido por [Yasmim Daiana](https://github.com/1da1ana1)

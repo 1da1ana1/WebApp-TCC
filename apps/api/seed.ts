@@ -4,47 +4,64 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-    const hashedPassword = await bcrypt.hash('password123', 10);
-    const user = await prisma.user.create({
-        data: {
-            name: 'Test Student',
-            email: 'student@example.com',
-            password: hashedPassword,
-            typeUser: 'student',
-        },
-    });
+  const passwordHash = await bcrypt.hash('123456', 10);
 
-    const student = await prisma.student.create({
-        data: {
-            userId: user.id,
-            ra: '123456',
-        },
-    });
+  // 1. Criar um Aluno
+  const aluno = await prisma.user.upsert({
+    where: { email: 'aluno@unicamp.br' },
+    update: {},
+    create: {
+      name: 'João Aluno',
+      email: 'aluno@unicamp.br',
+      password: passwordHash,
+      typeUser: 'STUDENT',
+      student: {
+        create: { ra: '111111' }
+      }
+    },
+  });
 
-    const teacherUser = await prisma.user.create({
-        data: {
-            name: 'Teacher User',
-            email: 'teacher@example.com',
-            password: hashedPassword,
-            typeUser: 'teacher',
-        },
-    });
+  // 2. Criar um Professor
+  const professor = await prisma.user.upsert({
+    where: { email: 'professor@unicamp.br' },
+    update: {},
+    create: {
+      name: 'Carlos Docente',
+      email: 'professor@unicamp.br',
+      password: passwordHash,
+      typeUser: 'TEACHER',
+      teacher: {
+        create: { lattesLink: 'http://lattes...123' }
+      }
+    },
+  });
 
-    const teacher = await prisma.teacher.create({
-        data: {
-            userId: teacherUser.id,
-        },
-    });
+  // 3. Criar um Coordenador (Que também é professor na regra de negócio)
+  const coordenador = await prisma.user.upsert({
+    where: { email: 'coord@unicamp.br' },
+    update: {},
+    create: {
+      name: 'Maria Coordenadora',
+      email: 'coord@unicamp.br',
+      password: passwordHash,
+      typeUser: 'COORDINATOR',
+      teacher: {
+        create: {
+          isCoordinator: true,
+          coordinator: { create: {} }
+        }
+      }
+    },
+  });
 
-    console.log('Created student:', student);
-    console.log('Created teacher:', teacher);
+  console.log('✅ Usuários de teste criados com sucesso!');
 }
 
 main()
-    .catch((e) => {
-        console.error(e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

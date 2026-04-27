@@ -1,0 +1,243 @@
+openapi: 3.0.0
+info:
+  title: API de Gestão de TCC - FT Unicamp
+  description: API para gerenciar o processo de seleção de orientadores de TCC na Faculdade de Tecnologia da Unicamp.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desenvolvimento
+
+paths:
+  /teachers:
+    get:
+      summary: Lista de Docentes
+      tags: [Teachers]
+      description: Retorna uma lista de docentes.
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Teacher'
+
+  /teachers/{id}:
+    get:
+      summary: Perfil de um Docente
+      tags: [Teachers]
+      description: Retorna o perfil detalhado de um docente específico.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+        '404':
+          description: Docente não encontrado
+
+  /requests:
+    post:
+      summary: Enviar Solicitação de Orientação
+      tags: [Requests]
+      description: Aluno envia uma solicitação para um docente. Requer autenticação JWT.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRequestDto'
+      responses:
+        '201':
+          description: Solicitação criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+        '400':
+          description: Erro de validação
+        '401':
+          description: Não autenticado
+
+    get:
+      summary: Lista de Solicitações do Usuário
+      tags: [Requests]
+      description: Retorna solicitações do usuário autenticado (aluno ou docente).
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          description: Não autenticado
+
+  /requests/{id}/respond:
+    patch:
+      summary: Responder Solicitação
+      tags: [Requests]
+      description: Docente responde uma solicitação com ACCEPTED ou REJECTED. Requer autenticação JWT.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequestResponseDto'
+      responses:
+        '200':
+          description: Solicitação respondida com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+        '400':
+          description: Erro de validação
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Solicitação não encontrada
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Prof. Lorem Ipsum
+        email:
+          type: string
+          format: email
+          example: professor@unicamp.br
+
+    Keyword:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          example: Inteligência Artificial
+
+    UserKeyword:
+      type: object
+      properties:
+        keyword:
+          $ref: '#/components/schemas/Keyword'
+
+    Vacancy:
+      type: object
+      properties:
+        id:
+          type: integer
+        amount:
+          type: integer
+          nullable: true
+        semesterId:
+          type: integer
+          nullable: true
+        teacherId:
+          type: integer
+
+    Teacher:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        lattesLink:
+          type: string
+          nullable: true
+        coordinator:
+          type: boolean
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+            keywords:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserKeyword'
+        vacancies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vacancy'
+
+    Request:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        teacherId:
+          type: integer
+        status:
+          type: string
+          enum: [PENDING, ACCEPTED, REJECTED]
+        sendDate:
+          type: string
+          format: date-time
+        responseDate:
+          type: string
+          format: date-time
+          nullable: true
+        denialJustification:
+          type: string
+          nullable: true
+
+    CreateRequestDto:
+      type: object
+      required: [teacherId]
+      properties:
+        teacherId:
+          type: integer
+
+    UpdateRequestResponseDto:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ACCEPTED, REJECTED]
+        denialJustification:
+          type: string

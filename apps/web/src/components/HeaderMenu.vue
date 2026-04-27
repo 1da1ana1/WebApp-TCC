@@ -1,6 +1,8 @@
 <template>
   <header class="header">
-    <img src="/src/assets/img/logos-header.png" alt="logo ft" class="header-logo" />
+    <router-link to="/" class="logo-link">
+      <img src="/src/assets/img/logos-header.png" alt="logo ft" class="header-logo" />
+    </router-link>
 
     <nav class="header-nav-desktop">
       <ul class="header-links">
@@ -40,6 +42,20 @@ import NavLinks from '@/components/NavLinks.vue';
   top: 0;
   left: 0;
   z-index: 10;
+}
+
+/* Container do link da logo para ajustar o clique */
+.logo-link {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s ease; /* Alterado para focar na opacidade */
+}
+
+/* Efeito suave de diminuir a opacidade no hover */
+.logo-link:hover {
+  opacity: 0.75; /* Altere este valor (0.0 a 1.0) se quiser mais ou menos transparente */
 }
 
 .header-logo {
