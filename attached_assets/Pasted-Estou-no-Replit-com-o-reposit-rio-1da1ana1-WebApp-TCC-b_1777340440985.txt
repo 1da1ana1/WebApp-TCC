@@ -1,0 +1,49 @@
+Estou no Replit com o repositório 1da1ana1/WebApp-TCC, branch files-re.
+O backend é NestJS em apps/api e eu acabei de fazer uma refatoração estrutural (mover AppModule/AppController/AppService para src/ e mover módulos para src/modules).
+
+Quero que você faça uma auditoria + melhorias com foco em organização e consistência, sem mudar regras de negócio (sem alterar comportamento das rotas).
+
+Objetivos:
+1) Verificar se a estrutura de pastas está correta e coerente com o padrão NestJS.
+2) Verificar se o projeto compila e inicia sem erros.
+3) Encontrar e corrigir imports quebrados ou antigos (principalmente caminhos de Prisma e Auth/JwtAuthGuard).
+4) Encontrar e remover/ajustar pastas antigas que ficaram sobrando após a refatoração (ex.: src/app/routes, src/app/services) se não forem mais usadas.
+5) Garantir que os testes e2e ainda importam o AppModule do lugar correto.
+6) Melhorias de organização: padronizar nomes, remover arquivos mortos/duplicados, e melhorar a clareza do projeto.
+
+Regras:
+- NÃO alterar a lógica do domínio (não mudar regras de Requests/Vacancies/Semesters/Reports).
+- Você pode mexer em imports, mover arquivos, renomear pastas/arquivos, ajustar exports, atualizar README, e arrumar config.
+- Faça mudanças em passos pequenos e explique cada passo.
+- Ao final, gere um checklist “O que foi verificado”, “O que foi corrigido”, “O que ficou como dívida técnica”.
+
+Passos que você deve seguir (ordem obrigatória):
+
+PASSO A — Diagnóstico rápido (sem mudar nada ainda)
+- Liste a árvore de pastas em apps/api/src (principalmente src/modules, src/auth, src/prisma).
+- Confirme exatamente onde está a pasta prisma (apps/api/src/prisma ou apps/api/prisma).
+- Faça uma busca global por strings antigas: "app/routes", "src/app/routes", "../services/app.service", "../../../auth", "../../../../prisma".
+- Liste todos os resultados encontrados e diga quais são erros prováveis.
+
+PASSO B — Compilar e rodar
+- Rode/verifique o TypeScript build (ex.: npm run build ou npx tsc --noEmit).
+- Se houver erro, conserte o mínimo necessário (imports/caminhos).
+- Rode o start:dev e confirme que sobe na porta configurada.
+
+PASSO C — Padronização de estrutura
+- Se existir pasta antiga src/app/routes ou src/app/services e ela não for mais usada, remova ou mova conteúdo remanescente corretamente.
+- Garanta que os módulos estejam todos em src/modules/<feature>.
+- Garanta que cada módulo tenha controller/service/module no mesmo diretório, e dto dentro de dto/.
+
+PASSO D — Melhorias pequenas e seguras (sem mudar negócio)
+- Verifique se há controllers vazios (sem endpoints) e apenas documente isso (não inventar endpoints).
+- Verifique se NotificationsModule não tem controller: documente.
+- Remova comentários desnecessários ou duplicados no bootstrap, mas sem quebrar nada.
+- Ajuste README (se necessário) para refletir a nova estrutura.
+
+PASSO E — Resultado final
+- Mostre a árvore final do backend.
+- Liste exatamente quais arquivos foram alterados.
+- Deixe instruções de como rodar: install, build, start, test.
+
+Comece pelo PASSO A agora.

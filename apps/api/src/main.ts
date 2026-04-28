@@ -25,10 +25,3 @@ async function bootstrap() {
   app.enableCors();
 }
 bootstrap();
-/*
-Ele cria o app NestJS usando o AppModule
-O AppModule importa os módulos (Teachers, Students, Keywords etc.)
-Cada módulo registra seus controllers
-O controller chama um service
-O service pode falar com o banco (via Prisma) ou retornar dados
-*/

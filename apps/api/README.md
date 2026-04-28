@@ -48,11 +48,41 @@ npm run build
 npm run start:prod
 ```
 
+## Estrutura do projeto
+
+```
+apps/api/
+├── prisma/                  # schema, migrações e PrismaService
+│   ├── schema.prisma
+│   ├── migrations/
+│   ├── prisma.module.ts
+│   └── prisma.service.ts
+├── src/
+│   ├── main.ts              # bootstrap (Swagger, ValidationPipe, CORS)
+│   ├── app.module.ts        # módulo raiz que agrega todas as features
+│   ├── app.controller.ts
+│   ├── app.service.ts
+│   ├── auth/                # autenticação JWT/local + guards + dto
+│   └── modules/             # uma pasta por feature: controller + service + module + dto/
+│       ├── keywords/
+│       ├── logs/
+│       ├── notifications/   # sem controller — service consumido por outros módulos
+│       ├── orientations/
+│       ├── reports/
+│       ├── requests/
+│       ├── semesters/
+│       ├── students/
+│       ├── teachers/
+│       └── vacancies/
+├── test/                    # specs e2e (Jest + Supertest)
+└── seed.ts                  # popular usuários de teste
+```
+
 ## Documentacao da API (Swagger/OpenAPI)
 
 - Swagger UI: http://localhost:3000/api/docs
 - JSON para importacao: http://localhost:3000/api/docs-json
-- Fonte da especificacao: openapi.yaml
+- A especificacao é gerada em tempo de execução pelo `DocumentBuilder` em `src/main.ts`.
 
 ## Importar rotas no Insomnia
 
