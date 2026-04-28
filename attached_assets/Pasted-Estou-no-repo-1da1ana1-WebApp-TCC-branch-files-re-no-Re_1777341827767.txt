@@ -1,0 +1,43 @@
+Estou no repo 1da1ana1/WebApp-TCC (branch files-re), no Replit.
+Eu sou iniciante e não sei o que existe no banco nem o que os controllers deveriam expor.
+
+Quero que você faça um diagnóstico completo (somente leitura/análise primeiro) para os módulos:
+- apps/api/src/modules/students
+- apps/api/src/modules/keywords
+- apps/api/src/modules/logs
+
+Objetivo:
+1) Descobrir o que já existe (services, prisma, DTOs, controllers vazios).
+2) Descobrir quais modelos existem no Prisma (schema.prisma) e como se conectam.
+3) Propor quais endpoints REST fazem sentido e quais devem ser protegidos com JWT.
+4) Só depois disso, pedir minha confirmação para implementar.
+
+Regras:
+- Não crie endpoints ainda no primeiro passo.
+- Não altere regras de negócio.
+- Explique como se eu nunca tivesse visto backend/TypeScript/Nest/Prisma.
+
+PASSO A — Encontrar Prisma e modelos
+- Localize o arquivo schema.prisma no projeto e abra ele.
+- Liste TODOS os models encontrados (nomes e campos principais).
+- Aponte quais models parecem ser Students, Keywords e Logs (ou equivalentes).
+
+PASSO B — Checar os módulos
+Para cada módulo (students/keywords/logs):
+- Liste os arquivos presentes (controller/service/module/dto).
+- Abra e resuma o controller: ele está vazio? Quais rotas já existem?
+- Abra e resuma o service: ele já tem métodos? Usa PrismaService? Quais métodos e o que retornam?
+- Abra e resuma o module: ele injeta PrismaService ou importa PrismaModule?
+
+PASSO C — Mapear endpoints reais que já existem hoje
+- Liste todas as rotas já implementadas nesses módulos (se existirem).
+- Diga o que está faltando para funcionar (por ex: faltam métodos no controller, ou faltam métodos no service).
+
+PASSO D — Proposta segura de endpoints (com autorização)
+- Para students: sugira endpoints mínimos e quem pode acessar (ex.: coordenador, docente, aluno).
+- Para keywords: sugira endpoints mínimos (ex.: listar palavras-chave) e se precisa login.
+- Para logs: sugira endpoints que façam sentido (pode não ser CRUD por id; pode ser “listar meus logs” etc.).
+- Para cada endpoint sugerido: diga URL, método HTTP (GET/POST/etc), qual service chamaria e qual model Prisma usaria.
+
+PASSO E — Me pergunte confirmação
+- Só depois de mostrar o plano, pergunte se quero que você implemente.
