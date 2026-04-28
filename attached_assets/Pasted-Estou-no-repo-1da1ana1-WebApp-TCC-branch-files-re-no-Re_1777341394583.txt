@@ -1,0 +1,65 @@
+Estou no repo 1da1ana1/WebApp-TCC, branch files-re, no Replit.
+Após refatoração da estrutura NestJS (AppModule em apps/api/src/app.module.ts e módulos em apps/api/src/modules), quero uma VARREDURA completa para encontrar pastas/arquivos duplicados ou “sobras” de estrutura antiga.
+
+Objetivo:
+- Identificar arquivos/pastas duplicados (mesmo nome ou mesmo conteúdo em locais diferentes).
+- Identificar sobras da estrutura antiga (ex.: apps/api/src/app/routes, apps/api/src/app/services, ou imports apontando para caminhos antigos).
+- Identificar inconsistências (ex.: um módulo em src/modules mas também existe resto em src/app/routes; testes apontando para caminho antigo; docs apontando para caminho antigo).
+
+Regras:
+- Não mude lógica de negócio.
+- Primeiro faça diagnóstico e me mostre um relatório.
+- Só depois proponha um plano de limpeza (o que deletar/mover/renomear) com justificativa e risco.
+- Se possível, sugira mudanças pequenas e seguras para corrigir.
+
+PASSO 1 — Inventário (listar árvore)
+1) Liste a árvore completa de:
+   - apps/api/src
+   - apps/api/test
+   - apps/api/prisma (se existir)
+2) Confirme se ainda existe qualquer uma destas pastas:
+   - apps/api/src/app/routes
+   - apps/api/src/app/services
+   - apps/api/src/app (como pasta)
+   - apps/api/src/modules (ok, deve existir)
+
+PASSO 2 — Procurar duplicados por nome
+Procure por possíveis duplicatas (mesmo nome em caminhos diferentes), especialmente:
+- app.module.ts
+- app.controller.ts
+- app.service.ts
+- main.ts (existe apps/api/main.ts e apps/api/src/main.ts: confirme se ambos são necessários)
+- qualquer *.module.ts, *.controller.ts, *.service.ts repetidos em src/app/** e src/modules/**
+Relate em uma tabela: [arquivo] [caminho 1] [caminho 2] [diferença? idêntico?].
+
+PASSO 3 — Procurar duplicados por conteúdo/hash
+Se possível, gere hashes (ou compare conteúdo) para achar arquivos iguais em locais diferentes.
+Foque em:
+- dto/
+- entities/
+- guards/auth
+- prisma service/module
+Relate o que é cópia exata vs parecido.
+
+PASSO 4 — Procurar referências antigas (busca global)
+Faça busca global por strings antigas:
+- "src/app/routes"
+- "app/routes"
+- "../services/app.service"
+- "/app/routes/"
+- "apps/api/src/app/"
+- imports com muitos ../../../ que possam ter ficado errados
+Liste resultados e aponte o que deve ser atualizado.
+
+PASSO 5 — Relatório final
+Entregar um relatório com:
+A) Duplicados confirmados (com risco/impacto)
+B) Sobras prováveis da estrutura antiga (sugestão: deletar/mover)
+C) Inconsistências (imports, testes, docs)
+D) Plano de limpeza em passos (comandos/movimentos sugeridos)
+E) Checklist de validação pós-limpeza:
+   - npm run build
+   - npm run start:dev
+   - npm run test (se existir)
+
+Comece pelo PASSO 1 agora e só avance quando terminar o relatório do passo atual.
