@@ -149,7 +149,7 @@ const handleClear = () => {
 /* ── Área de chips com scroll ──────────────────────────────────── */
 .visual-tags-header {
   background-color: #d9d9d9;
-  padding: 1rem 1.5rem;
+  padding: 0 0.75rem;
 }
 
 .tags-cloud {
