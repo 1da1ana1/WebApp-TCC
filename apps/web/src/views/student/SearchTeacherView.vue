@@ -1,10 +1,9 @@
 <template>
   
   <div class="search-page-layout">
-    <FilterBar 
+    <FilterBar
       title="Filtrar professor por temas"
-      :themes="availableThemes" 
-      v-model:selectedThemes="selectedThemes"
+      @filter-changed="selectedThemes = $event"
       @clear="resetFilters"
     />
 
@@ -76,11 +75,6 @@ onMounted(async () => {
   } finally {
     hasLoadedTeachers.value = true
   }
-})
-
-const availableThemes = computed(() => {
-  const allTags = teachers.value.flatMap(p => p.tags || [])
-  return [...new Set(allTags)].sort()
 })
 
 const filteredProfessors = computed(() => {
