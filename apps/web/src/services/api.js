@@ -14,4 +14,9 @@ export async function getTeachers() {
   }
 }
 
+export async function atualizarVagas(teacherId, quantity) {
+  const response = await api.post('/vacancies/define', { teacherId, quantity });
+  return response.data;
+}
+
 export default api;
