@@ -2,6 +2,14 @@
   <div class="view-vacancies">
     <h2 class="view-title">Definição de vagas</h2>
 
+    <!-- Alertas de feedback — aparecem apenas quando há mensagem -->
+    <div v-if="successMessage" class="alert-feedback alert-success">
+      <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
+    </div>
+    <div v-if="errorMessage" class="alert-feedback alert-error">
+      <i class="bi bi-x-circle-fill"></i> {{ errorMessage }}
+    </div>
+
     <div class="vacancies-board">
       <div class="section-global">
         <h3 class="section-subtitle">Configuração Global</h3>
@@ -27,8 +35,13 @@
         </div>
 
         <div class="action-row right mt-3">
-          <button class="btn-confirm" @click="saveGlobal">
-            <i class="bi bi-check2-circle"></i> Aplicar Globalmente
+          <button class="btn-confirm" @click="saveGlobal" :disabled="isLoadingGlobal">
+            <span v-if="isLoadingGlobal">
+              <i class="bi bi-arrow-repeat spinner-icon"></i> Salvando...
+            </span>
+            <span v-else>
+              <i class="bi bi-check2-circle"></i> Aplicar Globalmente
+            </span>
           </button>
         </div>
       </div>
@@ -67,12 +80,12 @@
 
           <div class="specific-right">
             <div class="list-header">
-                      <span class="list-title">Docentes Selecionados ({{ selectedProfessors.length }})</span>
-                      <button class="btn-clear-all" v-if="selectedProfessors.length > 0" @click="clearAll">Limpar tudo</button>
+              <span class="list-title">Docentes Selecionados ({{ selectedProfessors.length }})</span>
+              <button class="btn-clear-all" v-if="selectedProfessors.length > 0" @click="clearAll">Limpar tudo</button>
             </div>
 
             <div class="selected-professors-list custom-scrollbar">
-                      <div v-for="prof in selectedProfessors" :key="prof.id" class="prof-card-item">
+              <div v-for="prof in selectedProfessors" :key="prof.id" class="prof-card-item">
                 <div class="prof-avatar-container">
                   <i class="bi bi-person-circle prof-avatar-icon"></i>
                 </div>
@@ -82,7 +95,7 @@
                   <span class="prof-details">{{ prof.area }} • ID: {{ prof.id }}</span>
                 </div>
 
-                        <button class="btn-remove-card" @click="removeProf(prof.id)" title="Remover da lista">
+                <button class="btn-remove-card" @click="removeProf(prof.id)" title="Remover da lista">
                   <i class="bi bi-x-lg"></i>
                 </button>
               </div>
@@ -94,8 +107,17 @@
             </div>
 
             <div class="action-row right mt-3">
-              <button class="btn-confirm btn-confirm-specific" :disabled="selectedProfessors.length === 0" @click="saveSpecific">
-                Atualizar Selecionados
+              <button
+                class="btn-confirm btn-confirm-specific"
+                :disabled="selectedProfessors.length === 0 || isLoadingSpecific"
+                @click="saveSpecific"
+              >
+                <span v-if="isLoadingSpecific">
+                  <i class="bi bi-arrow-repeat spinner-icon"></i> Salvando...
+                </span>
+                <span v-else>
+                  Atualizar Selecionados
+                </span>
               </button>
             </div>
           </div>
@@ -109,7 +131,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import Swal from 'sweetalert2'
 
 const props = defineProps({
   selectedProfessors: {
@@ -125,6 +146,21 @@ const applyAll = ref(true)
 const specificCount = ref(3)
 const searchQuery = ref('')
 
+// ── Estados de feedback ────────────────────────────────────────
+const isLoadingGlobal = ref(false)
+const isLoadingSpecific = ref(false)
+const successMessage = ref('')
+const errorMessage = ref('')
+
+// Limpa as mensagens após N milissegundos
+function clearMessages(delay = 4000) {
+  setTimeout(() => {
+    successMessage.value = ''
+    errorMessage.value = ''
+  }, delay)
+}
+
+// ── Ações da lista ─────────────────────────────────────────────
 const removeProf = (id) => {
   emit('update:selectedProfessors', props.selectedProfessors.filter(p => p.id !== id))
 }
@@ -133,25 +169,32 @@ const clearAll = () => {
   emit('update:selectedProfessors', [])
 }
 
+// ── Salvar global (mock com setTimeout) ───────────────────────
 const saveGlobal = () => {
-  Swal.fire({
-    icon: 'success',
-    title: 'Aplicado Globalmente',
-    text: `Todas as vagas foram redefinidas para ${globalCount.value}.`,
-    confirmButtonColor: '#53b57c',
-    timer: 2000
-  })
+  successMessage.value = ''
+  errorMessage.value = ''
+  isLoadingGlobal.value = true
+
+  setTimeout(() => {
+    isLoadingGlobal.value = false
+    successMessage.value = `✓ Vagas globais definidas como ${globalCount.value} para todos os docentes.`
+    clearMessages()
+  }, 2000)
 }
 
+// ── Salvar específico (mock com setTimeout) ───────────────────
 const saveSpecific = () => {
   if (props.selectedProfessors.length === 0) return
-  Swal.fire({
-    icon: 'success',
-    title: 'Atualização Específica',
-    text: `Vagas atualizadas para ${props.selectedProfessors.length} docentes.`,
-    confirmButtonColor: '#065f8b',
-    timer: 2000
-  })
+
+  successMessage.value = ''
+  errorMessage.value = ''
+  isLoadingSpecific.value = true
+
+  setTimeout(() => {
+    isLoadingSpecific.value = false
+    successMessage.value = `✓ ${props.selectedProfessors.length} docente(s) atualizado(s) com ${specificCount.value} vaga(s).`
+    clearMessages()
+  }, 2000)
 }
 </script>
 
@@ -164,4 +207,36 @@ const saveSpecific = () => {
 .specific-left { flex: 1; }
 .specific-right { flex: 1.2; display: flex; flex-direction: column; }
 .selected-professors-list { display: flex; flex-direction: column; gap: 0.8rem; max-height: 350px; overflow-y: auto; padding-right: 5px; }
+
+/* ── Alertas de feedback ───────────────────────────────────── */
+.alert-feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  margin-bottom: 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.alert-success {
+  background-color: #d1f5e0;
+  color: #1a7a45;
+  border: 1px solid #a3e6c0;
+}
+.alert-error {
+  background-color: #fde8e8;
+  color: #9b1c1c;
+  border: 1px solid #f8b4b4;
+}
+
+/* ── Spinner no botão ─────────────────────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spinner-icon {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
 </style>
