@@ -111,6 +111,7 @@ const resetFilters = () => {
   flex-shrink: 0; /* Impede que a barra lateral seja esmagada */
   position: sticky; /* Opcional: faz o filtro "rolar" junto com a tela */
   top: 4.325rem; /* ajustado para encostar logo abaixo do header fixo */
+  height: calc(100vh - 4.325rem);
 }
 
 .search-container {
