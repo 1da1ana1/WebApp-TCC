@@ -105,12 +105,12 @@ const resetFilters = () => {
 
 }
 
-/* 2. BARRA LATERAL: Mantém a largura fixa para o FilterBar */
-.search-page-layout > :first-child {
+  /* 2. BARRA LATERAL: Mantém a largura fixa para o FilterBar */
+  .search-page-layout > :first-child {
   width: 280px;
   flex-shrink: 0; /* Impede que a barra lateral seja esmagada */
   position: sticky; /* Opcional: faz o filtro "rolar" junto com a tela */
-  top: 6.5rem;
+  top: 4.325rem; /* ajustado para encostar logo abaixo do header fixo */
 }
 
 .search-container {
