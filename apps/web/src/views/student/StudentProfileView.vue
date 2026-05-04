@@ -46,30 +46,60 @@
         <div v-if="currentView === 'home'">
           <section class="card-section tags-input-area">
             <h3>Cadastrar temas:</h3>
-            <p class="instruction italic">Insira palavras-chave aqui:</p>
+            <p class="instruction italic">Selecione até 5 áreas de interesse:</p>
 
             <div class="tags-control-container">
+              <!-- Dropdown -->
               <div class="input-wrapper">
+                <!-- Input fictício com dropdown trigger -->
                 <input
                   type="text"
-                  v-model="newTag"
-                  @keyup.enter="addTag"
-                  placeholder="Ex: Inteligência Artificial"
+                  class="dropdown-input"
+                  placeholder="Selecione até 5 áreas..."
+                  readonly
+                  @click="toggleDropdown"
                 />
-                <button type="button" class="add-tag-btn" @click="addTag">
-                  <i class="bi bi-plus-lg"></i>
+
+                <!-- Ícone de toggle -->
+                <button
+                  type="button"
+                  class="dropdown-icon-btn"
+                  @click="toggleDropdown"
+                  :class="{ 'open': isDropdownOpen }"
+                >
+                  <i class="bi" :class="isDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                 </button>
+
+                <!-- Dropdown com opções ordenadas -->
+                <div v-show="isDropdownOpen" class="dropdown-menu">
+                  <button
+                    v-for="keyword in sortedKeywords"
+                    :key="keyword"
+                    type="button"
+                    class="dropdown-option"
+                    :class="{
+                      selected: tags.includes(keyword),
+                      disabled: isOptionDisabled(keyword)
+                    }"
+                    :disabled="isOptionDisabled(keyword)"
+                    @click="toggleTag(keyword)"
+                  >
+                    <span class="option-text">{{ keyword }}</span>
+                    <i v-if="tags.includes(keyword)" class="bi bi-check2"></i>
+                  </button>
+                </div>
               </div>
 
-              <div class="tags-display">
+              <!-- Container de chips selecionados ao lado -->
+              <div class="selected-tags-container">
                 <span
                   v-for="(tag, index) in tags"
                   :key="index"
-                  class="tag"
+                  class="tag-chip"
                   :class="getTagColor(index)"
                 >
                   {{ tag }}
-                  <i class="bi bi-x" @click="removeTag(index)"></i>
+                  <i class="bi bi-x-circle" @click="removeTag(index)"></i>
                 </span>
               </div>
             </div>
@@ -128,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import Swal from 'sweetalert2'
@@ -142,17 +172,66 @@ const student = ref({
   photo: '',
 })
 
+// === MOCK DE DADOS - 20 ÁREAS DE COMPUTAÇÃO ===
+const MOCK_KEYWORDS = [
+  'Inteligência Artificial',
+  'Machine Learning',
+  'Deep Learning',
+  'Data Science',
+  'Big Data',
+  'Cloud Computing',
+  'Cybersecurity',
+  'DevOps',
+  'Blockchain',
+  'Vue.js',
+  'React',
+  'Angular',
+  'TypeScript',
+  'Python',
+  'Java',
+  'JavaScript',
+  'Desenvolvimento Mobile',
+  'API REST',
+  'Banco de Dados',
+  'Engenharia de Software'
+]
+
 // --- 2. TAGS (TEMAS) ---
-const newTag = ref('')
+const isDropdownOpen = ref(false)
 const tags = ref(['Machine Learning', 'Vue.js'])
 
-const addTag = () => {
-  if (newTag.value.trim() !== '') {
-    tags.value.push(newTag.value.trim())
-    newTag.value = ''
+// === COMPUTED PROPERTY - ORDENAÇÃO ALFABÉTICA ===
+const sortedKeywords = computed(() => {
+  return [...MOCK_KEYWORDS].sort((a, b) => 
+    a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+  )
+})
+
+/**
+ * Verifica se uma opção deve estar desabilitada (limite de 5 atingido)
+ */
+const isOptionDisabled = (keyword) => {
+  return !tags.value.includes(keyword) && tags.value.length >= 5
+}
+
+/**
+ * Alterna a seleção de uma tag (add/remove)
+ */
+const toggleTag = (keyword) => {
+  const index = tags.value.indexOf(keyword)
+  
+  if (index > -1) {
+    // Remove se já existe
+    tags.value.splice(index, 1)
+  } else if (tags.value.length < 5) {
+    // Adiciona se não atingiu o limite
+    tags.value.push(keyword)
   }
 }
 
+/**
+ * Remove tag pelo índice (ao clicar no X do chip)
+ */
 const removeTag = (index) => {
   tags.value.splice(index, 1)
 }
@@ -160,6 +239,20 @@ const removeTag = (index) => {
 const getTagColor = (index) => {
   const colors = ['purple', 'yellow', 'blue']
   return colors[index % colors.length]
+}
+
+/**
+ * Toggle do dropdown
+ */
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value
+}
+
+/**
+ * Fechar dropdown
+ */
+const closeDropdown = () => {
+  isDropdownOpen.value = false
 }
 
 // --- 3. DADOS DAS SOLICITAÇÕES ---
@@ -435,39 +528,198 @@ button {
   color: #1e3a8a;
 }
 
+/* === DROPDOWN CUSTOMIZADO === */
+
 .tags-control-container {
+  position: relative;
   display: flex;
-  align-items: center; /* Alinha verticalmente ao centro */
-  flex-wrap: wrap; /* Permite que as tags quebrem linha se houver muitas */
-  gap: 1.5rem; /* Espaço entre a caixa de escrita e as tags */
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: nowrap;
 }
 
-/* Ajuste no wrapper para não forçar quebra de linha */
+.selected-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.tag-chip {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.tag-chip i {
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: opacity 0.2s;
+}
+
+.tag-chip i:hover {
+  opacity: 0.7;
+}
+
+.tag-chip.purple {
+  background-color: #d8b4fe;
+  color: #4c1d95;
+}
+
+.tag-chip.yellow {
+  background-color: #fef08a;
+  color: #854d0e;
+}
+
+.tag-chip.blue {
+  background-color: #93c5fd;
+  color: #1e3a8a;
+}
+
 .input-wrapper {
   display: flex;
+  align-items: center;
   border: 1px solid #999;
   border-radius: 4px;
-  padding: 5px;
+  padding: 8px;
+  background-color: #fff;
+  position: relative;
+  gap: 8px;
+  min-height: 44px;
   width: 100%;
   max-width: 300px;
-  margin-bottom: 0; /* Removido para alinhar com as tags */
 }
 
-/* Garantir que o botão de adicionar seja clicável em toda sua área */
-.add-tag-btn {
+.dropdown-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  min-width: 120px;
+  font-style: italic;
+  color: #999;
+  font-family: poppins;
+}
+
+.dropdown-icon-btn {
   background: none;
   border: none;
-  font-size: 1.2rem;
-  color: #666;
   cursor: pointer;
+  color: #666;
+  padding: 4px 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 5px;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
 }
 
-.add-tag-btn:hover {
+.dropdown-icon-btn:hover {
   color: var(--color-brand-primary);
+}
+
+.dropdown-icon-btn.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.15s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 15px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: poppins;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.15s ease;
+  font-size: 0.95rem;
+}
+
+.dropdown-option:hover:not(.disabled) {
+  background-color: #f5f5f5;
+  padding-left: 18px;
+}
+
+.dropdown-option.selected {
+  background-color: #e8f0ff;
+  color: #0066cc;
+  font-weight: 600;
+}
+
+.dropdown-option.selected i {
+  color: #0066cc;
+  font-weight: bold;
+}
+
+.dropdown-option.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background-color: #fafafa;
+}
+
+.dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.option-text {
+  flex: 1;
+}
+
+.dropdown-option i {
+  font-size: 1rem;
+  margin-left: 8px;
+}
+
+/* Scrollbar customizada */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 3px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 .request-item {
