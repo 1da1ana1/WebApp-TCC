@@ -316,10 +316,11 @@ onMounted(async () => {
     }
   }
 
-  // 2. Buscar Solicitações Ativas
-  // Filtramos apenas o que é relevante para exibir na "Home" (ex: Pendente/Aceito)
-  // Assumimos aqui que o campo 'envolvido' no mockRequests é o nome do Professor
-  const activeRequests = mockRequests.filter(r => ['Pendente', 'Aceito'].includes(r.status))
+  // 2. Buscar Solicitações Ativas (apenas PENDENTE - aguardando resposta)
+  // Regra: apenas 1 solicitação ativa por vez
+  // Quando ACEITA: passa para "Minhas orientações" (não aparece aqui)
+  // Quando RECUSADA: vai para histórico
+  const activeRequests = mockRequests.filter(r => r.status === 'Pendente')
 
   myRequests.value = activeRequests.map((req, index) => ({
     id: index,
