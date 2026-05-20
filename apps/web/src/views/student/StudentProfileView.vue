@@ -132,7 +132,10 @@ import { ref, onMounted } from 'vue'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import Swal from 'sweetalert2'
-// Importando a Fonte Única da Verdade
+// TODO(deploy): migrar para os endpoints reais do backend
+//   - dados do aluno: GET /students/:id (a criar) ou /auth/me
+//   - solicitações:   GET /requests (já implementado em services/api.js)
+// Por enquanto esta view ainda lê do mockData.js — não acionar em produção sem migrar.
 import { getStudentById, mockRequests } from '@/services/mockData'
 
 // --- 1. DADOS DO ALUNO ---

@@ -1,65 +1,43 @@
 import { defineStore } from 'pinia';
+import api from '@/services/api';
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({ 
-    user: null,  
-    token: null  
+  state: () => ({
+    user: null,
+    token: null,
   }),
 
-  // Ativa a persistência automática (salva no localStorage)
-  persist: true, 
+  persist: true,
 
   actions: {
     async login(email, password) {
-      console.log("Tentando logar com:", email, password);
+      try {
+        const { data } = await api.post('/auth/login', { email, password });
 
-      let mockUser = null;
+        this.token = data.access_token;
+        this.user = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          type: (data.user.typeUser || '').toLowerCase(),
+          teacherId: data.user.teacherId ?? null,
+          studentId: data.user.studentId ?? null,
+        };
 
-      // 1. Lógica para ALUNO
-      if (email === 'aluno@unicamp.br' && password === '123456') {
-        mockUser = {
-          id: 1,
-          name: 'Yasmim Daiana',
-          email: email,
-          type: 'student', // Usado para controlar o menu de aluno
-          avatar: 'https://i.pravatar.cc/150?u=a' // Opcional: avatar fake
-        };
-      } 
-      // 2. Lógica para DOCENTE
-      else if (email === 'prof@unicamp.br' && password === '123456') {
-        mockUser = {
-          id: 2,
-          name: 'Prof. Carlos Silva',
-          email: email,
-          type: 'teacher', // Usado para controlar o menu de professor
-          avatar: 'https://i.pravatar.cc/150?u=b'
-        };
-      }
-      // 3. Lógica para COORDENADOR
-      else if (email === 'coord@unicamp.br' && password === '123456') {
-        mockUser = {
-          id: 3,
-          name: 'Coord. Maria Oliveira',
-          email: email,
-          type: 'coordinator', // Usado para controlar o menu de coordenador
-          avatar: 'https://i.pravatar.cc/150?u=c'
-        };
-      }
-
-      // Se encontrou algum usuário válido
-      if (mockUser) {
-        this.user = mockUser;
-        this.token = `token-falso-${mockUser.type}-123`; // Token diferente para cada tipo
-        return true; 
-      } else {
-        return false; 
+        return true;
+      } catch (err) {
+        this.user = null;
+        this.token = null;
+        if (err.response?.status === 401) {
+          return false;
+        }
+        throw err;
       }
     },
 
     logout() {
       this.user = null;
       this.token = null;
-      // O plugin remove do localStorage automaticamente aqui!
-    }
+    },
   },
 });

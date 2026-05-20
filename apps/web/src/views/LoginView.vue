@@ -34,12 +34,6 @@
         <p v-if="error" class="error-message">{{ error }}</p>
       </form>
 
-      <div class="demo-credentials">
-        <h3>Credenciais de Demonstração:</h3>
-        <p><strong>Aluno:</strong> aluno@unicamp.br / 123456</p>
-        <p><strong>Professor:</strong> prof@unicamp.br / 123456</p>
-        <p><strong>Coordenador:</strong> coord@unicamp.br / 123456</p>
-      </div>
     </div>
   </div>
 </template>
@@ -178,22 +172,4 @@ input:focus {
   text-align: center;
 }
 
-.demo-credentials {
-  margin-top: 30px;
-  padding-top: 30px;
-  border-top: 1px solid #eee;
-}
-
-.demo-credentials h3 {
-  color: #333;
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-.demo-credentials p {
-  color: #666;
-  font-size: 13px;
-  margin: 5px 0;
-  font-family: 'Courier New', monospace;
-}
 </style>

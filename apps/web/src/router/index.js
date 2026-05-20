@@ -100,7 +100,25 @@ const routes = [
     name: 'Access Denied',
     component: () => import('@/views/AccessDeniedView.vue'),
     meta: { layout: 'public' }
-  }
+  },
+
+  // ============================================
+  // DEV LOGIN — mock de papéis para desenvolvimento e homologação.
+  // Só existe no bundle quando a build é dev (vite dev / preview)
+  // OU quando VITE_ENABLE_DEV_LOGIN=true. Em produção (flag false ou
+  // ausente) a rota literalmente não é registrada.
+  // ============================================
+  ...(import.meta.env.DEV ||
+  import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true'
+    ? [
+        {
+          path: '/dev-login',
+          name: 'DevLogin',
+          component: () => import('@/views/DevLoginView.vue'),
+          meta: { layout: 'public' },
+        },
+      ]
+    : []),
 ]
 
 const router = createRouter({
@@ -113,29 +131,24 @@ const router = createRouter({
 // ============================================
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  
-  // Rotas públicas que não precisam de autenticação
-  const publicRoutes = ['/login', '/', '/info', '/acesso-negado']
-  const isPublicRoute = publicRoutes.includes(to.path)
-  
-  // 1. Se é rota pública, deixa passar
-  if (isPublicRoute) {
+
+  // 1. Rotas públicas (marcadas com meta.layout === 'public') passam direto
+  if (to.meta.layout === 'public') {
     next()
     return
   }
 
-  // 2. Se é rota protegida e não está autenticado, redireciona para login
+  // 2. Demais rotas exigem autenticação
   if (!authStore.user) {
     next('/login')
     return
   }
 
-  // 3. Verifica se a rota requer um role específico
+  // 3. Se a rota exige um role específico, valida (case-insensitive)
   if (to.meta.requiredRole) {
-    const userRole = authStore.user.type
-    const requiredRole = to.meta.requiredRole
+    const userRole = (authStore.user.type || '').toLowerCase()
+    const requiredRole = String(to.meta.requiredRole).toLowerCase()
 
-    // Se o role do usuário não bate com o requerido, acesso negado
     if (userRole !== requiredRole) {
       console.warn(
         `❌ Acesso Negado: Usuário com role '${userRole}' tentou acessar rota que requer '${requiredRole}'`,
@@ -146,7 +159,6 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // 4. Deixa a navegação acontecer
   next()
 })
 

@@ -201,7 +201,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useTeacherStore } from '@/stores/teacher'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
@@ -209,6 +209,10 @@ import StatisticCard from '@/components/StatisticCard.vue'
 import Swal from 'sweetalert2'
 
 const teacherStore = useTeacherStore()
+
+onMounted(() => {
+  teacherStore.loadData()
+})
 
 // Computed properties para acessar os dados do store
 const currentView = computed({

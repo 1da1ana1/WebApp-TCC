@@ -18,15 +18,23 @@
 
       <!-- Results Grid - SEM ESPAÇOS LATERAIS -->
       <div class="results-grid">
-        <StudentCard 
-          v-for="student in filteredStudents" 
-          :key="student.id" 
-          :student="student" 
-        />
-        
-        <div v-if="hasLoadedStudents && filteredStudents.length === 0" class="no-results">
-          Nenhum aluno encontrado com esses critérios.
+        <div v-if="loadError" class="error-state">
+          <i class="bi bi-exclamation-triangle"></i>
+          <p>Não foi possível carregar a lista de alunos no momento.</p>
+          <button class="btn-retry" @click="loadStudents">Tentar novamente</button>
         </div>
+
+        <template v-else>
+          <StudentCard
+            v-for="student in filteredStudents"
+            :key="student.id"
+            :student="student"
+          />
+
+          <div v-if="hasLoadedStudents && filteredStudents.length === 0" class="no-results">
+            Nenhum aluno encontrado com esses critérios.
+          </div>
+        </template>
       </div>
     </main>
   </div>
@@ -39,13 +47,13 @@ import SearchBar from '@/components/SearchBar.vue'
 import StudentCard from '@/components/StudentCard.vue'
 import { useNotificationStore } from '@/stores/notificationStore'
 import api from '@/services/api'
-import { mockStudents } from '@/services/mockData'
 
 const searchQuery = ref('')
 const selectedThemes = ref([])
 const notification = useNotificationStore()
 const students = ref([])
 const hasLoadedStudents = ref(false)
+const loadError = ref(false)
 
 const normalizeStudent = (student) => {
   const tagsFromKeywords =
@@ -60,18 +68,22 @@ const normalizeStudent = (student) => {
   }
 }
 
-onMounted(async () => {
+const loadStudents = async () => {
+  hasLoadedStudents.value = false
+  loadError.value = false
   try {
     const { data } = await api.get('/students')
-    students.value = Array.isArray(data)
-      ? data.map(normalizeStudent)
-      : mockStudents.map(normalizeStudent)
-  } catch {
-    students.value = mockStudents.map(normalizeStudent)
+    students.value = Array.isArray(data) ? data.map(normalizeStudent) : []
+  } catch (err) {
+    console.error('Erro ao buscar alunos:', err)
+    students.value = []
+    loadError.value = true
   } finally {
     hasLoadedStudents.value = true
   }
-})
+}
+
+onMounted(loadStudents)
 
 const availableThemes = computed(() => {
   const allTags = students.value.flatMap(s => s.tags || [])
@@ -153,6 +165,33 @@ const resetFilters = () => {
   font-style: italic;
   font-size: 1rem;
 }
+
+.error-state {
+  grid-column: 1 / -1;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: white;
+  color: #b00020;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.error-state i { font-size: 2rem; }
+.error-state p { margin: 0; color: #444; font-style: italic; }
+
+.btn-retry {
+  background-color: #065f8b;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-retry:hover { opacity: 0.9; }
 
 /* Responsividade */
 @media (max-width: 1024px) {

@@ -56,8 +56,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Swal from 'sweetalert2'
 
-// Importamos a função auxiliar que você criou no mockData.js
-import { getProfessorById } from '@/services/mockData' 
+// TODO(deploy): migrar para GET /teachers/:id (mockData.js ainda é a fonte primária aqui)
+import { getProfessorById } from '@/services/mockData'
 
 const docente = ref(null)
 const isLoading = ref(true)

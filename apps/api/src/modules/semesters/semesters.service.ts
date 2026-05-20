@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateSemesterDto } from './dto/create-semester.dto';
 
@@ -7,15 +7,9 @@ export class SemestersService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async createSemester(userId: number, data: CreateSemesterDto) {
-		const user = await this.prisma.user.findUnique({
-			where: { id: userId },
-		});
-
-		if (user?.typeUser !== 'COORDINATOR') {
-			throw new ForbiddenException(
-				'Apenas coordenadores podem gerenciar semestres.',
-			);
-		}
+		// Validação de papel agora é feita pelo RolesGuard no controller
+		// (@Roles('COORDINATOR')). Mantemos apenas as regras de domínio.
+		void userId;
 
 		if (data.isActive) {
 			await this.prisma.semester.updateMany({

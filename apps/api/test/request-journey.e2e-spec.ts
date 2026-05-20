@@ -166,10 +166,25 @@ describe('Request Journey (e2e)', () => {
     const teacherToken: string = teacherLogin.body.access_token;
     expect(teacherToken).toBeDefined();
 
+    // RolesGuard: a teacher token must NOT be able to define vacancies.
     await request(app.getHttpServer())
       .post('/vacancies/define')
       .set('Authorization', `Bearer ${teacherToken}`)
-      .send({ quantity: 3 })
+      .send({ teacherId, quantity: 3, semesterId })
+      .expect(403);
+
+    const coordinatorLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: coordinatorEmail, password })
+      .expect(201);
+
+    const coordinatorToken: string = coordinatorLogin.body.access_token;
+    expect(coordinatorToken).toBeDefined();
+
+    await request(app.getHttpServer())
+      .post('/vacancies/define')
+      .set('Authorization', `Bearer ${coordinatorToken}`)
+      .send({ teacherId, quantity: 3, semesterId })
       .expect(201);
 
     const studentLogin = await request(app.getHttpServer())

@@ -1,5 +1,7 @@
 import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { ReportsService } from './reports.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -20,7 +22,8 @@ export class ReportsController {
 		return this.reportsService.getTeacherStats(userIdLogado);
 	}
 
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles('COORDINATOR')
 	@Get('coordinator-stats')
 	@ApiOperation({ summary: 'Obter estatísticas gerais da coordenação' })
 	@ApiResponse({ status: 200, description: 'Estatísticas da coordenação retornadas com sucesso' })

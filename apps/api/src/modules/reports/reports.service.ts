@@ -47,13 +47,8 @@ export class ReportsService {
 	}
 
 	async getCoordinatorStats(userId: number) {
-		const user = await this.prisma.user.findUnique({ where: { id: userId } });
-
-		if (user?.typeUser !== 'COORDINATOR') {
-			throw new ForbiddenException(
-				'Apenas coordenadores podem acessar os relatórios gerais.',
-			);
-		}
+		// Validação de papel feita pelo RolesGuard (@Roles('COORDINATOR')).
+		void userId;
 
 		const totalStudents = await this.prisma.student.count();
 

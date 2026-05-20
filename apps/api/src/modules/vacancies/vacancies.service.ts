@@ -4,47 +4,68 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { DefineVacanciesDto } from './dto/define-vacancies.dto';
 
 @Injectable()
 export class VacanciesService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async defineVacancies(userId: number, quantity: number) {
+	async defineVacancies(userId: number, dto: DefineVacanciesDto) {
+		// 1. A validação de typeUser === 'COORDINATOR' já acontece no
+		//    RolesGuard (controller). Aqui só precisamos resolver o
+		//    coordinatorId via cadeia User -> Teacher -> Coordinator,
+		//    que o guard não tem como inspecionar.
 		const user = await this.prisma.user.findUnique({
 			where: { id: userId },
-			include: { teacher: true },
+			include: {
+				teacher: { include: { coordinator: true } },
+			},
 		});
 
-		if (!user || !user.teacher) {
-			throw new ForbiddenException('Apenas professores podem definir vagas.');
-		}
-
-		const activeSemester = await this.prisma.semester.findFirst({
-			where: { isActive: true },
-		});
-
-		if (!activeSemester) {
-			throw new NotFoundException(
-				'Nenhum semestre ativo no momento. A coordenação precisa abrir um semestre primeiro.',
+		if (!user?.teacher?.coordinator) {
+			throw new ForbiddenException(
+				'Usuário com papel COORDINATOR não possui registro de Coordinator vinculado.',
 			);
 		}
 
-		const coordinator = await this.prisma.coordinator.findFirst({
-			orderBy: { id: 'asc' },
+		const coordinatorId = user.teacher.coordinator.id;
+
+		// 3. Garante que o docente alvo existe antes de tocar no banco.
+		const targetTeacher = await this.prisma.teacher.findUnique({
+			where: { id: dto.teacherId },
+		});
+		if (!targetTeacher) {
+			throw new NotFoundException(
+				`Docente com id ${dto.teacherId} não encontrado.`,
+			);
+		}
+
+		// 4. Resolve o semestre: o do body, ou o ativo como fallback.
+		const semesterId = await this.resolveSemesterId(dto.semesterId);
+
+		// 5. Evita duplicidade. Não há @@unique([teacherId, semesterId]) no
+		//    schema, então um upsert do Prisma seria ambíguo — usamos
+		//    findFirst e decidimos entre update/create manualmente.
+		const existing = await this.prisma.vacancy.findFirst({
+			where: { teacherId: dto.teacherId, semesterId },
 		});
 
-		if (!coordinator) {
-			throw new NotFoundException(
-				'Nenhum coordenador cadastrado para vincular a vaga.',
-			);
+		if (existing) {
+			return this.prisma.vacancy.update({
+				where: { id: existing.id },
+				data: {
+					quantity: dto.quantity,
+					coordinatorId,
+				},
+			});
 		}
 
 		return this.prisma.vacancy.create({
 			data: {
-				quantity,
-				teacherId: user.teacher.id,
-				semesterId: activeSemester.id,
-				coordinatorId: coordinator.id,
+				quantity: dto.quantity,
+				teacherId: dto.teacherId,
+				semesterId,
+				coordinatorId,
 			},
 		});
 	}
@@ -55,5 +76,31 @@ export class VacanciesService {
 			include: { semester: true },
 			orderBy: { id: 'desc' },
 		});
+	}
+
+	private async resolveSemesterId(
+		requested: number | undefined,
+	): Promise<number> {
+		if (requested !== undefined && requested !== null) {
+			const semester = await this.prisma.semester.findUnique({
+				where: { id: requested },
+			});
+			if (!semester) {
+				throw new NotFoundException(
+					`Semestre com id ${requested} não encontrado.`,
+				);
+			}
+			return semester.id;
+		}
+
+		const activeSemester = await this.prisma.semester.findFirst({
+			where: { isActive: true },
+		});
+		if (!activeSemester) {
+			throw new NotFoundException(
+				'Nenhum semestre ativo. Abra um semestre antes de definir vagas.',
+			);
+		}
+		return activeSemester.id;
 	}
 }

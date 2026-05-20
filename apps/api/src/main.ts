@@ -20,8 +20,8 @@ async function bootstrap() {
   logger.log('Swagger UI disponível em /api/docs');
 
   app.useGlobalPipes(new ValidationPipe());
-  await app.listen(process.env.PORT ?? 3000);
-
   app.enableCors();
+
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

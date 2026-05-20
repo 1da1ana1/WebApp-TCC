@@ -9,6 +9,8 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { VacanciesService } from './vacancies.service';
 import {
 	ApiBearerAuth,
@@ -18,6 +20,7 @@ import {
 	ApiResponse,
 	ApiTags,
 } from '@nestjs/swagger';
+import { DefineVacanciesDto } from './dto/define-vacancies.dto';
 
 @ApiTags('Vacancies')
 @ApiBearerAuth()
@@ -25,28 +28,34 @@ import {
 export class VacanciesController {
 	constructor(private readonly vacanciesService: VacanciesService) {}
 
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles('COORDINATOR')
 	@Post('define')
-	@ApiOperation({ summary: 'Definir vagas do docente logado' })
-	@ApiBody({
-		schema: {
-			type: 'object',
-			required: ['quantity'],
-			properties: {
-				quantity: { type: 'integer', example: 3 },
-			},
-		},
+	@ApiOperation({
+		summary:
+			'Coordenador define a quantidade de vagas de um docente em um semestre',
 	})
-	@ApiResponse({ status: 201, description: 'Vaga criada com sucesso' })
+	@ApiBody({ type: DefineVacanciesDto })
+	@ApiResponse({
+		status: 201,
+		description: 'Vaga criada ou atualizada com sucesso',
+	})
+	@ApiResponse({ status: 400, description: 'Erro de validação no body' })
 	@ApiResponse({ status: 401, description: 'Não autenticado' })
-	@ApiResponse({ status: 403, description: 'Acesso negado' })
-	@ApiResponse({ status: 404, description: 'Semestre ativo ou coordenador não encontrado' })
+	@ApiResponse({
+		status: 403,
+		description: 'Apenas coordenadores podem definir vagas',
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'Docente, semestre ou coordenador não encontrado',
+	})
 	async defineVacancies(
 		@Request() req: { user: { sub: number } },
-		@Body('quantity', ParseIntPipe) quantity: number,
+		@Body() dto: DefineVacanciesDto,
 	) {
 		const userIdLogado = req.user.sub;
-		return this.vacanciesService.defineVacancies(userIdLogado, quantity);
+		return this.vacanciesService.defineVacancies(userIdLogado, dto);
 	}
 
 	@UseGuards(JwtAuthGuard)

@@ -32,10 +32,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { steps } from '@/stores/timelineData' 
+import { computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useTimelineStore } from '@/stores/timelineData'
 
-const timelineSteps = ref(steps) 
+const timelineStore = useTimelineStore()
+const { steps } = storeToRefs(timelineStore)
+
+const timelineSteps = computed(() => steps.value)
+
+onMounted(() => {
+  if (!timelineStore.hasLoaded) {
+    timelineStore.loadActiveSemester()
+  }
+})
 </script>
 
 <style scoped>

@@ -17,15 +17,23 @@
      
 
       <div class="results-list">
-        <ProfessorCard 
-          v-for="prof in filteredProfessors" 
-          :key="prof.id" 
-          :professor="prof" 
-        />
-        
-        <p v-if="hasLoadedTeachers && filteredProfessors.length === 0" class="no-results">
-          Nenhum orientador encontrado.
-        </p>
+        <div v-if="loadError" class="error-state">
+          <i class="bi bi-exclamation-triangle"></i>
+          <p>Não foi possível carregar a lista de orientadores no momento.</p>
+          <button class="btn-retry" @click="loadTeachers">Tentar novamente</button>
+        </div>
+
+        <template v-else>
+          <ProfessorCard
+            v-for="prof in filteredProfessors"
+            :key="prof.id"
+            :professor="prof"
+          />
+
+          <p v-if="hasLoadedTeachers && filteredProfessors.length === 0" class="no-results">
+            Nenhum orientador encontrado.
+          </p>
+        </template>
       </div>
     </main>
   </div>
@@ -39,12 +47,11 @@ import ProfessorCard from '@/components/ProfessorCard.vue'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { getTeachers } from '@/services/api'
 
-import { mockProfessors } from '@/services/mockData' 
-
 const searchQuery = ref('')
 const selectedThemes = ref([])
 const teachers = ref([])
 const hasLoadedTeachers = ref(false)
+const loadError = ref(false)
 
 const normalizeTeacher = (teacher) => {
   const tagsFromKeywords =
@@ -65,18 +72,22 @@ const normalizeTeacher = (teacher) => {
   }
 }
 
-onMounted(async () => {
+const loadTeachers = async () => {
+  hasLoadedTeachers.value = false
+  loadError.value = false
   try {
     const response = await getTeachers()
-    teachers.value = Array.isArray(response)
-      ? response.map(normalizeTeacher)
-      : mockProfessors.map(normalizeTeacher)
-  } catch {
-    teachers.value = mockProfessors.map(normalizeTeacher)
+    teachers.value = Array.isArray(response) ? response.map(normalizeTeacher) : []
+  } catch (err) {
+    console.error('Erro ao buscar orientadores:', err)
+    teachers.value = []
+    loadError.value = true
   } finally {
     hasLoadedTeachers.value = true
   }
-})
+}
+
+onMounted(loadTeachers)
 
 const availableThemes = computed(() => {
   const allTags = teachers.value.flatMap(p => p.tags || [])
@@ -151,6 +162,39 @@ const resetFilters = () => {
   font-style: italic;
   border-radius: 8px;
 }
+
+.error-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: white;
+  color: #b00020;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.error-state i {
+  font-size: 2rem;
+}
+
+.error-state p {
+  margin: 0;
+  color: #444;
+  font-style: italic;
+}
+
+.btn-retry {
+  background-color: #065f8b;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-retry:hover { opacity: 0.9; }
 
 /* Responsividade para tablets/celulares */
 @media (max-width: 1024px) {

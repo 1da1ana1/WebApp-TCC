@@ -1,0 +1,82 @@
+# =============================================================================
+# Nginx — TCC Management System (frontend Vue 3 + backend NestJS)
+# Mesma máquina, mesma origem: Nginx serve a SPA estática e faz proxy de /api
+# para o backend NestJS rodando em http://127.0.0.1:3000.
+#
+# Uso:
+#   1. Build do frontend:  cd apps/web && npm run build
+#   2. Copiar apps/web/dist/* para /var/www/tcc-web/
+#   3. Copiar este arquivo para /etc/nginx/sites-available/tcc.conf
+#      e linkar em /etc/nginx/sites-enabled/
+#   4. nginx -t && systemctl reload nginx
+# =============================================================================
+
+# (Opcional) força HTTP -> HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name tcc.unicamp.br;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name tcc.unicamp.br;
+
+    # --- TLS (ajuste para os caminhos do Let's Encrypt / certificado interno) ---
+    ssl_certificate     /etc/letsencrypt/live/tcc.unicamp.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tcc.unicamp.br/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    # --- SPA estática (saída do `vite build`) ---
+    root /var/www/tcc-web;
+    index index.html;
+
+    # Cache agressivo para assets versionados pelo Vite (hash no nome)
+    location /assets/ {
+        access_log off;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # ------------------------------------------------------------------
+    # Proxy para a API NestJS.
+    # O frontend chama paths como /api/auth/login. O Nginx remove o prefixo
+    # /api antes de encaminhar — o NestJS escuta em /auth/login etc.
+    # (Mesmo comportamento do proxy do Vite em desenvolvimento.)
+    # ------------------------------------------------------------------
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000/;   # a barra final remove o prefixo /api
+
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Authorization     $http_authorization;
+
+        # Timeouts (ajuste se houver endpoints longos, ex: relatórios)
+        proxy_connect_timeout 10s;
+        proxy_send_timeout    60s;
+        proxy_read_timeout    60s;
+
+        # Não fazer cache das respostas da API
+        proxy_cache off;
+        add_header Cache-Control "no-store" always;
+    }
+
+    # SPA fallback — rotas client-side (vue-router em createWebHistory)
+    # caem aqui e o index.html é servido para que o Vue assuma o roteamento.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Limites e headers de segurança básicos
+    client_max_body_size       10m;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+}
