@@ -98,6 +98,9 @@ const handleClear = () => {
   width: 280px;
   font-family: 'Poppins', sans-serif;
   background-color: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .filter-title {
@@ -114,13 +117,20 @@ const handleClear = () => {
 
 .filter-container {
   background: #fff;
-  overflow: hidden;
+  overflow-y: auto;
   padding: 0 1.75rem 1.75rem 1.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Permite que o filho estique */
 }
 
+/* ── MODIFICADO: Tranformado em Flex container para esticar ── */
 .content-container {
   border: 1px solid var(--color-border-default, #ccc);
   border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Faz preencher todo o espaço do filter-container */
 }
 
 /* ── Cabeçalho interno ──────────────────────────────────────────── */
@@ -149,19 +159,25 @@ const handleClear = () => {
   padding: 1px 8px;
 }
 
-/* ── Área de chips com scroll ──────────────────────────────────── */
+/* ── MODIFICADO: Fundo cinza estica até o final ────────────────── */
 .visual-tags-header {
   background-color: #d9d9d9;
-  padding: 1rem 1.5rem;
+  padding: 1rem 0.75rem; /* Ajustado levemente para respirar mais */
+  flex: 1; /* Faz o fundo cinza dominar a altura restante */
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Necessário para o scroll funcionar dentro de elementos flex */
 }
 
+/* ── MODIFICADO: Nuvem de chips infinita com scroll automático ── */
 .tags-cloud {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
   justify-content: flex-start;
-  max-height: 220px;
+  align-content: flex-start; /* Mantém as tags no topo, sem espalhar na vertical */
   overflow-y: auto;
+  flex: 1; /* Preenche a altura da div cinza */
   padding-right: 4px;
 
   /* Scrollbar discreta */
@@ -233,6 +249,7 @@ const handleClear = () => {
 .actions-section {
   padding: 1rem 1.5rem 1.5rem;
   background: #fff;
+  border-top: 1px solid #d9d9d9; /* Adicionado um filete para separar bem a rolagem do botão */
 }
 
 .btn-clear {

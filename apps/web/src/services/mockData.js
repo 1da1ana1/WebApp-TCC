@@ -129,20 +129,12 @@ export const mockRequests = [
     atualizacao: '05/10/2024',
   },
   {
-    semestre: '2025-1',
-    data: '05/02/2025',
-    envolvido: 'Carlos Mendes',
-    status: 'Aceito',
-    statusClass: 'accepted',
-    atualizacao: '06/02/2025',
-  },
-  {
-    semestre: '2024-2',
-    data: '20/10/2024',
+    semestre: '2024-1',
+    data: '20/09/2024',
     envolvido: 'Ana Costa',
-    status: 'Pendente',
-    statusClass: 'pending',
-    atualizacao: '-',
+    status: 'Recusado',
+    statusClass: 'rejected',
+    atualizacao: '22/09/2024',
   },
 ];
 

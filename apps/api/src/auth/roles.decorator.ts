@@ -1,6 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
 
-<<<<<<< HEAD
 /**
  * Tipos de usuário válidos no sistema.
  * Espelha exatamente os valores armazenados na coluna `User.typeUser` do
@@ -33,23 +32,3 @@ export const ROLES_METADATA_KEY = 'roles';
  */
 export const Roles = (...roles: UserRole[]) =>
   SetMetadata(ROLES_METADATA_KEY, roles);
-=======
-export const ROLES_KEY = 'roles';
-
-/**
- * Decorator @Roles()
- *
- * Marca uma rota com os perfis de usuário que têm permissão de acesso.
- * Deve ser usado em conjunto com o RolesGuard.
- *
- * Exemplo de uso em um Controller:
- *   @Roles('COORDINATOR')
- *   @UseGuards(JwtAuthGuard, RolesGuard)
- *   @Get('rota-restrita')
- *   minhaRota() { ... }
- *
- * Os valores válidos são os mesmos definidos no enum TypeUser do Prisma:
- *   'STUDENT' | 'TEACHER' | 'COORDINATOR'
- */
-export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
->>>>>>> 0b4299032dd50b96ab1a81f3b9aa43c99ee3b03f
