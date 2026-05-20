@@ -126,8 +126,11 @@ const resetFilters = () => {
 .search-page-layout > :first-child {
   width: 280px;
   flex-shrink: 0; /* Impede que a barra lateral seja esmagada */
-  position: sticky; /* Opcional: faz o filtro "rolar" junto com a tela */
-  top: 6.5rem;
+  position: sticky; /* Faz o filtro "rolar" junto com a tela */
+  /* Usa a mesma variável do header (base.css → --header-height: 4.325rem)
+     para o filtro grudar exatamente na borda inferior dele em qualquer
+     breakpoint, sem hardcode. */
+  top: var(--header-height);
 }
 
 .search-container {

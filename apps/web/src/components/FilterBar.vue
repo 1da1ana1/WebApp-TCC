@@ -79,7 +79,10 @@ const handleClear = () => {
   font-style: italic;
   font-weight: 500;
   text-align: left;
-  margin: 3rem 0 1rem 1.75rem;
+  /* Top reduzido (era 3rem) para o filtro encostar logo abaixo do header.
+     1.25rem preserva respiro interno entre o topo do <aside> e o título
+     sem reproduzir o gap antigo. */
+  margin: 1.25rem 0 1rem 1.75rem;
   font-size: 0.9rem;
   color: #000;
 }
