@@ -108,7 +108,10 @@ const resetFilters = () => {
   width: 280px;
   flex-shrink: 0;
   position: sticky;
-  top: 6.5rem;
+  /* Alinhado à altura real do header (base.css → --header-height).
+     Evita o gap que aparecia quando o sticky usava 6.5rem (~35px a mais
+     do que a altura efetiva do header). */
+  top: var(--header-height);
 }
 
 /* Área de Conteúdo - SEM PADDING LATERAL DESNECESSÁRIO */
