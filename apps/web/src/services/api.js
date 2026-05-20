@@ -42,6 +42,7 @@ export async function getTeachers() {
   }
 }
 
+<<<<<<< HEAD
 export async function getMyRequests() {
   const response = await api.get('/requests');
   return response.data;
@@ -73,3 +74,11 @@ export async function getTeacherVacancies(teacherId) {
 }
 
 export default api;
+=======
+export async function atualizarVagas(teacherId, quantity) {
+  const response = await api.post('/vacancies/define', { teacherId, quantity });
+  return response.data;
+}
+
+export default api;
+>>>>>>> 0b4299032dd50b96ab1a81f3b9aa43c99ee3b03f

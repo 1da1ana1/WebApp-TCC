@@ -19,8 +19,18 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
   logger.log('Swagger UI disponível em /api/docs');
 
+<<<<<<< HEAD
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
+=======
+  app.enableCors({
+    origin: true,
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  });
+
+  app.useGlobalPipes(new ValidationPipe());
+>>>>>>> 0b4299032dd50b96ab1a81f3b9aa43c99ee3b03f
 
   await app.listen(process.env.PORT ?? 3000);
 }
