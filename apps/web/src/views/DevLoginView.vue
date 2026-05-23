@@ -1,21 +1,7 @@
 <template>
   <div class="dev-login-page">
-    <header class="dev-warning" role="alert" aria-live="polite">
-      <span class="dev-warning__icon" aria-hidden="true">⚠</span>
-      <span class="dev-warning__text">
-        Tela exclusiva para ambiente de testes
-      </span>
-    </header>
-
     <main class="dev-login-card">
-      <h1 class="dev-login-title">
-        Ambiente de Desenvolvimento: Selecione o Papel
-      </h1>
-      <p class="dev-login-subtitle">
-        Autentica contra o backend usando os usuários seedados em
-        <code>apps/api/seed.ts</code>. Requer
-        <code>npx prisma db seed</code> executado.
-      </p>
+      <h1 class="dev-login-title">Selecione o Papel</h1>
 
       <div class="role-grid" role="group" aria-label="Selecione o papel">
         <button
@@ -46,34 +32,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
-
-// Gate de ambiente — defesa em profundidade.
-//
-// Liberado quando:
-//   1. Build é de desenvolvimento (vite dev / vite preview de uma build dev), OU
-//   2. A flag VITE_ENABLE_DEV_LOGIN === 'true' está setada na build.
-//
-// Em produção, com a flag false/ausente, a tela redireciona pra raiz mesmo
-// se a rota chegar a ser registrada por engano. O gate definitivo (que
-// remove a rota inteira do bundle) está no router/index.js.
-//
-// Importante: vars VITE_* são inlinadas em build time pelo Vite. Trocar
-// VITE_ENABLE_DEV_LOGIN no servidor de Staging exige rebuild — não é
-// um toggle runtime. Para flip runtime seria preciso config endpoint.
-const isDevLoginEnabled =
-  import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true'
-
-onMounted(() => {
-  if (!isDevLoginEnabled) {
-    router.replace('/')
-  }
-})
 
 const SEED_PASSWORD = '123456'
 
@@ -142,31 +106,6 @@ const loginAs = async (role) => {
   font-family: 'Poppins', system-ui, sans-serif;
 }
 
-/* --- Banner de alerta --- */
-.dev-warning {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  background: repeating-linear-gradient(
-    135deg,
-    #fff3b0 0 12px,
-    #ffe680 12px 24px
-  );
-  color: #5a4a00;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 0.6rem 1rem;
-  border-bottom: 2px solid #d6b800;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-}
-
-.dev-warning__icon {
-  font-size: 1.1rem;
-}
-
-/* --- Card central --- */
 .dev-login-card {
   flex: 1;
   display: flex;
@@ -180,25 +119,9 @@ const loginAs = async (role) => {
 .dev-login-title {
   font-size: clamp(1.25rem, 2.4vw, 1.75rem);
   color: #1f2937;
-  margin: 0 0 0.5rem;
-}
-
-.dev-login-subtitle {
-  color: #4b5563;
-  font-size: 0.9rem;
-  max-width: 540px;
   margin: 0 0 2rem;
-  line-height: 1.45;
 }
 
-.dev-login-subtitle code {
-  background: #e5e7eb;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 0.82rem;
-}
-
-/* --- Grid de botões --- */
 .role-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -254,7 +177,6 @@ const loginAs = async (role) => {
   font-family: 'Courier New', monospace;
 }
 
-/* Identidade visual por papel */
 .role-btn--student      { border-color: #93c5fd; }
 .role-btn--student:hover:not(:disabled) { border-color: #2563eb; }
 
@@ -264,7 +186,6 @@ const loginAs = async (role) => {
 .role-btn--coordinator  { border-color: #86efac; }
 .role-btn--coordinator:hover:not(:disabled) { border-color: #16a34a; }
 
-/* Spinner inline */
 .role-btn__spinner {
   width: 16px;
   height: 16px;
@@ -279,7 +200,6 @@ const loginAs = async (role) => {
   to { transform: rotate(360deg); }
 }
 
-/* Mensagem de erro */
 .dev-login-error {
   margin-top: 1.5rem;
   color: #b91c1c;
@@ -291,15 +211,9 @@ const loginAs = async (role) => {
   font-size: 0.88rem;
 }
 
-/* --- Responsivo --- */
 @media (max-width: 480px) {
   .role-grid {
     grid-template-columns: 1fr;
-  }
-
-  .dev-warning {
-    font-size: 0.75rem;
-    padding: 0.5rem 0.75rem;
   }
 }
 </style>

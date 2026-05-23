@@ -24,8 +24,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const authStore = useAuthStore();
       authStore.logout();
-      if (router.currentRoute.value.path !== '/login') {
-        router.push('/login');
+      if (router.currentRoute.value.path !== '/dev-login') {
+        router.push('/dev-login');
       }
     }
     return Promise.reject(error);

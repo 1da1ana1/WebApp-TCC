@@ -29,7 +29,7 @@ webapptcc/
 ### Project Structure
 - `apps/api/src/` - Application source code
   - `app/routes/` - Main application modules (Teachers, Solicitações)
-  - `auth/` - JWT & Passport-based authentication (LocalStrategy, JwtStrategy)
+  - `auth/` - JWT & Passport-based authentication (JwtStrategy)
   - `app/services/` - Business logic (TeachersService, RequestService)
   - `main.ts` - Application entry point
 - `apps/api/prisma/` - Database schema and migrations (SQLite)
@@ -38,7 +38,7 @@ webapptcc/
 1. **Modular Architecture**: Each feature (Teachers, Solicitações) is a complete module with controller, service, DTO
 2. **Prisma ORM**: Relations defined in `schema.prisma` - always reference this for understanding data flows
 3. **Data Validation**: Use `class-validator` + DTOs in `dto/` folders (e.g., `create-teacher.dto.ts`)
-4. **Authentication**: JWT via Passport; LocalStrategy handles login, JwtStrategy guards protected routes
+4. **Authentication**: JWT via Passport; JwtStrategy guards protected routes
 
 ### Database Schema Essentials
 - **User** (base model): email, password, typeUser (student/teacher/coordinator)

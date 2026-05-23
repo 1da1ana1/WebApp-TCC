@@ -16,7 +16,7 @@
       </div>
 
       <div class="access-denied-actions">
-        <router-link to="/login" class="btn-primary">
+        <router-link to="/dev-login" class="btn-primary">
           <i class="bi bi-box-arrow-in-right"></i> Ir para Login
         </router-link>
         <router-link to="/" class="btn-secondary">

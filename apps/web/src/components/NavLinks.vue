@@ -31,7 +31,7 @@ const router = useRouter();
 
 const logout = () => {
   authStore.logout();
-  router.push('/login');
+  router.push('/dev-login');
 };
 
 const menuItems = computed(() => {
@@ -40,11 +40,11 @@ const menuItems = computed(() => {
   // 1. Visitante (Não logado)
   if (!user) {
     return [
-      { 
-        label: 'FAZER LOGIN', 
-        path: '/login', 
-        icon: 'bi bi-box-arrow-in-right', // Mantido pois é botão especial
-        class: 'btn-login-especial' 
+      {
+        label: 'FAZER LOGIN',
+        path: '/dev-login',
+        icon: 'bi bi-box-arrow-in-right',
+        class: 'btn-login-especial'
       }
     ];
   }
