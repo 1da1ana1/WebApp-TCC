@@ -1,6 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TeachersService } from './teachers.service';
+import { ListTeachersQueryDto } from './dto/list-teachers-query.dto';
 
 @ApiTags('Teachers')
 @Controller('teachers')
@@ -8,10 +9,14 @@ export class TeachersController {
   constructor(private readonly teachersService: TeachersService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Listar docentes' })
+  @ApiOperation({
+    summary: 'Listar docentes',
+    description:
+      'Filtros opcionais via query: ?name=silva&keywords=Inteligência Artificial,Redes (AND).',
+  })
   @ApiResponse({ status: 200, description: 'Lista de docentes retornada com sucesso' })
-  async findAll() {
-    return this.teachersService.findAll();
+  async findAll(@Query() query: ListTeachersQueryDto) {
+    return this.teachersService.findAll(query);
   }
 
   @Get(':id')
