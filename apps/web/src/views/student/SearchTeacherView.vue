@@ -135,6 +135,10 @@ const resetFilters = () => {
 /* 3. ÁREA DE CONTEÚDO: Ocupa o restante do espaço à direita */
 .content-area {
   flex: 1;
+  /* min-width: 0 quebra o min-width default `auto` dos flex items.
+     Sem isso, conteúdo "indivisível" (URLs longas, imagens, tabelas)
+     empurra o pai pra fora da viewport e gera scroll horizontal. */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -198,12 +202,17 @@ const resetFilters = () => {
 @media (max-width: 1024px) {
   .search-page-layout {
     flex-direction: column; /* Empilha o filtro acima da busca em telas menores */
-    padding: 6rem 1.5rem;
+    /* Removido o `padding-top: 6rem` antigo — contradizia "filtro colado
+       logo abaixo do header". Mantém apenas o padding horizontal. */
+    padding: 0 1.5rem;
   }
-  
+
   .search-page-layout > :first-child {
     width: 100%;
+    /* Em mobile o filtro empilha — sem sticky e sem altura travada,
+       deixa o conteúdo fluir naturalmente abaixo dele. */
     position: static;
+    height: auto;
   }
 }
 </style>

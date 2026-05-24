@@ -5,12 +5,9 @@
     <div class="filter-container">
       <div class="content-container">
 
-        <!-- Cabeçalho com contador de selecionados -->
+        <!-- Cabeçalho -->
         <div class="tags-header">
           <span class="tags-label">Áreas de Interesse</span>
-          <span v-if="selectedTags.length > 0" class="tags-count">
-            {{ selectedTags.length }} selecionada{{ selectedTags.length > 1 ? 's' : '' }}
-          </span>
         </div>
 
         <!-- Nuvem de chips com scroll automático -->
@@ -98,7 +95,11 @@ const handleClear = () => {
   width: 280px;
   font-family: 'Poppins', sans-serif;
   background-color: #fff;
-  height: 100%;
+  /* `height: 100%` não funciona sem altura definida no pai. Usamos
+     min-height ancorado na viewport menos o header, garantindo que o
+     fundo branco e o flex interno (tag cloud com scroll) sempre tenham
+     espaço para esticar até o rodapé visual da tela. */
+  min-height: calc(100vh - var(--header-height));
   display: flex;
   flex-direction: column;
 }
@@ -107,10 +108,9 @@ const handleClear = () => {
   font-style: italic;
   font-weight: 500;
   text-align: left;
-  /* Top reduzido (era 3rem) para o filtro encostar logo abaixo do header.
-     1.25rem preserva respiro interno entre o topo do <aside> e o título
-     sem reproduzir o gap antigo. */
-  margin: 1.25rem 0 1rem 1.75rem;
+  /* Margem reduzida (de 1.25rem → 0.75rem) para o título encostar
+     visualmente logo abaixo do header. */
+  margin: 0.75rem 0 1rem 1.75rem;
   font-size: 0.9rem;
   color: #000;
 }
@@ -135,9 +135,6 @@ const handleClear = () => {
 
 /* ── Cabeçalho interno ──────────────────────────────────────────── */
 .tags-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 0.75rem 1.5rem 0.5rem;
   background: #fff;
 }
@@ -148,25 +145,17 @@ const handleClear = () => {
   color: #4c1d95;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-
-.tags-count {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #fff;
-  background: #4c1d95;
-  border-radius: 20px;
-  padding: 1px 8px;
+  line-height: 1.2;
 }
 
 /* ── MODIFICADO: Fundo cinza estica até o final ────────────────── */
 .visual-tags-header {
   background-color: #d9d9d9;
-  padding: 1rem 0.75rem; /* Ajustado levemente para respirar mais */
-  flex: 1; /* Faz o fundo cinza dominar a altura restante */
+  padding: 1rem 0.75rem;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0; /* Necessário para o scroll funcionar dentro de elementos flex */
+  min-height: 0;
 }
 
 /* ── MODIFICADO: Nuvem de chips infinita com scroll automático ── */
@@ -175,14 +164,10 @@ const handleClear = () => {
   flex-wrap: wrap;
   gap: 0.6rem;
   justify-content: flex-start;
-  align-content: flex-start; /* Mantém as tags no topo, sem espalhar na vertical */
+  align-content: flex-start;
   overflow-y: auto;
-  flex: 1; /* Preenche a altura da div cinza */
-  padding-right: 4px;
-
-  /* Scrollbar discreta */
-  scrollbar-width: thin;
-  scrollbar-color: #a78bfa #e9d5ff;
+  overflow-x: hidden;
+  flex: 1;
 }
 
 .tags-cloud::-webkit-scrollbar {

@@ -3,91 +3,142 @@
     <h2 class="view-title">Estatísticas e Monitoramento</h2>
 
     <div class="stats-container-border">
-      
+
       <nav class="sub-tabs-nav">
-        <button 
-          :class="{ active: currentStatsTab === 'overview' }" 
-          @click="currentStatsTab = 'overview'">Visão Geral</button>
-        <button 
-          :class="{ active: currentStatsTab === 'funnel' }" 
-          @click="currentStatsTab = 'funnel'">Funil de Vinculação</button>
-        <button 
-          :class="{ active: currentStatsTab === 'risks' }" 
-          @click="currentStatsTab = 'risks'">Riscos & Gargalos</button>
+        <button
+          :class="{ active: currentStatsTab === 'overview' }"
+          @click="selectTab('overview')">Visão Geral</button>
+        <button
+          :class="{ active: currentStatsTab === 'funnel' }"
+          @click="selectTab('funnel')">Funil de Vinculação</button>
+        <button
+          :class="{ active: currentStatsTab === 'risks' }"
+          @click="selectTab('risks')">Riscos &amp; Gargalos</button>
       </nav>
 
       <div class="stats-inner-content">
-        
+
+        <!-- ============================================================
+             VISÃO GERAL — integrado com GET /reports/coordinator-stats
+             ============================================================ -->
         <div v-if="currentStatsTab === 'overview'" class="sub-view-overview">
-          <div class="overview-grid">
-            
+
+          <div v-if="overview.isLoading" class="state-block">
+            <i class="bi bi-arrow-repeat spinner-icon"></i>
+            <p>Carregando estatísticas...</p>
+          </div>
+
+          <div v-else-if="overview.error" class="state-block error">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <p>{{ overview.error }}</p>
+            <button class="btn-action-outline" @click="loadOverview">Tentar novamente</button>
+          </div>
+
+          <div v-else-if="overview.isEmpty" class="state-block empty">
+            <i class="bi bi-inbox"></i>
+            <p>Sem dados suficientes para exibir estatísticas.</p>
+          </div>
+
+          <div v-else class="overview-grid">
+
             <div class="stat-gray-card left">
               <div class="card-header-row">
                 <h4>Saúde do Processo</h4>
-                <span class="badge-status warning">Atenção Necessária</span>
+                <span class="badge-status" :class="healthStatus.variant">{{ healthStatus.label }}</span>
               </div>
-              
+
               <div class="kpi-list">
                 <div class="kpi-item">
                   <span class="kpi-label">Total de Alunos Matriculados</span>
-                  <span class="kpi-value">45</span>
+                  <span class="kpi-value">{{ formatKpi(totalStudents) }}</span>
                 </div>
-                
+
                 <div class="kpi-item">
                   <span class="kpi-label">Vagas Totais Ofertadas</span>
-                  <span class="kpi-value text-danger">40 <i class="bi bi-exclamation-circle-fill" title="Déficit de 5 vagas!"></i></span>
+                  <span class="kpi-value" :class="{ 'text-danger': vacancyDeficit > 0 }">
+                    {{ formatKpi(totalVacancies) }}
+                    <i v-if="vacancyDeficit > 0" class="bi bi-exclamation-circle-fill" :title="`Déficit de ${vacancyDeficit} vagas!`"></i>
+                  </span>
                 </div>
 
                 <div class="divider-line"></div>
 
-                <div class="kpi-item highlight-risk">
+                <div class="kpi-item" :class="{ 'highlight-risk': studentsWithoutOrientation > 0 }">
                   <span class="kpi-label">Alunos SEM Orientador (Risco)</span>
-                  <span class="kpi-value text-danger">15</span>
+                  <span class="kpi-value" :class="{ 'text-danger': studentsWithoutOrientation > 0 }">
+                    {{ formatKpi(studentsWithoutOrientation) }}
+                  </span>
                 </div>
 
                 <div class="kpi-item">
                   <span class="kpi-label">Docentes com vagas sobrando</span>
-                  <span class="kpi-value text-success">4</span>
+                  <span class="kpi-value text-success">{{ formatKpi(teachersWithSurplus) }}</span>
                 </div>
               </div>
 
               <div class="card-footer-actions">
-                <button class="btn-export-yellow">Baixar relatório de alunos sem vínculo</button>
+                <button class="btn-export-yellow" :disabled="!studentsWithoutOrientation" @click="onExportUnlinked">
+                  Baixar relatório de alunos sem vínculo
+                </button>
               </div>
             </div>
 
             <div class="stat-gray-card right">
               <h4>Prazo da Etapa Atual</h4>
-              <p class="phase-label">Fase: <strong>Solicitação de Vagas</strong></p>
-              
-              <div class="calendar-widget-mock">
-                <div class="cal-header">
-                  <div class="cal-title">Outubro 2025</div>
-                  <div class="cal-status">Restam <strong>5 dias</strong></div>
+
+              <template v-if="currentPhase">
+                <p class="phase-label">Fase: <strong>{{ currentPhase.label }}</strong></p>
+
+                <div class="phase-widget">
+                  <div class="phase-header">
+                    <span class="phase-period">{{ formatRange(currentPhase.start, currentPhase.end) }}</span>
+                    <span class="phase-status" :class="phaseUrgencyClass">
+                      <template v-if="currentPhase.daysLeft > 0">
+                        Restam <strong>{{ currentPhase.daysLeft }}</strong> dia{{ currentPhase.daysLeft === 1 ? '' : 's' }}
+                      </template>
+                      <template v-else>
+                        Encerrado
+                      </template>
+                    </span>
+                  </div>
+                  <div class="phase-progress">
+                    <div class="phase-progress-bar" :style="{ width: phaseProgressPct + '%' }"></div>
+                  </div>
                 </div>
-                <div class="cal-weekdays">
-                  <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
-                </div>
-                <div class="cal-days">
-                  <span class="muted">29</span><span class="muted">30</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-                  <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span>
-                  <span>13</span><span>14</span><span class="range-start">15</span><span class="range-mid">16</span><span class="range-mid">17</span><span class="range-mid">18</span><span class="range-mid">19</span>
-                  <span class="range-end">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span>
-                  <span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span class="muted">1</span><span class="muted">2</span>
-                </div>
-              </div>
+              </template>
+
+              <template v-else>
+                <p class="phase-label">
+                  <em>{{ activeSemester ? 'Fora do período de qualquer etapa configurada.' : 'Nenhum semestre ativo encontrado.' }}</em>
+                </p>
+              </template>
 
               <div class="card-footer-actions">
-                <button class="btn-action-outline">Estender prazo (+2 dias)</button>
+                <button class="btn-action-outline" :disabled="!currentPhase" @click="onExtendDeadline">
+                  Estender prazo (+2 dias)
+                </button>
               </div>
             </div>
 
           </div>
         </div>
 
+        <!-- ============================================================
+             FUNIL — estrutura preparada para expansão (placeholder)
+             ============================================================ -->
         <div v-else-if="currentStatsTab === 'funnel'" class="sub-view-charts">
           <div class="charts-grid">
-            
+            <div class="chart-card wide">
+              <div class="chart-header">
+                <h5>Funil de Vinculação</h5>
+                <small>Progresso dos alunos no processo</small>
+              </div>
+              <div class="state-block empty inline">
+                <i class="bi bi-bar-chart-line"></i>
+                <p>Em breve — aguardando endpoint do funil de vinculação.</p>
+              </div>
+            </div>
+
             <div class="chart-card">
               <div class="chart-header">
                 <div>
@@ -95,49 +146,19 @@
                   <small>Onde os alunos estão focando?</small>
                 </div>
               </div>
-              <div class="main-metric">IA e Machine Learning</div>
-              <div class="chart-visual donut-container">
-                <div class="donut-chart"></div>
-                <div class="legend">
-                  <span><i class="dot blue"></i> Inteligência Artificial (45%)</span>
-                  <span><i class="dot purple"></i> Web Development (35%)</span>
-                  <span><i class="dot pink"></i> Segurança (20%)</span>
-                </div>
+              <div class="state-block empty inline">
+                <i class="bi bi-pie-chart"></i>
+                <p>Em breve — aguardando endpoint de distribuição por área.</p>
               </div>
             </div>
-
-            <div class="chart-card wide">
-              <div class="chart-header">
-                <h5>Funil de Vinculação</h5>
-                <small>Progresso dos alunos no processo</small>
-              </div>
-              
-              <div class="funnel-visual">
-                <div class="funnel-step">
-                  <div class="step-bar step-1">100%</div>
-                  <span class="step-label">Total Alunos (45)</span>
-                </div>
-                <div class="funnel-step">
-                  <div class="step-bar step-2">80%</div>
-                  <span class="step-label">Enviaram Solicitação (36)</span>
-                </div>
-                <div class="funnel-step">
-                  <div class="step-bar step-3">66%</div>
-                  <span class="step-label">Vinculados (30)</span>
-                </div>
-              </div>
-              
-              <div class="chart-legend-bottom mt-2">
-                <span class="text-danger"><i class="bi bi-exclamation-triangle"></i> 9 alunos ainda não iniciaram!</span>
-              </div>
-            </div>
-
           </div>
         </div>
 
+        <!-- ============================================================
+             RISCOS — estrutura preparada para expansão (placeholder)
+             ============================================================ -->
         <div v-else-if="currentStatsTab === 'risks'" class="sub-view-charts">
           <div class="charts-grid">
-            
             <div class="chart-card">
               <div class="chart-header">
                 <div>
@@ -145,24 +166,9 @@
                   <small>Docentes com baixa procura</small>
                 </div>
               </div>
-              <div class="chart-visual bar-container">
-                <div class="bars-wrapper align-bottom">
-                  <div class="bar-group-labeled">
-                    <div class="bar-fat bg-green" style="height: 80%"></div>
-                    <span>Prof. A</span>
-                  </div>
-                  <div class="bar-group-labeled">
-                    <div class="bar-fat bg-green" style="height: 60%"></div>
-                    <span>Prof. B</span>
-                  </div>
-                  <div class="bar-group-labeled">
-                    <div class="bar-fat bg-green" style="height: 30%"></div>
-                    <span>Prof. C</span>
-                  </div>
-                </div>
-              </div>
-              <div class="chart-advice">
-                <small>Sugestão: Incentivar alunos a procurarem estas áreas.</small>
+              <div class="state-block empty inline">
+                <i class="bi bi-bar-chart"></i>
+                <p>Em breve — aguardando endpoint de vagas com baixa procura.</p>
               </div>
             </div>
 
@@ -173,27 +179,19 @@
                   <small>Maior nº de recusas enviadas</small>
                 </div>
               </div>
-              <div class="chart-visual bar-container">
-                <div class="bars-wrapper align-bottom">
-                  <div class="bar-group-labeled">
-                    <div class="bar-fat bg-red" style="height: 90%"></div>
-                    <span>Prof. X</span>
-                  </div>
-                  <div class="bar-group-labeled">
-                    <div class="bar-fat bg-red" style="height: 70%"></div>
-                    <span>Prof. Y</span>
-                  </div>
-                  <div class="bar-group-labeled">
-                    <div class="bar-fat bg-red" style="height: 40%"></div>
-                    <span>Prof. Z</span>
-                  </div>
+              <!-- Já temos overloadedTeachers vindo de /reports/coordinator-stats:
+                   exibimos um preview enxuto até o endpoint dedicado existir. -->
+              <div v-if="overloadedTeachers.length > 0" class="overloaded-list">
+                <div v-for="t in overloadedTeachers" :key="t.name" class="overloaded-row">
+                  <span class="overloaded-name">{{ t.name }}</span>
+                  <span class="overloaded-count">{{ t.rejections }} recusa{{ t.rejections === 1 ? '' : 's' }}</span>
                 </div>
               </div>
-              <div class="chart-advice">
-                <small>Estes docentes receberam muito mais solicitações do que vagas.</small>
+              <div v-else class="state-block empty inline">
+                <i class="bi bi-people"></i>
+                <p>Sem dados de sobrecarga para o semestre atual.</p>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -203,10 +201,155 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getCoordinatorStats, getActiveSemester } from '@/services/api'
 
-// 'overview', 'funnel', 'risks'
 const currentStatsTab = ref('overview')
+
+// ── Slots de estado por aba — preparados para expansão ─────────
+// Cada aba terá seu próprio loader assim que ganhar endpoint dedicado.
+const overview = ref({ isLoading: false, error: null, isEmpty: false })
+const funnel = ref({ isLoading: false, error: null, isEmpty: true, data: null })
+const risks = ref({ isLoading: false, error: null, isEmpty: true, data: null })
+
+// Dados da Visão Geral
+const stats = ref(null)
+const activeSemester = ref(null)
+
+// ── KPIs derivados ─────────────────────────────────────────────
+// Campos opcionais (totalVacancies, teachersWithSurplus) já estão
+// previstos — quando o backend incluí-los na resposta de
+// /reports/coordinator-stats, a UI exibe automaticamente.
+const totalStudents = computed(() => stats.value?.totalStudents ?? null)
+const studentsWithoutOrientation = computed(() => stats.value?.studentsWithoutOrientation ?? null)
+const totalVacancies = computed(() => stats.value?.totalVacancies ?? null)
+const teachersWithSurplus = computed(() => stats.value?.teachersWithSurplus ?? null)
+const overloadedTeachers = computed(() => stats.value?.overloadedTeachers ?? [])
+
+const vacancyDeficit = computed(() => {
+  const t = totalStudents.value
+  const v = totalVacancies.value
+  if (t == null || v == null) return 0
+  return Math.max(t - v, 0)
+})
+
+const healthStatus = computed(() => {
+  const risk = studentsWithoutOrientation.value
+  if (risk == null) return { label: 'Sem dados', variant: 'neutral' }
+  if (risk === 0) return { label: 'Saudável', variant: 'success' }
+  if (risk > 10 || vacancyDeficit.value > 0) return { label: 'Atenção Necessária', variant: 'warning' }
+  return { label: 'Em monitoramento', variant: 'info' }
+})
+
+// ── Etapa atual do semestre ativo ──────────────────────────────
+const PHASE_DEFINITIONS = [
+  { label: 'Definição de vagas',          startKey: 'vacancyDefStartDate',   endKey: 'vacancyDefEndDate' },
+  { label: 'Cadastro de temas',           startKey: 'themeRegStartDate',     endKey: 'themeRegEndDate' },
+  { label: 'Busca de orientadores',       startKey: 'searchStartDate',       endKey: 'searchEndDate' },
+  { label: 'Análise de solicitações',     startKey: 'analysisStartDate',     endKey: 'analysisEndDate' },
+  { label: 'Confirmação de vínculo',      startKey: 'linkConfirmStartDate',  endKey: 'linkConfirmEndDate' },
+]
+
+const currentPhase = computed(() => {
+  const sem = activeSemester.value
+  if (!sem) return null
+  const today = new Date()
+  for (const def of PHASE_DEFINITIONS) {
+    const start = sem[def.startKey] ? new Date(sem[def.startKey]) : null
+    const end = sem[def.endKey] ? new Date(sem[def.endKey]) : null
+    if (!start || !end) continue
+    if (today >= start && today <= end) {
+      const ms = end.getTime() - today.getTime()
+      const daysLeft = Math.max(Math.ceil(ms / 86400000), 0)
+      return { label: def.label, start, end, daysLeft }
+    }
+  }
+  return null
+})
+
+const phaseProgressPct = computed(() => {
+  if (!currentPhase.value) return 0
+  const { start, end } = currentPhase.value
+  const total = end.getTime() - start.getTime()
+  const done = Date.now() - start.getTime()
+  if (total <= 0) return 100
+  return Math.min(Math.max(Math.round((done / total) * 100), 0), 100)
+})
+
+const phaseUrgencyClass = computed(() => {
+  const d = currentPhase.value?.daysLeft ?? null
+  if (d == null) return ''
+  if (d <= 2) return 'urgent'
+  if (d <= 7) return 'soon'
+  return 'ok'
+})
+
+// ── Helpers de UI ──────────────────────────────────────────────
+function formatKpi(value) {
+  return value == null ? '—' : value
+}
+
+function formatRange(start, end) {
+  if (!start || !end) return ''
+  const fmt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' })
+  return `${fmt.format(start)} → ${fmt.format(end)}`
+}
+
+function extractApiError(err) {
+  const apiMsg = err?.response?.data?.message
+  if (Array.isArray(apiMsg)) return apiMsg.join('; ')
+  return apiMsg || err?.message || 'Falha ao carregar estatísticas.'
+}
+
+// ── Loaders ────────────────────────────────────────────────────
+async function loadOverview() {
+  overview.value = { isLoading: true, error: null, isEmpty: false }
+  try {
+    const [statsResult, semesterResult] = await Promise.allSettled([
+      getCoordinatorStats(),
+      getActiveSemester(),
+    ])
+
+    if (statsResult.status === 'rejected') throw statsResult.reason
+    stats.value = statsResult.value ?? null
+    activeSemester.value = semesterResult.status === 'fulfilled' ? (semesterResult.value ?? null) : null
+
+    const empty = !stats.value || (
+      stats.value.totalStudents == null &&
+      stats.value.studentsWithoutOrientation == null
+    )
+    overview.value = { isLoading: false, error: null, isEmpty: empty }
+  } catch (err) {
+    stats.value = null
+    overview.value = { isLoading: false, error: extractApiError(err), isEmpty: false }
+  }
+}
+
+// Slots prontos para os próximos endpoints.
+// Quando existirem, substituir o corpo abaixo pela chamada real
+// (ex.: getCoordinatorFunnel(), getCoordinatorRisks()).
+async function loadFunnel() {
+  funnel.value = { isLoading: false, error: null, isEmpty: true, data: null }
+}
+async function loadRisks() {
+  risks.value = { isLoading: false, error: null, isEmpty: true, data: null }
+}
+
+function selectTab(tab) {
+  currentStatsTab.value = tab
+  if (tab === 'overview' && !stats.value && !overview.value.isLoading) loadOverview()
+  if (tab === 'funnel' && !funnel.value.data && !funnel.value.isLoading) loadFunnel()
+  if (tab === 'risks' && !risks.value.data && !risks.value.isLoading) loadRisks()
+}
+
+function onExportUnlinked() {
+  // TODO: integrar com endpoint de export (ex.: /reports/unlinked-students.csv)
+}
+function onExtendDeadline() {
+  // TODO: integrar com endpoint de extensão de prazo da etapa atual
+}
+
+onMounted(loadOverview)
 </script>
 
 <style scoped>
@@ -216,12 +359,12 @@ const currentStatsTab = ref('overview')
   width: 100%;
 }
 
-.view-title { 
-  text-align: center; 
-  font-weight: 600; 
-  margin-bottom: 2rem; 
-  color: #1a1a1a; 
-  font-size: 1.5rem; 
+.view-title {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #1a1a1a;
+  font-size: 1.5rem;
 }
 
 .stats-container-border {
@@ -252,7 +395,6 @@ const currentStatsTab = ref('overview')
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: color 0.2s;
-  font-family: 'Poppins', sans-serif;
 }
 
 .sub-tabs-nav button.active {
@@ -289,10 +431,16 @@ const currentStatsTab = ref('overview')
 }
 .card-header-row h4 { margin: 0; font-size: 1.1rem; color: #333; }
 
-.badge-status.warning {
-  background-color: #fff3cd; color: #856404;
-  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+.badge-status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
+.badge-status.warning { background-color: #fff3cd; color: #856404; }
+.badge-status.success { background-color: #d1f5e0; color: #1a7a45; }
+.badge-status.info    { background-color: #d0e8f7; color: #065f8b; }
+.badge-status.neutral { background-color: #e9ecef; color: #555; }
 
 .kpi-list {
   display: flex;
@@ -331,69 +479,58 @@ const currentStatsTab = ref('overview')
   margin-top: 1rem; color: #000;
   font-family: 'Poppins', sans-serif;
 }
+.btn-export-yellow:disabled { opacity: 0.55; cursor: not-allowed; }
+
 .btn-action-outline {
   background: transparent; border: 1px solid #065f8b;
   color: #065f8b; padding: 8px; border-radius: 6px;
   cursor: pointer; width: 100%; font-weight: 500;
   font-family: 'Poppins', sans-serif;
 }
+.btn-action-outline:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* Calendário Miniatura */
-.calendar-widget-mock {
-  background: white; border: 1px solid #eee; border-radius: 8px; padding: 1rem;
-  margin: 1rem 0;
+/* --- Widget de Etapa Atual (substitui calendário mock) --- */
+.phase-label { color: #444; margin: 0.25rem 0 1rem; }
+.phase-widget { background: white; border: 1px solid #eee; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.phase-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; }
+.phase-period { color: #555; font-weight: 500; }
+.phase-status.ok      { color: #1a7a45; }
+.phase-status.soon    { color: #e67e22; }
+.phase-status.urgent  { color: #c0392b; }
+.phase-progress { height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; }
+.phase-progress-bar { height: 100%; background: linear-gradient(90deg, #065f8b, #63a4ff); transition: width 0.4s ease; }
+
+/* --- Estados (loading/error/empty) --- */
+.state-block {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.6rem; padding: 3rem 1rem; color: #666; text-align: center;
 }
-.cal-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
-.cal-status { color: #e67e22; }
-.cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.7rem; color: #888; margin-bottom: 5px; }
-.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 0.8rem; }
-.cal-days span { padding: 4px 0; }
-.cal-days span.muted { color: #ddd; }
-.range-start { background: #065f8b; color: white; border-radius: 4px 0 0 4px; }
-.range-mid { background: #d0e8f7; color: #065f8b; }
-.range-end { background: #065f8b; color: white; border-radius: 0 4px 4px 0; }
+.state-block i { font-size: 2rem; color: #aaa; }
+.state-block.error i { color: #c0392b; }
+.state-block.error p { color: #9b1c1c; }
+.state-block.empty.inline { padding: 1.5rem; }
 
-/* --- GRÁFICOS E FUNIL --- */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spinner-icon { display: inline-block; animation: spin 0.8s linear infinite; font-size: 2rem; color: #065f8b; }
+
+/* --- GRÁFICOS E FUNIL (estrutura preservada) --- */
 .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-.chart-card { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; }
-.chart-card.wide { grid-column: span 2; } /* Ocupa 2 colunas se possível */
+.chart-card { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; min-height: 200px; }
+.chart-card.wide { grid-column: span 2; }
 
 .chart-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
 .chart-header h5 { margin: 0; font-size: 1rem; color: #333; }
 .chart-header small { color: #777; font-size: 0.8rem; }
 
-/* Funil Visual (CSS Puro) */
-.funnel-visual { display: flex; flex-direction: column; gap: 8px; margin-top: 1rem; }
-.funnel-step { display: flex; align-items: center; gap: 10px; }
-.step-bar {
-  background: linear-gradient(90deg, #065f8b, #63a4ff);
-  color: white; font-size: 0.75rem; font-weight: bold;
-  padding: 6px 10px; border-radius: 0 4px 4px 0;
-  display: flex; align-items: center;
+/* --- Lista de docentes sobrecarregados (preview a partir do endpoint atual) --- */
+.overloaded-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.overloaded-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #fff; border: 1px solid #eee; border-radius: 6px;
+  padding: 8px 12px; font-size: 0.9rem;
 }
-.step-1 { width: 100%; background: #065f8b; }
-.step-2 { width: 80%; background: #4a90e2; }
-.step-3 { width: 66%; background: #53b57c; } /* Verde para sucesso */
-.step-label { font-size: 0.85rem; color: #555; }
-
-/* Donut e Barras (Simplificados) */
-.chart-visual { height: 150px; display: flex; align-items: center; justify-content: center; position: relative; }
-.donut-chart { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#065f8b 0% 45%, #63a4ff 45% 80%, #d8b4fe 80% 100%); position: relative; }
-.donut-chart::after { content: ""; position: absolute; top: 20px; left: 20px; width: 60px; height: 60px; background: #f8f9fa; border-radius: 50%; }
-.legend { font-size: 0.75rem; display: flex; flex-direction: column; gap: 4px; margin-left: 1rem; }
-.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
-.dot.blue { background: #065f8b; } .dot.purple { background: #63a4ff; } .dot.pink { background: #d8b4fe; }
-
-/* Barras Labeled */
-.bar-container { width: 100%; padding: 0 20px; }
-.bars-wrapper { display: flex; justify-content: space-around; height: 100%; align-items: flex-end; width: 100%; }
-.bar-group-labeled { display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; justify-content: flex-end; width: 30px; }
-.bar-fat { width: 100%; border-radius: 4px 4px 0 0; }
-.bg-green { background-color: #53b57c; }
-.bg-red { background-color: #dc3545; }
-.bar-group-labeled span { font-size: 0.7rem; color: #666; }
-
-.chart-advice { margin-top: 1rem; font-style: italic; color: #777; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 4px; }
+.overloaded-name { color: #333; font-weight: 500; }
+.overloaded-count { color: #c0392b; font-weight: 600; font-size: 0.85rem; }
 
 @media (max-width: 900px) {
   .overview-grid, .charts-grid { grid-template-columns: 1fr; }

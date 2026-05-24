@@ -132,12 +132,16 @@ export const useTeacherStore = defineStore('teacher', {
       }
     },
 
-    async defineVacancies(quantity) {
+    async defineVacancies({ teacherId, quantity, semesterId } = {}) {
       const qty = Number(quantity);
-      if (!Number.isInteger(qty) || qty <= 0) {
+      if (!Number.isInteger(qty) || qty < 0) {
         throw new Error('Quantidade de vagas inválida.');
       }
-      await apiDefineVacancies(qty);
+      const tId = Number(teacherId);
+      if (!Number.isInteger(tId) || tId <= 0) {
+        throw new Error('teacherId inválido.');
+      }
+      await apiDefineVacancies({ teacherId: tId, quantity: qty, semesterId });
       await this.loadData();
     },
 

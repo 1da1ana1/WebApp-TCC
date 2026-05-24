@@ -124,16 +124,21 @@ const resetFilters = () => {
      Evita o gap que aparecia quando o sticky usava 6.5rem (~35px a mais
      do que a altura efetiva do header). */
   top: var(--header-height);
+  /* Altura definida para o FilterBar interno (que usa min-height) poder
+     esticar até o rodapé da viewport. */
+  height: calc(100vh - var(--header-height));
 }
 
 /* Área de Conteúdo - SEM PADDING LATERAL DESNECESSÁRIO */
 .content-area {
   flex: 1;
+  /* min-width: 0 — quebra o `auto` default e impede que conteúdo
+     "indivisível" do flex item gere scroll horizontal na página. */
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 2rem 0; 
+  padding: 2rem 0;
   gap: 1.5rem;
-
 }
 
 /* Search Container - COM PADDING APENAS PARA O INPUT */
@@ -201,12 +206,14 @@ const resetFilters = () => {
   .search-page-layout {
     flex-direction: column;
   }
-  
+
   .search-page-layout > :first-child {
     width: 100%;
+    /* Em mobile o filtro empilha — sem sticky/height fixo, flui natural. */
     position: static;
+    height: auto;
   }
-  
+
   .content-area {
     padding: 1.5rem 0;
   }

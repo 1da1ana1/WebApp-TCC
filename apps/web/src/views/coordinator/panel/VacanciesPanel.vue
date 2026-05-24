@@ -17,18 +17,18 @@
           <div class="control-group">
             <label>Quantidade padrão de vagas</label>
             <div class="modern-stepper">
-              <button class="stepper-btn minus" @click="globalCount > 0 ? globalCount-- : 0">
+              <button class="stepper-btn minus" :disabled="isLoadingGlobal" @click="globalCount > 0 ? globalCount-- : 0">
                 <i class="bi bi-dash-lg"></i>
               </button>
               <input type="number" v-model="globalCount" readonly class="stepper-input">
-              <button class="stepper-btn plus" @click="globalCount++">
+              <button class="stepper-btn plus" :disabled="isLoadingGlobal" @click="globalCount++">
                 <i class="bi bi-plus-lg"></i>
               </button>
             </div>
           </div>
 
           <label class="checkbox-container">
-            <input type="checkbox" v-model="applyAll">
+            <input type="checkbox" v-model="applyAll" :disabled="isLoadingGlobal">
             <span class="checkmark"></span>
             <span class="label-text">Aplicar esta quantidade para <strong>todos</strong> os docentes inicialmente</span>
           </label>
@@ -67,11 +67,11 @@
             <div class="form-group">
               <label class="field-label">Quantidade de vagas para os selecionados</label>
               <div class="modern-stepper mr-auto">
-                <button class="stepper-btn minus" @click="specificCount > 0 ? specificCount-- : 0">
+                <button class="stepper-btn minus" :disabled="isLoadingSpecific" @click="specificCount > 0 ? specificCount-- : 0">
                   <i class="bi bi-dash-lg"></i>
                 </button>
                 <input type="number" v-model="specificCount" readonly class="stepper-input">
-                <button class="stepper-btn plus" @click="specificCount++">
+                <button class="stepper-btn plus" :disabled="isLoadingSpecific" @click="specificCount++">
                   <i class="bi bi-plus-lg"></i>
                 </button>
               </div>
@@ -81,7 +81,7 @@
           <div class="specific-right">
             <div class="list-header">
               <span class="list-title">Docentes Selecionados ({{ selectedProfessors.length }})</span>
-              <button class="btn-clear-all" v-if="selectedProfessors.length > 0" @click="clearAll">Limpar tudo</button>
+              <button class="btn-clear-all" v-if="selectedProfessors.length > 0" :disabled="isLoadingSpecific" @click="clearAll">Limpar tudo</button>
             </div>
 
             <div class="selected-professors-list custom-scrollbar">
@@ -95,7 +95,7 @@
                   <span class="prof-details">{{ prof.area }} • ID: {{ prof.id }}</span>
                 </div>
 
-                <button class="btn-remove-card" @click="removeProf(prof.id)" title="Remover da lista">
+                <button class="btn-remove-card" :disabled="isLoadingSpecific" @click="removeProf(prof.id)" title="Remover da lista">
                   <i class="bi bi-x-lg"></i>
                 </button>
               </div>
@@ -131,6 +131,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { defineVacancies, getTeachers } from '@/services/api'
 
 const props = defineProps({
   selectedProfessors: {
@@ -152,12 +153,49 @@ const isLoadingSpecific = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 
-// Limpa as mensagens após N milissegundos
 function clearMessages(delay = 4000) {
   setTimeout(() => {
     successMessage.value = ''
     errorMessage.value = ''
   }, delay)
+}
+
+function resetMessages() {
+  successMessage.value = ''
+  errorMessage.value = ''
+}
+
+function extractApiError(err) {
+  const apiMsg = err?.response?.data?.message
+  if (Array.isArray(apiMsg)) return apiMsg.join('; ')
+  return apiMsg || err?.message || 'Falha na comunicação com o servidor.'
+}
+
+function validateQuantity(qty) {
+  const n = Number(qty)
+  if (!Number.isInteger(n) || n < 0) {
+    return { ok: false, value: 0, error: 'Quantidade inválida. Use um número inteiro maior ou igual a 0.' }
+  }
+  return { ok: true, value: n, error: null }
+}
+
+// Dispara POST /vacancies/define em paralelo para uma lista de docentes
+// e devolve um resumo agregado (ok, falhas, mensagens) sem propagar exceção.
+async function applyVacanciesBatch(teacherIds, quantity) {
+  const results = await Promise.allSettled(
+    teacherIds.map(id => defineVacancies({ teacherId: id, quantity })),
+  )
+
+  const ok = []
+  const fail = []
+  results.forEach((r, idx) => {
+    if (r.status === 'fulfilled') {
+      ok.push(teacherIds[idx])
+    } else {
+      fail.push({ teacherId: teacherIds[idx], reason: extractApiError(r.reason) })
+    }
+  })
+  return { ok, fail, total: teacherIds.length }
 }
 
 // ── Ações da lista ─────────────────────────────────────────────
@@ -169,32 +207,90 @@ const clearAll = () => {
   emit('update:selectedProfessors', [])
 }
 
-// ── Salvar global (mock com setTimeout) ───────────────────────
-const saveGlobal = () => {
-  successMessage.value = ''
-  errorMessage.value = ''
-  isLoadingGlobal.value = true
+// ── Salvar global ──────────────────────────────────────────────
+const saveGlobal = async () => {
+  if (isLoadingGlobal.value) return
+  resetMessages()
 
-  setTimeout(() => {
-    isLoadingGlobal.value = false
-    successMessage.value = `✓ Vagas globais definidas como ${globalCount.value} para todos os docentes.`
+  const v = validateQuantity(globalCount.value)
+  if (!v.ok) {
+    errorMessage.value = v.error
     clearMessages()
-  }, 2000)
+    return
+  }
+
+  isLoadingGlobal.value = true
+  try {
+    const teachers = await getTeachers()
+    const teacherIds = (Array.isArray(teachers) ? teachers : [])
+      .map(t => Number(t?.id))
+      .filter(id => Number.isInteger(id) && id > 0)
+
+    if (teacherIds.length === 0) {
+      errorMessage.value = 'Nenhum docente encontrado para aplicar a quantidade global.'
+      clearMessages()
+      return
+    }
+
+    const { ok, fail, total } = await applyVacanciesBatch(teacherIds, v.value)
+
+    if (fail.length === 0) {
+      successMessage.value = `✓ ${ok.length} docente(s) atualizado(s) com ${v.value} vaga(s).`
+    } else if (ok.length === 0) {
+      errorMessage.value = `Falha ao definir vagas globais (${fail.length}/${total}). ${fail[0].reason}`
+    } else {
+      successMessage.value = `Atualização parcial: ${ok.length}/${total} docente(s) com sucesso.`
+      errorMessage.value = `${fail.length} falha(s). Ex.: ${fail[0].reason}`
+    }
+  } catch (err) {
+    errorMessage.value = extractApiError(err)
+  } finally {
+    isLoadingGlobal.value = false
+    clearMessages()
+  }
 }
 
-// ── Salvar específico (mock com setTimeout) ───────────────────
-const saveSpecific = () => {
+// ── Salvar específico ──────────────────────────────────────────
+const saveSpecific = async () => {
+  if (isLoadingSpecific.value) return
   if (props.selectedProfessors.length === 0) return
+  resetMessages()
 
-  successMessage.value = ''
-  errorMessage.value = ''
-  isLoadingSpecific.value = true
-
-  setTimeout(() => {
-    isLoadingSpecific.value = false
-    successMessage.value = `✓ ${props.selectedProfessors.length} docente(s) atualizado(s) com ${specificCount.value} vaga(s).`
+  const v = validateQuantity(specificCount.value)
+  if (!v.ok) {
+    errorMessage.value = v.error
     clearMessages()
-  }, 2000)
+    return
+  }
+
+  const teacherIds = props.selectedProfessors
+    .map(p => Number(p?.id))
+    .filter(id => Number.isInteger(id) && id > 0)
+
+  if (teacherIds.length === 0) {
+    errorMessage.value = 'Nenhum docente válido na lista (IDs inválidos).'
+    clearMessages()
+    return
+  }
+
+  isLoadingSpecific.value = true
+  try {
+    const { ok, fail, total } = await applyVacanciesBatch(teacherIds, v.value)
+
+    if (fail.length === 0) {
+      successMessage.value = `✓ ${ok.length} docente(s) atualizado(s) com ${v.value} vaga(s).`
+    } else if (ok.length === 0) {
+      errorMessage.value = `Falha ao atualizar selecionados (${fail.length}/${total}). ${fail[0].reason}`
+    } else {
+      successMessage.value = `Atualização parcial: ${ok.length}/${total} docente(s) com sucesso.`
+      errorMessage.value = `${fail.length} falha(s). Ex.: ${fail[0].reason}`
+    }
+  } catch (err) {
+    errorMessage.value = extractApiError(err)
+  } finally {
+    isLoadingSpecific.value = false
+    clearMessages()
+  }
 }
 </script>
 
@@ -238,5 +334,13 @@ const saveSpecific = () => {
 .spinner-icon {
   display: inline-block;
   animation: spin 0.8s linear infinite;
+}
+
+.btn-confirm:disabled,
+.stepper-btn:disabled,
+.btn-clear-all:disabled,
+.btn-remove-card:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

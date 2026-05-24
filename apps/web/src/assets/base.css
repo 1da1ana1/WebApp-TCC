@@ -108,9 +108,12 @@ html,
 body {
   height: 100vh;
   font-family: 'Poppins', sans-serif;
+  /* Trava o scroll horizontal nos dois elementos. Aplicar só no body
+     deixa o html livre pra rolar lateralmente em alguns cenários
+     (mobile Safari, elementos com transform). */
+  overflow-x: hidden;
 }
 
 body {
-  overflow-x: hidden;
   background-color: var(--color-background-default);
 }
