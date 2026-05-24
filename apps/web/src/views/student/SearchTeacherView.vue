@@ -16,9 +16,11 @@
      
 
       <div class="results-list">
-        <div v-if="loadError" class="error-state">
+        <p v-if="isLoading" class="no-results">Carregando…</p>
+
+        <div v-else-if="errorMessage" class="error-state">
           <i class="bi bi-exclamation-triangle"></i>
-          <p>Não foi possível carregar a lista de orientadores no momento.</p>
+          <p>{{ errorMessage }}</p>
           <button class="btn-retry" @click="loadTeachers">Tentar novamente</button>
         </div>
 
@@ -29,7 +31,7 @@
             :professor="prof"
           />
 
-          <p v-if="hasLoadedTeachers && filteredProfessors.length === 0" class="no-results">
+          <p v-if="filteredProfessors.length === 0" class="no-results">
             Nenhum orientador encontrado.
           </p>
         </template>
@@ -49,8 +51,8 @@ import { getTeachers } from '@/services/api'
 const searchQuery = ref('')
 const selectedThemes = ref([])
 const teachers = ref([])
-const hasLoadedTeachers = ref(false)
-const loadError = ref(false)
+const isLoading = ref(true)
+const errorMessage = ref(null)
 
 const normalizeTeacher = (teacher) => {
   const tagsFromKeywords =
@@ -72,17 +74,17 @@ const normalizeTeacher = (teacher) => {
 }
 
 const loadTeachers = async () => {
-  hasLoadedTeachers.value = false
-  loadError.value = false
+  isLoading.value = true
+  errorMessage.value = null
   try {
     const response = await getTeachers()
     teachers.value = Array.isArray(response) ? response.map(normalizeTeacher) : []
   } catch (err) {
     console.error('Erro ao buscar orientadores:', err)
     teachers.value = []
-    loadError.value = true
+    errorMessage.value = 'Erro ao carregar os dados. Tente novamente.'
   } finally {
-    hasLoadedTeachers.value = true
+    isLoading.value = false
   }
 }
 

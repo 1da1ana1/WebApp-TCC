@@ -3,11 +3,11 @@
   <div class="profile-container">
     <div v-if="isLoading" class="loading-message">Carregando dados do docente...</div>
 
-    <div v-else-if="error" class="error-message">
-      {{ error }}
+    <div v-else-if="errorMessage" class="error-message">
+      {{ errorMessage }}
     </div>
 
-    <div v-else-if="docente" class="profile-content">
+    <div v-else class="profile-content">
       <div class="profile-header">
         <img src="/src/assets/img/foto-perfil.svg" alt="foto de perfil" />
         <div class="profile-info">
@@ -55,14 +55,20 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Swal from 'sweetalert2'
-
-// TODO(deploy): migrar para GET /teachers/:id (mockData.js ainda é a fonte primária aqui)
-import { getProfessorById } from '@/services/mockData'
+import { getTeacherById } from '@/services/api'
 
 const docente = ref(null)
 const isLoading = ref(true)
-const error = ref(null)
+const errorMessage = ref(null)
 const route = useRoute()
+
+const normalizeTeacher = (t) => ({
+  id: t.id,
+  name: t.user?.name || 'Professor sem nome',
+  email: t.user?.email || '',
+  lattes: t.lattesLink || '',
+  tags: t.user?.keywords?.map((k) => k.keyword?.name).filter(Boolean) || [],
+})
 
 // --- LÓGICA DO MODAL (Mantida igual) ---
 const showModal = ref(false)
@@ -100,27 +106,14 @@ const confirmarEnvio = async () => {
   }
 }
 
-// --- BUSCAR DADOS ---
 onMounted(async () => {
   try {
-    // Simula delay de rede
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    // 1. Pegamos o ID da URL e convertemos para NÚMERO
-    // (Pois no seu mockData o id é: 1, e na rota vem: "1")
-    const idDaRota = Number(route.params.id)
-
-    // 2. Usamos sua função auxiliar para buscar
-    const foundDocente = getProfessorById(idDaRota)
-
-    if (foundDocente) {
-      docente.value = foundDocente
-    } else {
-      throw new Error('Docente não encontrado no sistema.')
-    }
+    const data = await getTeacherById(route.params.id)
+    docente.value = normalizeTeacher(data)
   } catch (err) {
-    error.value = err.message
-    console.error(err)
+    console.error('Erro ao buscar docente:', err)
+    docente.value = null
+    errorMessage.value = 'Não foi possível carregar o perfil do orientador.'
   } finally {
     isLoading.value = false
   }
