@@ -228,4 +228,19 @@ export async function createSemester(payload) {
   return response.data;
 }
 
+export async function getKeywords() {
+  const response = await api.get('/keywords');
+  return response.data;
+}
+
+export async function getStudentProfile() {
+  const response = await api.get('/students/me');
+  return response.data;
+}
+
+export async function updateStudentKeywords(keywordIds) {
+  const response = await api.put('/keywords/me', { keywordIds });
+  return response.data;
+}
+
 export default api;

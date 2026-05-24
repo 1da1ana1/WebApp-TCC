@@ -42,115 +42,123 @@
       </aside>
 
       <main class="content-panel">
-        
-        <div v-if="currentView === 'home'">
-          <section class="card-section tags-input-area">
-            <h3>Cadastrar temas:</h3>
-            <p class="instruction italic">Selecione até 5 áreas de interesse:</p>
 
-            <div class="tags-control-container">
-              <!-- Dropdown -->
-              <div class="input-wrapper">
-                <!-- Input fictício com dropdown trigger -->
-                <input
-                  type="text"
-                  class="dropdown-input"
-                  placeholder="Selecione até 5 áreas..."
-                  readonly
-                  @click="toggleDropdown"
-                />
+        <p v-if="isLoading" class="no-data">Carregando seu perfil…</p>
 
-                <!-- Ícone de toggle -->
-                <button
-                  type="button"
-                  class="dropdown-icon-btn"
-                  @click="toggleDropdown"
-                  :class="{ 'open': isDropdownOpen }"
-                >
-                  <i class="bi" :class="isDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-                </button>
+        <p v-else-if="errorMessage" class="no-data">{{ errorMessage }}</p>
 
-                <!-- Dropdown com opções ordenadas -->
-                <div v-show="isDropdownOpen" class="dropdown-menu">
+        <template v-else>
+          <div v-if="currentView === 'home'">
+            <section class="card-section tags-input-area">
+              <h3>Cadastrar temas:</h3>
+              <p class="instruction italic">Selecione até 5 áreas de interesse:</p>
+
+              <div class="tags-control-container">
+                <!-- Dropdown -->
+                <div class="input-wrapper">
+                  <!-- Input fictício com dropdown trigger -->
+                  <input
+                    type="text"
+                    class="dropdown-input"
+                    placeholder="Selecione até 5 áreas..."
+                    readonly
+                    @click="toggleDropdown"
+                  />
+
+                  <!-- Ícone de toggle -->
                   <button
-                    v-for="keyword in sortedKeywords"
-                    :key="keyword"
                     type="button"
-                    class="dropdown-option"
-                    :class="{
-                      selected: tags.includes(keyword),
-                      disabled: isOptionDisabled(keyword)
-                    }"
-                    :disabled="isOptionDisabled(keyword)"
-                    @click="toggleTag(keyword)"
+                    class="dropdown-icon-btn"
+                    @click="toggleDropdown"
+                    :class="{ 'open': isDropdownOpen }"
                   >
-                    <span class="option-text">{{ keyword }}</span>
-                    <i v-if="tags.includes(keyword)" class="bi bi-check2"></i>
+                    <i class="bi" :class="isDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                   </button>
-                </div>
-              </div>
 
-              <!-- Container de chips selecionados ao lado -->
-              <div class="selected-tags-container">
-                <span
-                  v-for="(tag, index) in tags"
-                  :key="index"
-                  class="tag-chip"
-                  :class="getTagColor(index)"
-                >
-                  {{ tag }}
-                  <i class="bi bi-x-circle" @click="removeTag(index)"></i>
-                </span>
-              </div>
-            </div>
-          </section>
-
-          <section class="card-section requests-area">
-            <h3>Minhas solicitações:</h3>
-
-            <div v-for="req in myRequests" :key="req.id" class="request-item">
-              <div class="teacher-info">
-                <div class="professor-mini-card">
-                  <img src="/src/assets/img/foto-perfil.svg" class="mini-avatar" />
-                  <div class="prof-details">
-                    <p class="prof-name">{{ req.professorName }}</p>
-                    <span class="vagas-badge">{{ req.availableSpots }} vagas disponíveis</span>
+                  <!-- Dropdown com opções ordenadas (vocabulário controlado vindo do backend) -->
+                  <div v-show="isDropdownOpen" class="dropdown-menu">
+                    <button
+                      v-for="keyword in sortedKeywords"
+                      :key="keyword.id"
+                      type="button"
+                      class="dropdown-option"
+                      :class="{
+                        selected: tags.includes(keyword.id),
+                        disabled: isOptionDisabled(keyword)
+                      }"
+                      :disabled="isOptionDisabled(keyword)"
+                      @click="toggleTag(keyword)"
+                    >
+                      <span class="option-text">{{ keyword.name }}</span>
+                      <i v-if="tags.includes(keyword.id)" class="bi bi-check2"></i>
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              <div class="vertical-divider"></div>
-
-              <div class="status-info">
-                <div class="status-row">
-                  <p>Situação:</p>
-                  <span :class="['status-btn', getStatusClass(req.status)]">
-                    {{ req.status }}
+                <!-- Container de chips selecionados ao lado -->
+                <div class="selected-tags-container">
+                  <span
+                    v-for="(id, index) in tags"
+                    :key="id"
+                    class="tag-chip"
+                    :class="getTagColor(index)"
+                  >
+                    {{ tagNameById(id) }}
+                    <i class="bi bi-x-circle" @click="removeTag(id)"></i>
                   </span>
                 </div>
-                <p class="status-note">
-                  {{ getStatusMessage(req.status) }}
-                </p>
               </div>
-            </div>
+            </section>
 
-            <p v-if="myRequests.length === 0" class="no-data">Nenhuma solicitação encontrada.</p>
-          </section>
+            <section class="card-section requests-area">
+              <h3>Minhas solicitações:</h3>
 
-          <section class="card-section guidances-area">
-            <h3>Minhas orientações:</h3>
-            <div class="empty-state">
-              <p v-if="!hasGuidance">Você ainda não possui orientações ativas.</p>
-            </div>
-          </section>
-        </div>
+              <div v-for="req in myRequests" :key="req.id" class="request-item">
+                <div class="teacher-info">
+                  <div class="professor-mini-card">
+                    <img src="/src/assets/img/foto-perfil.svg" class="mini-avatar" />
+                    <div class="prof-details">
+                      <p class="prof-name">{{ req.professorName }}</p>
+                      <span v-if="req.availableSpots" class="vagas-badge">
+                        {{ req.availableSpots }} vagas disponíveis
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-        <RequestHistoryTable 
-          v-else-if="currentView === 'history'" 
-          title="Histórico de solicitações"
-          :data="historyData"
-          @view-reason="showJustification" 
-        />
+                <div class="vertical-divider"></div>
+
+                <div class="status-info">
+                  <div class="status-row">
+                    <p>Situação:</p>
+                    <span :class="['status-btn', getStatusClass(req.status)]">
+                      {{ req.status }}
+                    </span>
+                  </div>
+                  <p class="status-note">
+                    {{ getStatusMessage(req.status) }}
+                  </p>
+                </div>
+              </div>
+
+              <p v-if="myRequests.length === 0" class="no-data">Nenhuma solicitação encontrada.</p>
+            </section>
+
+            <section class="card-section guidances-area">
+              <h3>Minhas orientações:</h3>
+              <div class="empty-state">
+                <p v-if="!hasGuidance">Você ainda não possui orientações ativas.</p>
+              </div>
+            </section>
+          </div>
+
+          <RequestHistoryTable
+            v-else-if="currentView === 'history'"
+            title="Histórico de solicitações"
+            :data="historyData"
+            @view-reason="showJustification"
+          />
+        </template>
 
       </main>
     </div>
@@ -162,137 +170,108 @@ import { ref, onMounted, computed } from 'vue'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import Swal from 'sweetalert2'
-// TODO(deploy): migrar para os endpoints reais do backend
-//   - dados do aluno: GET /students/:id (a criar) ou /auth/me
-//   - solicitações:   GET /requests (já implementado em services/api.js)
-// Por enquanto esta view ainda lê do mockData.js — não acionar em produção sem migrar.
-import { getStudentById, mockRequests } from '@/services/mockData'
+import { useNotificationStore } from '@/stores/notificationStore'
+import {
+  getStudentProfile,
+  getKeywords,
+  updateStudentKeywords,
+} from '@/services/api'
 
-// --- 1. DADOS DO ALUNO ---
-const student = ref({
-  name: 'Carregando...',
-  ra: '...',
-  photo: '',
-})
+const notification = useNotificationStore()
 
-// === MOCK DE DADOS - 20 ÁREAS DE COMPUTAÇÃO ===
-const MOCK_KEYWORDS = [
-  'Inteligência Artificial',
-  'Machine Learning',
-  'Deep Learning',
-  'Data Science',
-  'Big Data',
-  'Cloud Computing',
-  'Cybersecurity',
-  'DevOps',
-  'Blockchain',
-  'Vue.js',
-  'React',
-  'Angular',
-  'TypeScript',
-  'Python',
-  'Java',
-  'JavaScript',
-  'Desenvolvimento Mobile',
-  'API REST',
-  'Banco de Dados',
-  'Engenharia de Software'
-]
+const MAX_TAGS = 5
 
-// --- 2. TAGS (TEMAS) ---
-const isDropdownOpen = ref(false)
-const tags = ref(['Machine Learning', 'Vue.js'])
+// --- ESTADO GLOBAL DE CARREGAMENTO ---
+const isLoading = ref(true)
+const errorMessage = ref(null)
+const isSaving = ref(false)
 
-// === COMPUTED PROPERTY - ORDENAÇÃO ALFABÉTICA ===
-const sortedKeywords = computed(() => {
-  return [...MOCK_KEYWORDS].sort((a, b) => 
-    a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
-  )
-})
+// --- DADOS DO ALUNO ---
+const student = ref({ name: '...', ra: '...', photo: '' })
 
-/**
- * Verifica se uma opção deve estar desabilitada (limite de 5 atingido)
- */
-const isOptionDisabled = (keyword) => {
-  return !tags.value.includes(keyword) && tags.value.length >= 5
-}
+// --- VOCABULÁRIO + SELEÇÃO ---
+const allKeywords = ref([])     // [{ id, name }] — vocabulário controlado vindo do backend
+const tags = ref([])            // ids das keywords selecionadas pelo aluno
 
-/**
- * Alterna a seleção de uma tag (add/remove)
- */
-const toggleTag = (keyword) => {
-  const index = tags.value.indexOf(keyword)
-  
-  if (index > -1) {
-    // Remove se já existe
-    tags.value.splice(index, 1)
-  } else if (tags.value.length < 5) {
-    // Adiciona se não atingiu o limite
-    tags.value.push(keyword)
-  }
-}
+const sortedKeywords = computed(() =>
+  [...allKeywords.value].sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
+  ),
+)
 
-/**
- * Remove tag pelo índice (ao clicar no X do chip)
- */
-const removeTag = (index) => {
-  tags.value.splice(index, 1)
-}
+const isOptionDisabled = (kw) =>
+  isSaving.value ||
+  (!tags.value.includes(kw.id) && tags.value.length >= MAX_TAGS)
+
+const tagNameById = (id) =>
+  allKeywords.value.find((k) => k.id === id)?.name ?? '—'
 
 const getTagColor = (index) => {
   const colors = ['purple', 'yellow', 'blue']
   return colors[index % colors.length]
 }
 
-/**
- * Toggle do dropdown
- */
-const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value
+// --- DROPDOWN ---
+const isDropdownOpen = ref(false)
+const toggleDropdown = () => { isDropdownOpen.value = !isDropdownOpen.value }
+
+// --- PERSISTÊNCIA OTIMISTA ---
+// Atualiza o array local de uma vez, dispara PUT /keywords/me e
+// faz rollback se o backend recusar. Evita 2 estados (visual e
+// persistido) saírem do ar.
+const persistTags = async (next) => {
+  const previous = tags.value
+  tags.value = next
+  isSaving.value = true
+  try {
+    await updateStudentKeywords(next)
+    notification.success('Áreas de interesse atualizadas.')
+  } catch (err) {
+    console.error('Falha ao salvar tags:', err)
+    tags.value = previous
+    notification.error('Não foi possível salvar suas áreas. Tente novamente.')
+  } finally {
+    isSaving.value = false
+  }
 }
 
-/**
- * Fechar dropdown
- */
-const closeDropdown = () => {
-  isDropdownOpen.value = false
+const toggleTag = (kw) => {
+  if (isSaving.value) return
+  if (tags.value.includes(kw.id)) {
+    persistTags(tags.value.filter((id) => id !== kw.id))
+  } else if (tags.value.length < MAX_TAGS) {
+    persistTags([...tags.value, kw.id])
+  }
 }
 
-// --- 3. DADOS DAS SOLICITAÇÕES ---
+const removeTag = (id) => {
+  if (isSaving.value) return
+  persistTags(tags.value.filter((x) => x !== id))
+}
+
+// --- SOLICITAÇÕES (vêm do mesmo /students/me) ---
 const myRequests = ref([])
 const hasGuidance = ref(false)
+const historyData = ref([])
 
-// Helpers de Status (Normaliza para maiúsculo para evitar erros de digitação no mock)
 const getStatusClass = (status) => {
-  const s = status ? status.toUpperCase() : ''
-  if (s === 'PENDENTE') return 'pending'
-  if (s === 'ACEITO') return 'success'
-  if (s === 'RECUSADO') return 'danger'
+  const s = (status ?? '').toUpperCase()
+  if (s === 'PENDING' || s === 'PENDENTE') return 'pending'
+  if (s === 'ACCEPTED' || s === 'ACEITO') return 'success'
+  if (s === 'REJECTED' || s === 'RECUSADO') return 'danger'
   return 'pending'
 }
 
 const getStatusMessage = (status) => {
-  const s = status ? status.toUpperCase() : ''
-  if (s === 'PENDENTE') return 'Aguardando aceite do docente, você será notificado(a)'
-  if (s === 'ACEITO') return 'O docente aceitou sua solicitação! Verifique suas orientações.'
-  if (s === 'RECUSADO') return 'O docente não pôde aceitar no momento.'
+  const s = (status ?? '').toUpperCase()
+  if (s === 'PENDING' || s === 'PENDENTE') return 'Aguardando aceite do docente, você será notificado(a)'
+  if (s === 'ACCEPTED' || s === 'ACEITO') return 'O docente aceitou sua solicitação! Verifique suas orientações.'
+  if (s === 'REJECTED' || s === 'RECUSADO') return 'O docente não pôde aceitar no momento.'
   return ''
 }
 
 // --- VIEW CONTROL ---
 const currentView = ref('home')
-
-const historyData = ref([
-  {
-    id: 1,
-    name: 'Lorem Ipsum Dolor Siamet',
-    ra: '123456',
-    sendDate: '30/04/2025 16:45',
-    replyDate: '30/04/2025 16:45',
-    status: 'Recusada',
-    justification: 'Não tenho disponibilidade para novas orientações este semestre.',
-  },
-])
 
 const showJustification = (msg) => {
   Swal.fire({
@@ -303,34 +282,50 @@ const showJustification = (msg) => {
   })
 }
 
-// --- CARREGAMENTO DE DADOS (INTEGRAÇÃO) ---
+// --- ON MOUNTED ---
 onMounted(async () => {
-  // Simula delay de rede
-  await new Promise((resolve) => setTimeout(resolve, 500))
+  try {
+    const [profile, keywords] = await Promise.all([
+      getStudentProfile(),
+      getKeywords(),
+    ])
 
-  // 1. Buscar Aluno (Simulando login do ID 1 - Yasmim Daiana)
-  const studentData = getStudentById(1)
-  
-  if (studentData) {
     student.value = {
-      name: studentData.nome,
-      ra: studentData.registro,
-      photo: studentData.avatar || '/src/assets/img/foto-perfil.svg'
+      name: profile.user?.name ?? '—',
+      ra: profile.ra ?? '—',
+      photo: null, // backend devolve avatar:null — integração Unicamp futura
     }
+
+    allKeywords.value = keywords
+    tags.value = (profile.keywords ?? []).map((k) => k.id)
+
+    const isPending = (s) => ['PENDING', 'PENDENTE'].includes((s ?? '').toUpperCase())
+
+    myRequests.value = (profile.requests ?? [])
+      .filter((r) => isPending(r.status))
+      .map((r) => ({
+        id: r.id,
+        professorName: r.teacher?.user?.name ?? '—',
+        availableSpots: null, // /requests não retorna vagas; ficará escondido no template
+        status: r.status,
+      }))
+
+    historyData.value = (profile.requests ?? [])
+      .filter((r) => !isPending(r.status))
+      .map((r) => ({
+        id: r.id,
+        name: r.teacher?.user?.name ?? '—',
+        sendDate: r.sendDate,
+        replyDate: r.responseDate,
+        status: r.status,
+        justification: r.denialJustification ?? '',
+      }))
+  } catch (err) {
+    console.error('Erro ao carregar perfil do aluno:', err)
+    errorMessage.value = 'Não foi possível carregar seu perfil. Tente novamente.'
+  } finally {
+    isLoading.value = false
   }
-
-  // 2. Buscar Solicitações Ativas (apenas PENDENTE - aguardando resposta)
-  // Regra: apenas 1 solicitação ativa por vez
-  // Quando ACEITA: passa para "Minhas orientações" (não aparece aqui)
-  // Quando RECUSADA: vai para histórico
-  const activeRequests = mockRequests.filter(r => r.status === 'Pendente')
-
-  myRequests.value = activeRequests.map((req, index) => ({
-    id: index,
-    professorName: req.envolvido, // Mapeia o nome do 'envolvido' para o card
-    availableSpots: '2/5',        // Mock fixo (pois requests não tem dados de vaga no mock simples)
-    status: req.status.toUpperCase(),
-  }))
 })
 </script>
 
