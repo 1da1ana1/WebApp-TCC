@@ -55,6 +55,40 @@ async function main() {
   });
 
   console.log('✅ Usuários de teste criados com sucesso!');
+
+  // 4. Vocabulário Controlado: áreas de interesse.
+  // Como não há POST público em /keywords, a lista nasce daqui.
+  const keywords = [
+    'Inteligência Artificial',
+    'Aprendizado de Máquina',
+    'Ciência de Dados',
+    'Engenharia de Software',
+    'Banco de Dados',
+    'Redes de Computadores',
+    'Segurança da Informação',
+    'Computação em Nuvem',
+    'DevOps',
+    'Sistemas Distribuídos',
+    'Internet das Coisas',
+    'Desenvolvimento Web',
+    'Desenvolvimento Mobile',
+    'Interação Humano-Computador',
+    'Computação Gráfica',
+    'Visão Computacional',
+    'Processamento de Linguagem Natural',
+    'Bioinformática',
+    'Realidade Virtual e Aumentada',
+    'Blockchain',
+  ];
+
+  const { count } = await prisma.keyword.createMany({
+    data: keywords.map((name) => ({ name })),
+    skipDuplicates: true,
+  });
+
+  console.log(
+    `✅ Vocabulário controlado: ${count} novas keywords inseridas (${keywords.length - count} já existiam).`,
+  );
 }
 
 main()
