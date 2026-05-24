@@ -18,9 +18,11 @@
 
       <!-- Results Grid - SEM ESPAÇOS LATERAIS -->
       <div class="results-grid">
-        <div v-if="loadError" class="error-state">
+        <div v-if="isLoading" class="no-results">Carregando alunos…</div>
+
+        <div v-else-if="errorMessage" class="error-state">
           <i class="bi bi-exclamation-triangle"></i>
-          <p>Não foi possível carregar a lista de alunos no momento.</p>
+          <p>{{ errorMessage }}</p>
           <button class="btn-retry" @click="loadStudents">Tentar novamente</button>
         </div>
 
@@ -31,7 +33,7 @@
             :student="student"
           />
 
-          <div v-if="hasLoadedStudents && filteredStudents.length === 0" class="no-results">
+          <div v-if="filteredStudents.length === 0" class="no-results">
             Nenhum aluno encontrado com esses critérios.
           </div>
         </template>
@@ -52,34 +54,42 @@ const searchQuery = ref('')
 const selectedThemes = ref([])
 const notification = useNotificationStore()
 const students = ref([])
-const hasLoadedStudents = ref(false)
-const loadError = ref(false)
+const isLoading = ref(true)
+const errorMessage = ref(null)
 
 const normalizeStudent = (student) => {
   const tagsFromKeywords =
     student?.user?.keywords?.map((item) => item.keyword?.name).filter(Boolean) || []
 
-  const tags = student?.tags || student?.themes || tagsFromKeywords
+  // Backend já entrega `keywords: [{ id, name }]` plano via GET /students;
+  // mantemos `student.tags` (alias do payload) e o fallback antigo p/ não
+  // quebrar caso o shape mude.
+  const tags =
+    (Array.isArray(student?.keywords) && student.keywords.length > 0
+      ? student.keywords.map((k) => k.name).filter(Boolean)
+      : null) || student?.tags || student?.themes || tagsFromKeywords
 
   return {
     id: student.id || student.registro,
     name: student.name || student.nome || student?.user?.name || 'Aluno sem nome',
+    ra: student.ra ?? null,
     tags,
   }
 }
 
 const loadStudents = async () => {
-  hasLoadedStudents.value = false
-  loadError.value = false
+  isLoading.value = true
+  errorMessage.value = null
   try {
     const { data } = await api.get('/students')
     students.value = Array.isArray(data) ? data.map(normalizeStudent) : []
   } catch (err) {
     console.error('Erro ao buscar alunos:', err)
     students.value = []
-    loadError.value = true
+    errorMessage.value =
+      'Não foi possível carregar a lista de alunos. Tente novamente.'
   } finally {
-    hasLoadedStudents.value = true
+    isLoading.value = false
   }
 }
 

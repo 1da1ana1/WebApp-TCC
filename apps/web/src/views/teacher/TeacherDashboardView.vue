@@ -114,24 +114,46 @@
             <h3 class="mb-4">Minhas solicitações</h3>
             
             <div class="requests-list">
-              <div v-for="req in requestsList" :key="req.id" class="request-item">
-                <div class="request-info">
-                  <div class="avatar-placeholder"><i class="bi bi-person-fill"></i></div>
-                  <div class="student-details">
-                    <span class="student-name">{{ req.name }}</span>
-                    <span class="student-ra">{{ req.ra }}</span>
+              <div v-if="isLoading" class="empty-state">
+                <p>Carregando solicitações…</p>
+              </div>
+
+              <div v-else-if="errorMessage" class="empty-state">
+                <p>{{ errorMessage }}</p>
+              </div>
+
+              <template v-else>
+                <div v-for="req in requestsList" :key="req.id" class="request-item">
+                  <div class="request-info">
+                    <div class="avatar-placeholder"><i class="bi bi-person-fill"></i></div>
+                    <div class="student-details">
+                      <span class="student-name">{{ req.name }}</span>
+                      <span class="student-ra">{{ req.ra }}</span>
+                    </div>
+                  </div>
+
+                  <div class="request-actions">
+                    <button
+                      class="btn-action btn-accept"
+                      :disabled="isResponding"
+                      @click="handleAccept(req)"
+                    >
+                      {{ respondingId === req.id ? 'Aceitando…' : 'Aceitar' }}
+                    </button>
+                    <button
+                      class="btn-action btn-reject"
+                      :disabled="isResponding"
+                      @click="openRejectModal(req)"
+                    >
+                      Recusar
+                    </button>
                   </div>
                 </div>
 
-                <div class="request-actions">
-                  <button class="btn-action btn-accept" @click="handleAccept(req)">Aceitar</button>
-                  <button class="btn-action btn-reject" @click="openRejectModal(req)">Recusar</button>
+                <div v-if="requestsList.length === 0" class="empty-state">
+                  <p>Nenhuma solicitação pendente.</p>
                 </div>
-              </div>
-
-              <div v-if="requestsList.length === 0" class="empty-state">
-                <p>Nenhuma solicitação pendente.</p>
-              </div>
+              </template>
             </div>
           </section>
         </div>
@@ -189,27 +211,26 @@
               </div>
             </div>
             <div class="stats-grid">
-              <StatisticCard 
-                label="Total de Solicitações Recebidas" 
-                :value="statsData.recebidas"
-                :performance="getPerformance('requests', statsData.recebidas)"
+              <StatisticCard
+                label="Total de Solicitações Recebidas"
+                :value="statsData.totalRequests || 0"
+                :performance="getPerformance('requests', statsData.totalRequests || 0)"
               />
-              <StatisticCard 
-                label="Taxa de Aceite" 
-                :value="statsData.taxaAceite + '%'"
-                :subtitle="statsData.aceitas + ' aceitas / ' + statsData.recusadas + ' recusadas'"
-                :performance="getPerformance('acceptRate', statsData.taxaAceite)"
+              <StatisticCard
+                label="Taxa de Aceite"
+                :value="statsData.acceptanceRate || '0%'"
+                :subtitle="`${statsData.acceptedRequests || 0} aceitas de ${statsData.totalRequests || 0} totais`"
+                :performance="getPerformance('acceptRate', parseInt(statsData.acceptanceRate || '0', 10))"
               />
-              <StatisticCard 
-                label="Orientações Concluídas" 
-                :value="statsData.concluidas"
-                :performance="getPerformance('completed', statsData.concluidas)"
+              <StatisticCard
+                label="Orientações Concluídas"
+                :value="statsData.completedOrientations || 0"
+                :performance="getPerformance('completed', statsData.completedOrientations || 0)"
               />
-              <StatisticCard 
-                label="Vagas Preenchidas" 
-                :value="statsData.vagasOcupadas + '/' + statsData.vagasTotais"
-                :subtitle="((statsData.vagasOcupadas / statsData.vagasTotais) * 100).toFixed(0) + '% ocupadas'"
-                :performance="getPerformance('vacancies', (statsData.vagasOcupadas / statsData.vagasTotais) * 100)"
+              <StatisticCard
+                label="Vagas Preenchidas"
+                :value="statsData.activeOrientations || 0"
+                :performance="getPerformance('completed', statsData.activeOrientations || 0)"
               />
             </div>
           </section>
@@ -218,29 +239,11 @@
       </main>
     </div>
 
-    <div v-if="showRejectModal" class="modal-overlay" @click.self="closeRejectModal">
-      <div class="modal-card">
-        <h3>Por favor, insira a justificativa da recusa:</h3>
-        <div class="modal-form">
-          <label>Selecione um motivo:</label>
-          <select v-model="selectedReason" class="modal-select">
-            <option value="" disabled selected>Selecione...</option>
-            <option value="Sem vagas disponíveis">Sem vagas disponíveis</option>
-            <option value="Tema não compatível">Tema não compatível</option>
-            <option value="Falta de disponibilidade">Falta de disponibilidade</option>
-            <option value="Outro">Outro motivo não listado</option>
-          </select>
-          <div v-if="selectedReason === 'Outro'" class="textarea-container">
-            <label>Outro motivo:</label>
-            <textarea v-model="customJustification" placeholder="Digite a justificativa..." rows="4"></textarea>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn-modal-cancel" @click="closeRejectModal">Cancelar</button>
-          <button class="btn-modal-confirm" @click="confirmReject">Enviar</button>
-        </div>
-      </div>
-    </div>
+    <RejectModal
+      :show="showRejectModal"
+      @close="closeRejectModal"
+      @confirm="onRejectConfirm"
+    />
 
   </div>
 </template>
@@ -251,13 +254,15 @@ import { useTeacherStore } from '@/stores/teacher'
 import CronogramSchedule from '@/components/CronogramSchedule.vue'
 import RequestHistoryTable from '@/components/RequestHistoryTable.vue'
 import StatisticCard from '@/components/StatisticCard.vue'
+import RejectModal from '@/components/RejectModal.vue'
 import Swal from 'sweetalert2'
+import {
+  getTeacherRequests,
+  respondRequest,
+  getTeacherStats,
+} from '@/services/api'
 
 const teacherStore = useTeacherStore()
-
-onMounted(() => {
-  teacherStore.loadData()
-})
 
 // === MOCK DE DADOS - 20 ÁREAS DE COMPUTAÇÃO ===
 const MOCK_KEYWORDS = [
@@ -292,10 +297,82 @@ const currentView = computed({
 const teacher = computed(() => teacherStore.teacher)
 const vacancies = computed(() => teacherStore.vacancies)
 const tags = computed(() => teacherStore.tags)
-const requestsList = computed(() => teacherStore.requestsList)
-const historyData = computed(() => teacherStore.historyData)
 const guidancesList = computed(() => teacherStore.guidancesList)
-const statsData = computed(() => teacherStore.statsData)
+
+// --- ESTATÍSTICAS (GET /reports/teacher-stats) ---
+const statsData = ref({
+  totalRequests: 0,
+  acceptedRequests: 0,
+  acceptanceRate: '0%',
+  activeOrientations: 0,
+  completedOrientations: 0,
+})
+
+const loadStats = async () => {
+  try {
+    const data = await getTeacherStats()
+    statsData.value = {
+      totalRequests: data.totalRequests ?? 0,
+      acceptedRequests: data.acceptedRequests ?? 0,
+      acceptanceRate: data.acceptanceRate ?? '0%',
+      activeOrientations: data.activeOrientations ?? 0,
+      completedOrientations: data.completedOrientations ?? 0,
+    }
+  } catch (err) {
+    console.error('Erro ao carregar estatísticas:', err)
+    // Mantém zeros — UI nunca mostra NaN/undefined durante/depois de uma falha.
+  }
+}
+
+// --- SOLICITAÇÕES (fonte da verdade: GET /requests) ---
+const requestsList = ref([])
+const historyData = ref([])
+const isLoading = ref(true)
+const errorMessage = ref(null)
+const isResponding = ref(false)
+const respondingId = ref(null)
+
+const STATUS_LABEL = { ACCEPTED: 'Aceita', REJECTED: 'Recusada' }
+
+const loadRequests = async () => {
+  isLoading.value = true
+  errorMessage.value = null
+  try {
+    const data = await getTeacherRequests()
+    requestsList.value = data
+      .filter((r) => r.status === 'PENDING')
+      .map((r) => ({
+        id: r.id,
+        name: r.student?.user?.name ?? '—',
+        ra: r.student?.ra ?? '—',
+      }))
+    historyData.value = data
+      .filter((r) => r.status !== 'PENDING')
+      .map((r) => ({
+        id: r.id,
+        name: r.student?.user?.name ?? '—',
+        ra: r.student?.ra ?? '—',
+        sendDate: new Date(r.sendDate).toLocaleString('pt-BR'),
+        replyDate: r.responseDate
+          ? new Date(r.responseDate).toLocaleString('pt-BR')
+          : '—',
+        status: STATUS_LABEL[r.status] ?? r.status,
+        justification: r.denialJustification ?? '',
+      }))
+  } catch (err) {
+    console.error('Erro ao carregar solicitações:', err)
+    errorMessage.value =
+      'Não foi possível carregar suas solicitações. Tente novamente.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  teacherStore.loadData()
+  loadRequests()
+  loadStats()
+})
 
 const semestreSelecionado = computed({
   get: () => teacherStore.semestreSelecionado,
@@ -365,55 +442,74 @@ const closeDropdown = () => {
   isDropdownOpen.value = false
 }
 
-// --- LÓGICA DE SOLICITAÇÕES ---
+// --- LÓGICA DE SOLICITAÇÕES (ações reais contra PATCH /requests/:id/respond) ---
 const showRejectModal = ref(false)
 const requestToReject = ref(null)
-const selectedReason = ref('')
-const customJustification = ref('')
 
-const handleAccept = (req) => {
-  Swal.fire({
+const handleAccept = async (req) => {
+  const confirm = await Swal.fire({
     title: 'Confirmar vínculo?',
     text: "O aluno será movido para 'Orientações em vigência'.",
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#28a745',
-    confirmButtonText: 'Sim, confirmar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      teacherStore.removeRequest(req.id)
-      teacherStore.addToHistory(req, 'Aceita')
-      teacherStore.addGuidance({ 
-        id: Date.now(), 
-        studentName: req.name, 
-        project: 'Novo Projeto (TCC)', 
-        startDate: new Date().toLocaleDateString('pt-BR'), 
-        semester: '2025-1', 
-        status: 'Em vigência' 
-      })
-      Swal.fire('Sucesso', 'Orientação iniciada!', 'success')
-    }
+    confirmButtonText: 'Sim, confirmar',
   })
+  if (!confirm.isConfirmed) return
+
+  isResponding.value = true
+  respondingId.value = req.id
+  try {
+    await respondRequest(req.id, 'ACCEPTED')
+    await loadRequests()
+    Swal.fire('Sucesso', 'Orientação iniciada!', 'success')
+  } catch (err) {
+    console.error('Falha ao aceitar solicitação:', err)
+    Swal.fire(
+      'Erro',
+      'Não foi possível aceitar a solicitação. Tente novamente.',
+      'error',
+    )
+  } finally {
+    isResponding.value = false
+    respondingId.value = null
+  }
 }
 
-const openRejectModal = (req) => { 
+const openRejectModal = (req) => {
   requestToReject.value = req
-  selectedReason.value = ''
-  customJustification.value = ''
-  showRejectModal.value = true 
+  showRejectModal.value = true
 }
 
-const closeRejectModal = () => { 
+const closeRejectModal = () => {
   showRejectModal.value = false
-  requestToReject.value = null 
+  requestToReject.value = null
 }
 
-const confirmReject = () => {
-  const justification = selectedReason.value === 'Outro' ? customJustification.value : selectedReason.value
-  teacherStore.removeRequest(requestToReject.value.id)
-  teacherStore.addToHistory(requestToReject.value, 'Recusada', justification)
-  closeRejectModal()
-  Swal.fire('Recusada', 'Justificativa enviada.', 'info')
+const onRejectConfirm = async (justification) => {
+  if (!requestToReject.value) return
+  const reqId = requestToReject.value.id
+
+  isResponding.value = true
+  respondingId.value = reqId
+  try {
+    await respondRequest(reqId, 'REJECTED', justification)
+    closeRejectModal()
+    await loadRequests()
+    Swal.fire('Recusada', 'Justificativa enviada.', 'info')
+  } catch (err) {
+    console.error('Falha ao recusar solicitação:', err)
+    // Mantém o modal aberto pra retry — RejectModal só reseta state ao
+    // sair de show=true→false→true, então o texto digitado fica.
+    Swal.fire(
+      'Erro',
+      'Não foi possível recusar a solicitação. Tente novamente.',
+      'error',
+    )
+  } finally {
+    isResponding.value = false
+    respondingId.value = null
+  }
 }
 
 // --- LÓGICA DE ORIENTAÇÕES ---

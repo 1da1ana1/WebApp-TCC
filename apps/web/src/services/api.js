@@ -243,4 +243,18 @@ export async function updateStudentKeywords(keywordIds) {
   return response.data;
 }
 
+export async function getTeacherRequests() {
+  const response = await api.get('/requests');
+  return response.data;
+}
+
+export async function respondRequest(id, status, justification) {
+  const body = { status };
+  if (justification) {
+    body.denialJustification = justification;
+  }
+  const response = await api.patch(`/requests/${id}/respond`, body);
+  return response.data;
+}
+
 export default api;
