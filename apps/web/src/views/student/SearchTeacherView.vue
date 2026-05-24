@@ -64,12 +64,9 @@ const normalizeTeacher = (teacher) => {
     id: teacher.id,
     name: teacher.name || teacher?.user?.name || 'Professor sem nome',
     tags,
-    vagas:
-      teacher.vagas ??
-      teacher.availableSpots ??
-      teacher?.vacancies?.available_spots ??
-      teacher?.vacancies?.total_spots ??
-      0,
+    vagas: Array.isArray(teacher.vacancies)
+      ? teacher.vacancies.reduce((sum, v) => sum + (v.quantity ?? 0), 0)
+      : null,
   }
 }
 

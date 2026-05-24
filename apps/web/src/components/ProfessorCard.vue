@@ -5,7 +5,9 @@
 
       <div class="details-column">
         <p class="professor-name">{{ professor.name }}</p>
-        <div class="available-spots">{{ professor.vagas }} vagas disponíveis</div>
+        <div class="available-spots">
+          {{ professor.vagas != null ? `${professor.vagas} vagas disponíveis` : 'Vagas não informadas' }}
+        </div>
       </div>
 
       <div class="tags-column">
