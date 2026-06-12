@@ -4,7 +4,9 @@
       "Bash(git restore *)",
       "Bash(npm run *)",
       "PowerShell(Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue | Select-Object LocalAddress, LocalPort, OwningProcess, @{n='ProcessName';e={\\(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue\\).ProcessName}})",
-      "PowerShell($conns = Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue; if \\($conns\\) { $conns | ForEach-Object { try { Stop-Process -Id $_.OwningProcess -Force -ErrorAction Stop; \"Killed PID $\\($_.OwningProcess\\)\" } catch { \"Could not kill PID $\\($_.OwningProcess\\)\" } } } else { \"Port 5000 free\" })"
+      "PowerShell($conns = Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue; if \\($conns\\) { $conns | ForEach-Object { try { Stop-Process -Id $_.OwningProcess -Force -ErrorAction Stop; \"Killed PID $\\($_.OwningProcess\\)\" } catch { \"Could not kill PID $\\($_.OwningProcess\\)\" } } } else { \"Port 5000 free\" })",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
