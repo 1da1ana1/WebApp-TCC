@@ -14,6 +14,7 @@ import { SemestersModule } from './modules/semesters/semesters.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { LogsModule } from './modules/logs/logs.module';
+import { ContestationsModule } from './modules/contestations/contestations.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { LogsModule } from './modules/logs/logs.module';
     NotificationsModule,
     ReportsModule,
     LogsModule,
+    ContestationsModule,
     PrismaModule,
     AuthModule,
   ],
