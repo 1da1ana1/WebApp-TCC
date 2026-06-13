@@ -57,7 +57,7 @@
 
           <ul class="custom-list">
             <li>
-              <strong>1. Autenticação Segura:</strong> Faça o login utilizando o botão no menu superior. Você será redirecionado para a autenticação centralizada da UNICAMP (Senha Única).
+              <strong>1. Autenticação Secura:</strong> Faça o login utilizando o botão no menu superior. Você será redirecionado para a autenticação centralizada da UNICAMP (Senha Única).
             </li>
             <li>
               <strong>2. Busque por Áreas de Interesse:</strong> Utilize a aba "Buscar Orientador". Você pode filtrar docentes por palavras-chave (tags) como <em>Inteligência Artificial</em>, <em>Engenharia de Software</em> ou buscar diretamente pelo nome.
@@ -85,7 +85,7 @@
         <div class="glass-card">
           <h2>Links Úteis, Tutoriais e Regulamento</h2>
           <p>
-            Acesse as páginas oficiais da Diretoria Acadêmica (DAC) e da FT para baixar o regulamento completo, formulários necessários para composição de banca e ler os tutoriais de uso do SIGA (para a matrícula oficial).
+            Acese as páginas oficiais da Diretoria Acadêmica (DAC) e da FT para baixar o regulamento completo, formulários necessários para composição de banca e ler os tutoriais de uso do SIGA (para a matrícula oficial).
           </p>
           
           <div class="highlight-doc mb-4">
@@ -153,6 +153,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import CronogramSchedulePublic from '@/components/CronogramSchedulePublic.vue'
 
 const activeSectionId = ref('section-1')
+const showBackToTop = ref(false)
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id)
@@ -164,17 +165,22 @@ const scrollToSection = (id) => {
   }
 }
 
-const showBackToTop = ref(false)
-
 const handleScroll = () => {
   showBackToTop.value = window.scrollY > 700
 
   const sections = ['section-1', 'section-2', 'section-3']
+  const isAtBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 50
+
+  if (isAtBottom) {
+    activeSectionId.value = sections[sections.length - 1]
+    return
+  }
+
   sections.forEach((id) => {
     const element = document.getElementById(id)
     if (element) {
       const rect = element.getBoundingClientRect()
-      if (rect.top <= 150 && rect.bottom >= 150) {
+      if (rect.top <= 160 && rect.bottom >= 160) {
         activeSectionId.value = id
       }
     }
@@ -302,7 +308,6 @@ onUnmounted(() => {
   margin-bottom: 1.5rem;
 }
 
-/* Grid para as regras do TCC */
 .rules-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -335,7 +340,6 @@ onUnmounted(() => {
   line-height: 1.4;
 }
 
-/* Lista Customizada - Passo a passo */
 .custom-list {
   list-style: none;
   padding: 0;
@@ -365,7 +369,6 @@ onUnmounted(() => {
   margin-bottom: 0.5rem;
 }
 
-/* Destaque do Documento PDF */
 .highlight-doc {
   display: flex;
   align-items: center;
@@ -418,7 +421,6 @@ onUnmounted(() => {
   color: #003366;
 }
 
-/* Grid de Links e Formulários */
 .links-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
