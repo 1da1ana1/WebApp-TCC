@@ -144,4 +144,159 @@ export class ReportsService {
 			})),
 		};
 	}
+
+	/**
+	 * Resolve o filtro de período para WHEREs do Prisma.
+	 * - semesterId: escopa orientações por semestre; solicitações ficam all-time
+	 *   (Request não tem vínculo de semestre no schema).
+	 * - from/to (YYYY-MM-DD): faixa em startDate (orientações) e sendDate
+	 *   (solicitações). Comparação por instante UTC — sem fuso.
+	 */
+	private buildPeriodFilters(params: {
+		from?: string;
+		to?: string;
+		semesterId?: number;
+	}) {
+		const { from, to, semesterId } = params;
+
+		if (semesterId !== undefined) {
+			return { orientationWhere: { semesterId }, requestWhere: {} };
+		}
+
+		const range: { gte?: Date; lte?: Date } = {};
+		if (from) range.gte = new Date(`${from}T00:00:00.000Z`);
+		if (to) range.lte = new Date(`${to}T23:59:59.999Z`);
+		const hasRange = range.gte !== undefined || range.lte !== undefined;
+
+		return {
+			orientationWhere: hasRange ? { startDate: range } : {},
+			requestWhere: hasRange ? { sendDate: range } : {},
+		};
+	}
+
+	/**
+	 * RF019 — contagem de orientandos por docente no período.
+	 * Lista TODOS os docentes (inclusive com 0) para análise de distribuição.
+	 */
+	async getDistribution(params: { from?: string; to?: string; semesterId?: number }) {
+		const { orientationWhere } = this.buildPeriodFilters(params);
+
+		const teachers = await this.prisma.teacher.findMany({
+			include: { user: { select: { name: true } } },
+			orderBy: { id: 'asc' },
+		});
+
+		const rows: Array<{
+			teacherId: number;
+			teacherName: string;
+			orientations: number;
+			orientandos: number;
+		}> = [];
+		for (const teacher of teachers) {
+			const orientations = await this.prisma.orientation.findMany({
+				where: { supervisorId: teacher.id, ...orientationWhere },
+				include: { students: { select: { id: true } } },
+			});
+			const orientandos = orientations.reduce(
+				(sum, o) => sum + o.students.length,
+				0,
+			);
+			rows.push({
+				teacherId: teacher.id,
+				teacherName: teacher.user?.name ?? '—',
+				orientations: orientations.length,
+				orientandos,
+			});
+		}
+
+		rows.sort((a, b) => b.orientandos - a.orientandos);
+		return { period: params, distribution: rows };
+	}
+
+	/** Linhas de estatísticas por docente, com o filtro de período aplicado. */
+	private async getTeacherStatsRows(params: {
+		from?: string;
+		to?: string;
+		semesterId?: number;
+	}) {
+		const { orientationWhere, requestWhere } = this.buildPeriodFilters(params);
+
+		const teachers = await this.prisma.teacher.findMany({
+			include: { user: { select: { name: true, email: true } } },
+			orderBy: { id: 'asc' },
+		});
+
+		const rows: Array<{
+			teacherId: number;
+			teacherName: string;
+			email: string;
+			totalRequests: number;
+			acceptedRequests: number;
+			acceptanceRate: number;
+			activeOrientations: number;
+			completedOrientations: number;
+		}> = [];
+		for (const teacher of teachers) {
+			const totalRequests = await this.prisma.request.count({
+				where: { teacherId: teacher.id, ...requestWhere },
+			});
+			const acceptedRequests = await this.prisma.request.count({
+				where: { teacherId: teacher.id, status: 'ACCEPTED', ...requestWhere },
+			});
+			const acceptanceRate =
+				totalRequests > 0
+					? Math.round((acceptedRequests / totalRequests) * 100)
+					: 0;
+			const activeOrientations = await this.prisma.orientation.count({
+				where: { supervisorId: teacher.id, status: 'ACTIVE', ...orientationWhere },
+			});
+			const completedOrientations = await this.prisma.orientation.count({
+				where: { supervisorId: teacher.id, status: 'COMPLETED', ...orientationWhere },
+			});
+
+			rows.push({
+				teacherId: teacher.id,
+				teacherName: teacher.user?.name ?? '',
+				email: teacher.user?.email ?? '',
+				totalRequests,
+				acceptedRequests,
+				acceptanceRate,
+				activeOrientations,
+				completedOrientations,
+			});
+		}
+		return rows;
+	}
+
+	/**
+	 * RF015 — estatísticas dos docentes em CSV. Geração manual (sem dependência
+	 * extra). XLSX (exceljs) fica para depois, conforme o risco apontado.
+	 */
+	async getTeacherStatsCsv(params: { from?: string; to?: string; semesterId?: number }) {
+		const rows = await this.getTeacherStatsRows(params);
+
+		const headers = [
+			'teacherId',
+			'teacherName',
+			'email',
+			'totalRequests',
+			'acceptedRequests',
+			'acceptanceRate',
+			'activeOrientations',
+			'completedOrientations',
+		];
+
+		const escape = (value: unknown) => {
+			const s = String(value ?? '');
+			return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+		};
+
+		const lines = [headers.join(',')];
+		for (const row of rows) {
+			lines.push(headers.map((h) => escape((row as Record<string, unknown>)[h])).join(','));
+		}
+
+		// BOM para o Excel reconhecer UTF-8 (acentos nos nomes).
+		return '﻿' + lines.join('\r\n');
+	}
 }
