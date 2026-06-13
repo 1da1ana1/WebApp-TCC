@@ -16,9 +16,12 @@ const formatDay = (value) => {
   if (!value) return '';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
-  const dd = String(date.getDate()).padStart(2, '0');
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  return `${dd}/${mm}`;
+  // UTC para casar com a data que o coordenador cadastrou (salva como
+  // YYYY-MM-DDT00:00:00Z); usar hora local causaria off-by-one em UTC-3.
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const yyyy = date.getUTCFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 };
 
 const formatRange = (start, end) => {
