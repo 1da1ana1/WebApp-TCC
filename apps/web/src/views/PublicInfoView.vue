@@ -16,6 +16,16 @@
           <span>Links e Regulamentos</span>
           <i class="bi bi-chevron-compact-right"></i>
         </li>
+
+        <li class="side-menu-li" :class="{ active: isActive('section-4') }" @click="scrollToSection('section-4')">
+          <span>Documentos importantes</span>
+          <i class="bi bi-chevron-compact-right"></i>
+        </li>
+
+        <li class="side-menu-li" :class="{ active: isActive('section-5') }" @click="scrollToSection('section-5')">
+          <span>Perguntas Frequentes</span>
+          <i class="bi bi-chevron-compact-right"></i>
+        </li>
       </ul>
     </nav>
 
@@ -134,6 +144,74 @@
           </div>
         </div>
       </section>
+
+      <section id="section-4" class="info-section">
+        <div class="glass-card">
+          <h2>Documentos importantes</h2>
+          <p class="subtitle">Materiais de referência para o desenvolvimento do seu TCC. Todos abrem em uma nova aba.</p>
+
+          <div class="links-grid">
+            <a href="https://acervus.unicamp.br/" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <i class="bi bi-search"></i>
+              <div>
+                <h4>Acervus (Biblioteca UNICAMP)</h4>
+                <span>Catálogo do Sistema de Bibliotecas da UNICAMP para pesquisa bibliográfica.</span>
+              </div>
+            </a>
+
+            <a href="https://www.ft.unicamp.br/sites/default/files/graduacao/Regulamento_TCC_TADS_BSI.pdf" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <i class="bi bi-file-earmark-pdf-fill"></i>
+              <div>
+                <h4>Regulamento do TCC (PDF)</h4>
+                <span>Documento oficial com todas as regras do TCC para BSI e TADS.</span>
+              </div>
+            </a>
+
+            <!-- TODO: substituir href pela URL real do Guia da Profa. Gisele -->
+            <a href="https://www.ft.unicamp.br/pt-br/graduacao/tccestagio" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <i class="bi bi-journal-richtext"></i>
+              <div>
+                <h4>Guia da Profa. Gisele</h4>
+                <span>Guia prático de elaboração do TCC (link a confirmar com a coordenação).</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-5" class="info-section">
+        <div class="glass-card">
+          <h2>Perguntas Frequentes (FAQ)</h2>
+          <p class="subtitle">Dúvidas comuns sobre o processo de TCC na plataforma.</p>
+
+          <div class="faq-list">
+            <details class="faq-item">
+              <summary>Quantas solicitações de orientação posso enviar ao mesmo tempo?</summary>
+              <p>Apenas uma por vez. Você só pode enviar uma nova solicitação após a anterior ser respondida (aceita ou recusada).</p>
+            </details>
+
+            <details class="faq-item">
+              <summary>Como sei se um professor tem vagas disponíveis?</summary>
+              <p>No perfil de cada docente o sistema mostra claramente as vagas disponíveis para o semestre atual antes de você solicitar.</p>
+            </details>
+
+            <details class="faq-item">
+              <summary>O que acontece quando o professor responde minha solicitação?</summary>
+              <p>Você é notificado pelo sino no topo da página (e por e-mail, em breve). Se aceito, o vínculo é oficializado automaticamente no sistema.</p>
+            </details>
+
+            <details class="faq-item">
+              <summary>Posso solicitar orientação fora do período definido?</summary>
+              <p>Não. O sistema bloqueia solicitações fora da janela de busca definida pela coordenação — confira as datas no cronograma acima.</p>
+            </details>
+
+            <details class="faq-item">
+              <summary>Como faço login na plataforma?</summary>
+              <p>Use o botão "Fazer login" no menu superior. A autenticação com a Senha Única (CAS) da UNICAMP está em implantação.</p>
+            </details>
+          </div>
+        </div>
+      </section>
     </main>
 
     <button
@@ -168,7 +246,7 @@ const scrollToSection = (id) => {
 const handleScroll = () => {
   showBackToTop.value = window.scrollY > 700
 
-  const sections = ['section-1', 'section-2', 'section-3']
+  const sections = ['section-1', 'section-2', 'section-3', 'section-4', 'section-5']
   const isAtBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 50
 
   if (isAtBottom) {
@@ -461,6 +539,60 @@ onUnmounted(() => {
   font-size: 0.85rem;
   color: #666;
   line-height: 1.4;
+}
+
+/* FAQ — accordion nativo (details/summary), sem JS */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.faq-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.faq-item summary {
+  cursor: pointer;
+  padding: 1rem 1.2rem;
+  font-weight: 600;
+  color: var(--color-brand-primary, #003366);
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  content: '+';
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.faq-item[open] summary::after {
+  content: '−';
+}
+
+.faq-item summary:hover {
+  background: #f8f9fa;
+}
+
+.faq-item > p {
+  margin: 0;
+  padding: 0 1.2rem 1rem;
+  color: #555;
+  line-height: 1.5;
+  font-size: 0.92rem;
 }
 
 #btn-back-to-top {

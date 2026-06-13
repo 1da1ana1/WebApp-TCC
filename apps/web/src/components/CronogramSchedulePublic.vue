@@ -23,7 +23,7 @@
           <div class="arrow">→</div>
 
           <div class="info-box">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <p>{{ step.description || 'Etapa do processo de TCC.' }}</p>
           </div>
         </div>
       </div>

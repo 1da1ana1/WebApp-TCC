@@ -2,14 +2,14 @@ import { defineStore } from 'pinia';
 import { getActiveSemester } from '@/services/api';
 
 const STEP_DEFINITIONS = [
-  { label: 'Definição de vagas', icon: 'bi-paperclip', startField: 'vacancyDefStartDate', endField: 'vacancyDefEndDate' },
-  { label: 'Cadastro de temas', icon: 'bi-list-check', startField: 'themeRegStartDate', endField: 'themeRegEndDate' },
-  { label: 'Período de busca', icon: 'bi-chat-left-text', startField: 'searchStartDate', endField: 'searchEndDate' },
-  { label: 'Análise solicitações', icon: 'bi-hourglass-split', startField: 'analysisStartDate', endField: 'analysisEndDate' },
-  { label: 'Confirmação vínculo', icon: 'bi-person-check', startField: 'linkConfirmStartDate', endField: 'linkConfirmEndDate' },
-  { label: 'Encerramento', icon: 'bi-lock', startField: 'closureDate' },
-  { label: 'Início orientações', icon: 'bi-pencil-square', startField: 'orientationStartDate' },
-  { label: 'Homologação', icon: 'bi-graph-up', startField: 'homologationDate' },
+  { label: 'Definição de vagas', icon: 'bi-paperclip', startField: 'vacancyDefStartDate', endField: 'vacancyDefEndDate', description: 'A coordenação define quantas vagas cada docente oferece no semestre.' },
+  { label: 'Cadastro de temas', icon: 'bi-list-check', startField: 'themeRegStartDate', endField: 'themeRegEndDate', description: 'Docentes cadastram suas áreas e temas de orientação.' },
+  { label: 'Período de busca', icon: 'bi-chat-left-text', startField: 'searchStartDate', endField: 'searchEndDate', description: 'Alunos buscam orientadores e enviam solicitações de orientação.' },
+  { label: 'Análise solicitações', icon: 'bi-hourglass-split', startField: 'analysisStartDate', endField: 'analysisEndDate', description: 'Docentes analisam e respondem (aceitam ou recusam) às solicitações.' },
+  { label: 'Confirmação vínculo', icon: 'bi-person-check', startField: 'linkConfirmStartDate', endField: 'linkConfirmEndDate', description: 'Os vínculos aceitos são oficializados no sistema.' },
+  { label: 'Encerramento', icon: 'bi-lock', startField: 'closureDate', description: 'Fim do período de buscas por orientador.' },
+  { label: 'Início orientações', icon: 'bi-pencil-square', startField: 'orientationStartDate', description: 'Começam as orientações com os vínculos firmados.' },
+  { label: 'Homologação', icon: 'bi-graph-up', startField: 'homologationDate', description: 'Homologação final do processo pela coordenação.' },
 ];
 
 const formatDay = (value) => {
@@ -44,6 +44,7 @@ const buildSteps = (semester) => {
     return {
       label: def.label,
       icon: def.icon,
+      description: def.description,
       date: def.endField ? formatRange(start, end) : formatDay(start),
       active: isCurrent(todayMs, start, end),
     };

@@ -27,6 +27,22 @@
       <p v-if="error" class="dev-login-error" role="alert">
         {{ error }}
       </p>
+
+      <!-- Placeholder do RF002 (login institucional). Desabilitado até a
+           integração com a Senha Única (CAS). -->
+      <div class="cas-wrapper">
+        <button
+          type="button"
+          class="cas-btn"
+          disabled
+          title="Em breve"
+          aria-disabled="true"
+        >
+          <i class="bi bi-shield-lock" aria-hidden="true"></i>
+          Entrar com conta Unicamp (CAS)
+        </button>
+        <span class="cas-hint">Em breve — integração com a Senha Única (RF002).</span>
+      </div>
     </main>
   </div>
 </template>
@@ -209,6 +225,43 @@ const loginAs = async (role) => {
   border-radius: 8px;
   max-width: 540px;
   font-size: 0.88rem;
+}
+
+.cas-wrapper {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 780px;
+}
+
+.cas-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 360px;
+  padding: 0.85rem 1.2rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #e9ecef;
+  color: #6b7280;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+.cas-btn i {
+  font-size: 1.1rem;
+}
+
+.cas-hint {
+  font-size: 0.78rem;
+  color: #9ca3af;
 }
 
 @media (max-width: 480px) {
