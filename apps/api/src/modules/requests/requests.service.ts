@@ -112,12 +112,17 @@ export class RequestsService {
             return [];
         }
 
-        // Reusa os mesmos includes do GET /requests padrão (ambos os lados).
+        // Inclui ambos os lados + as keywords (tags de interesse) do usuário,
+        // que o front exibe nos cards. As keywords vivem em User.keywords[].keyword.
         return this.prisma.request.findMany({
             where: { OR: orConditions },
             include: {
-                student: { include: { user: true } },
-                teacher: { include: { user: true } },
+                student: {
+                    include: { user: { include: { keywords: { include: { keyword: true } } } } },
+                },
+                teacher: {
+                    include: { user: { include: { keywords: { include: { keyword: true } } } } },
+                },
             },
             orderBy: { sendDate: 'desc' },
         });
