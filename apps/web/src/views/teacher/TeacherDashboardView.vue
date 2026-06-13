@@ -202,9 +202,12 @@
                   <div class="filter-group">
                     <label>Selecione o semestre:</label>
                     <select v-model="semestreSelecionado" @change="atualizarEstatisticas">
-                      <option value="2025-1">1º Semestre 2025 (Atual)</option>
-                      <option value="2024-2">2º Semestre 2024</option>
-                      <option value="2024-1">1º Semestre 2024</option>
+                      <option v-if="semesterOptions.length === 0" :value="null" disabled>
+                        Nenhum semestre cadastrado
+                      </option>
+                      <option v-for="opt in semesterOptions" :key="opt.id" :value="opt.id">
+                        {{ opt.label }}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -233,6 +236,12 @@
                 :performance="getPerformance('completed', statsData.activeOrientations || 0)"
               />
             </div>
+            <p class="stats-note">
+              <i class="bi bi-info-circle"></i>
+              Orientações (concluídas e vagas preenchidas) são filtradas pelo semestre
+              selecionado. Solicitações recebidas e taxa de aceite são totais (não
+              vinculadas a semestre).
+            </p>
           </section>
         </div>
 
@@ -260,6 +269,7 @@ import {
   getTeacherRequests,
   respondRequest,
   getTeacherStats,
+  getSemesters,
 } from '@/services/api'
 
 const teacherStore = useTeacherStore()
@@ -310,7 +320,9 @@ const statsData = ref({
 
 const loadStats = async () => {
   try {
-    const data = await getTeacherStats()
+    // Orientações são escopadas pelo semestre selecionado; métricas de
+    // solicitações continuam all-time (Request não tem vínculo de semestre).
+    const data = await getTeacherStats(semestreSelecionado.value ?? undefined)
     statsData.value = {
       totalRequests: data.totalRequests ?? 0,
       acceptedRequests: data.acceptedRequests ?? 0,
@@ -321,6 +333,34 @@ const loadStats = async () => {
   } catch (err) {
     console.error('Erro ao carregar estatísticas:', err)
     // Mantém zeros — UI nunca mostra NaN/undefined durante/depois de uma falha.
+  }
+}
+
+// --- SEMESTRES (GET /semesters) — alimenta o filtro de estatísticas ---
+const semesters = ref([])
+
+const semesterOptions = computed(() =>
+  semesters.value.map((s) => ({
+    id: s.id,
+    label: `${s.period}/${s.year}${s.isActive ? ' (Atual)' : ''}`,
+  })),
+)
+
+const loadSemesters = async () => {
+  try {
+    const data = await getSemesters()
+    semesters.value = Array.isArray(data) ? data : []
+  } catch (err) {
+    console.error('Erro ao carregar semestres:', err)
+    semesters.value = []
+  }
+
+  // Reconcilia a seleção: o valor persistido pode ser antigo (string legada
+  // ou id inexistente). Default = semestre ativo → primeiro → null.
+  const validIds = semesters.value.map((s) => s.id)
+  if (!validIds.includes(semestreSelecionado.value)) {
+    const active = semesters.value.find((s) => s.isActive)
+    semestreSelecionado.value = active?.id ?? semesters.value[0]?.id ?? null
   }
 }
 
@@ -368,9 +408,11 @@ const loadRequests = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   teacherStore.loadData()
   loadRequests()
+  // Semestres primeiro: loadStats usa o semestre selecionado reconciliado.
+  await loadSemesters()
   loadStats()
 })
 
@@ -556,8 +598,8 @@ const openContestModal = () => {
 }
 
 const atualizarEstatisticas = () => {
-  console.log("Filtrando estatísticas para:", semestreSelecionado.value)
-  // Em um cenário real, aqui você faria um novo fetch na API passando o semestre
+  // Re-busca as estatísticas escopadas pelo semestre recém-selecionado.
+  loadStats()
 }
 
 // --- ESTATÍSTICAS COM LÓGICA DE DESEMPENHO ---
@@ -846,6 +888,8 @@ const getPerformance = (metric, value) => {
 .btn-contest { background-color: var(--color-button-contest); border: none; padding: 10px 20px; font-weight: bold; font-style: italic; font-family: poppins; font-size: 1rem; border-radius: 5px; cursor: pointer; width: 100%; }
 .contest-dates { font-size: 0.8rem; font-style: italic; font-weight: bold; margin: 0; }
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+.stats-note { margin-top: 1.25rem; font-size: 0.8rem; color: var(--color-text-light-gray); font-style: italic; display: flex; align-items: flex-start; gap: 0.4rem; line-height: 1.4; }
+.stats-note i { margin-top: 0.1rem; }
 .guidances-list { display: flex; flex-direction: column; gap: 1.5rem; }
 
 /* --- FILTRO DE SEMESTRE (STATS) --- */

@@ -47,8 +47,10 @@ export async function getMyRequests() {
   return response.data;
 }
 
-export async function getTeacherStats() {
-  const response = await api.get('/reports/teacher-stats');
+export async function getTeacherStats(semesterId) {
+  const response = await api.get('/reports/teacher-stats', {
+    params: semesterId != null ? { semesterId } : {},
+  });
   return response.data;
 }
 
@@ -210,6 +212,11 @@ export async function getMyOrientations() {
 
 export async function getActiveSemester() {
   const response = await api.get('/semesters/active');
+  return response.data;
+}
+
+export async function getSemesters() {
+  const response = await api.get('/semesters');
   return response.data;
 }
 

@@ -47,4 +47,13 @@ export class SemestersController {
 	async getActiveSemester() {
 		return this.semestersService.getActiveSemester();
 	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get()
+	@ApiOperation({ summary: 'Listar todos os semestres (autenticado)' })
+	@ApiResponse({ status: 200, description: 'Lista de semestres retornada com sucesso' })
+	@ApiResponse({ status: 401, description: 'Não autenticado' })
+	async listSemesters() {
+		return this.semestersService.listSemesters();
+	}
 }

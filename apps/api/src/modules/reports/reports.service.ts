@@ -5,7 +5,7 @@ import { PrismaService } from '../../../prisma/prisma.service';
 export class ReportsService {
 	constructor(private prisma: PrismaService) {}
 
-	async getTeacherStats(userId: number) {
+	async getTeacherStats(userId: number, semesterId?: number) {
 		const user = await this.prisma.user.findUnique({
 			where: { id: userId },
 			include: { teacher: true },
@@ -17,6 +17,9 @@ export class ReportsService {
 
 		const teacherId = user.teacher.id;
 
+		// Solicitações não têm vínculo com semestre no schema (Request.semesterId
+		// não existe), então essas métricas são sempre totais (all-time). A UI
+		// sinaliza isso ao usuário.
 		const totalRequests = await this.prisma.request.count({
 			where: { teacherId },
 		});
@@ -29,12 +32,15 @@ export class ReportsService {
 			? Math.round((acceptedRequests / totalRequests) * 100)
 			: 0;
 
+		// Orientações têm semesterId — quando informado, escopa por semestre.
+		const semesterFilter = semesterId !== undefined ? { semesterId } : {};
+
 		const activeOrientations = await this.prisma.orientation.count({
-			where: { supervisorId: teacherId, status: 'ACTIVE' },
+			where: { supervisorId: teacherId, status: 'ACTIVE', ...semesterFilter },
 		});
 
 		const completedOrientations = await this.prisma.orientation.count({
-			where: { supervisorId: teacherId, status: 'COMPLETED' },
+			where: { supervisorId: teacherId, status: 'COMPLETED', ...semesterFilter },
 		});
 
 		return {
@@ -43,6 +49,7 @@ export class ReportsService {
 			acceptanceRate: `${acceptanceRate}%`,
 			activeOrientations,
 			completedOrientations,
+			semesterId: semesterId ?? null,
 		};
 	}
 

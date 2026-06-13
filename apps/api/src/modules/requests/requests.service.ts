@@ -117,11 +117,18 @@ export class RequestsService {
         });
 
         if (status === 'ACCEPTED') {
+            // Carimba o semestre ativo (se houver) para que a orientação possa
+            // ser filtrada por semestre nas estatísticas do docente.
+            const activeSemester = await this.prisma.semester.findFirst({
+                where: { isActive: true },
+            });
+
             await this.prisma.orientation.create({
                 data: {
                     status: 'ACTIVE',
                     startDate: new Date(),
                     supervisorId: teacherUser.teacher.id,
+                    semesterId: activeSemester?.id ?? undefined,
                     students: {
                         connect: { id: request.studentId },
                     },

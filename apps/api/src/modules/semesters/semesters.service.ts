@@ -39,4 +39,11 @@ export class SemestersService {
 			where: { isActive: true },
 		});
 	}
+
+	async listSemesters() {
+		// Mais recente primeiro — alimenta o dropdown de filtro de estatísticas.
+		return this.prisma.semester.findMany({
+			orderBy: [{ year: 'desc' }, { period: 'desc' }],
+		});
+	}
 }
