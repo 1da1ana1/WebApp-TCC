@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateContestationDto } from './dto/create-contestation.dto';
 import { ResolveContestationDto } from './dto/resolve-contestation.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 /** Janela de contestação: até 7 dias após o fim da definição de vagas. */
 const CONTEST_WINDOW_DAYS = 7;
@@ -14,7 +15,10 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class ContestationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   /**
    * POST /contestations — docente contesta a sua vaga do semestre ativo,
@@ -73,8 +77,8 @@ export class ContestationsService {
     }
 
     // Cria a contestação e marca a vaga como contestada atomicamente.
-    return this.prisma.$transaction(async (tx) => {
-      const contestation = await tx.contestation.create({
+    const contestation = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.contestation.create({
         data: {
           contestationReason: dto.contestationReason,
           status: 'PENDING',
@@ -87,8 +91,25 @@ export class ContestationsService {
         where: { id: vacancy.id },
         data: { isContested: true, contestReason: dto.contestationReason },
       });
-      return contestation;
+      return created;
     });
+
+    // Notifica o coordenador dono da vaga (best-effort).
+    const coordinator = await this.prisma.coordinator.findUnique({
+      where: { id: vacancy.coordinatorId },
+      include: { teacher: true },
+    });
+    if (coordinator?.teacher) {
+      await this.notifications.notify({
+        userId: coordinator.teacher.userId,
+        type: 'CONTESTATION',
+        title: 'Nova contestação de vagas',
+        body: `${user.name} contestou as vagas atribuídas.`,
+        link: '/perfil-coordenador',
+      });
+    }
+
+    return contestation;
   }
 
   /** GET /contestations — lista as contestações pendentes (coordenador). */

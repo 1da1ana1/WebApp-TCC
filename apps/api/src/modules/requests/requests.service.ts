@@ -5,14 +5,19 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class RequestsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private notifications: NotificationsService,
+    ) { }
 
     async createRequest(userId: number, teacherId: number) {
         const student = await this.prisma.student.findUnique({
             where: { userId },
+            include: { user: true },
         });
 
         if (!student) {
@@ -38,13 +43,24 @@ export class RequestsService {
             throw new BadRequestException('Você já possui uma solicitação pendente com um professor.');
         }
 
-        return this.prisma.request.create({
+        const created = await this.prisma.request.create({
             data: {
                 studentId: student.id,
                 teacherId,
                 status: 'PENDING',
             },
         });
+
+        // Notifica o docente sobre a nova solicitação (best-effort).
+        await this.notifications.notify({
+            userId: teacher.userId,
+            type: 'NEW_REQUEST',
+            title: 'Nova solicitação de orientação',
+            body: `${student.user?.name ?? 'Um aluno'} solicitou você como orientador.`,
+            link: '/perfil/docente',
+        });
+
+        return created;
     }
 
     async getUserRequests(userId: number) {
@@ -74,6 +90,37 @@ export class RequestsService {
         }
 
         return [];
+    }
+
+    async getRequestsByUserId(userId: number) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            include: { student: true, teacher: true },
+        });
+
+        if (!user) {
+            throw new NotFoundException('Usuário não encontrado.');
+        }
+
+        // O usuário pode aparecer como ALUNO (studentId) ou PROFESSOR (teacherId).
+        const orConditions: { studentId?: number; teacherId?: number }[] = [];
+        if (user.student) orConditions.push({ studentId: user.student.id });
+        if (user.teacher) orConditions.push({ teacherId: user.teacher.id });
+
+        // Nem aluno nem docente — não há solicitações vinculáveis.
+        if (orConditions.length === 0) {
+            return [];
+        }
+
+        // Reusa os mesmos includes do GET /requests padrão (ambos os lados).
+        return this.prisma.request.findMany({
+            where: { OR: orConditions },
+            include: {
+                student: { include: { user: true } },
+                teacher: { include: { user: true } },
+            },
+            orderBy: { sendDate: 'desc' },
+        });
     }
 
     async respondRequest(
@@ -133,6 +180,20 @@ export class RequestsService {
                         connect: { id: request.studentId },
                     },
                 },
+            });
+        }
+
+        // Notifica o aluno sobre a resposta (best-effort).
+        const student = await this.prisma.student.findUnique({
+            where: { id: request.studentId },
+        });
+        if (student) {
+            await this.notifications.notify({
+                userId: student.userId,
+                type: 'REQUEST_RESPONSE',
+                title: status === 'ACCEPTED' ? 'Solicitação aceita' : 'Solicitação recusada',
+                body: `${teacherUser.name} ${status === 'ACCEPTED' ? 'aceitou' : 'recusou'} sua solicitação de orientação.`,
+                link: '/perfil/aluno',
             });
         }
 

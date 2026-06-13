@@ -5,10 +5,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { DefineVacanciesDto } from './dto/define-vacancies.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class VacanciesService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly notifications: NotificationsService,
+	) {}
 
 	async defineVacancies(userId: number, dto: DefineVacanciesDto) {
 		// 1. A validação de typeUser === 'COORDINATOR' já acontece no
@@ -50,24 +54,33 @@ export class VacanciesService {
 			where: { teacherId: dto.teacherId, semesterId },
 		});
 
-		if (existing) {
-			return this.prisma.vacancy.update({
-				where: { id: existing.id },
-				data: {
-					quantity: dto.quantity,
-					coordinatorId,
-				},
-			});
-		}
+		const vacancy = existing
+			? await this.prisma.vacancy.update({
+					where: { id: existing.id },
+					data: {
+						quantity: dto.quantity,
+						coordinatorId,
+					},
+				})
+			: await this.prisma.vacancy.create({
+					data: {
+						quantity: dto.quantity,
+						teacherId: dto.teacherId,
+						semesterId,
+						coordinatorId,
+					},
+				});
 
-		return this.prisma.vacancy.create({
-			data: {
-				quantity: dto.quantity,
-				teacherId: dto.teacherId,
-				semesterId,
-				coordinatorId,
-			},
+		// Notifica o docente sobre a definição de vagas (best-effort).
+		await this.notifications.notify({
+			userId: targetTeacher.userId,
+			type: 'VACANCY_DEFINED',
+			title: 'Vagas definidas',
+			body: `A coordenação definiu ${dto.quantity} vaga(s) para você neste semestre.`,
+			link: '/perfil/docente',
 		});
+
+		return vacancy;
 	}
 
 	async getTeacherVacancies(teacherId: number) {

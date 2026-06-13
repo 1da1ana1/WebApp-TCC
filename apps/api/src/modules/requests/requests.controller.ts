@@ -13,6 +13,8 @@ import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestResponseDto } from './dto/update-request-response.dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../auth/roles.decorator';
 import {
     ApiBearerAuth,
     ApiBody,
@@ -48,6 +50,19 @@ export class RequestsController {
     async getUserRequests(@Request() req: { user: { sub: number } }) {
         const userIdLogado = req.user.sub;
         return this.requestsService.getUserRequests(userIdLogado);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('COORDINATOR')
+    @Get('user/:userId')
+    @ApiOperation({ summary: 'Listar solicitações de um usuário (coordenador)' })
+    @ApiParam({ name: 'userId', type: Number })
+    @ApiResponse({ status: 200, description: 'Solicitações retornadas com sucesso' })
+    @ApiResponse({ status: 401, description: 'Não autenticado' })
+    @ApiResponse({ status: 403, description: 'Acesso restrito a COORDINATOR' })
+    @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+    async getRequestsByUser(@Param('userId', ParseIntPipe) userId: number) {
+        return this.requestsService.getRequestsByUserId(userId);
     }
 
     @UseGuards(JwtAuthGuard)

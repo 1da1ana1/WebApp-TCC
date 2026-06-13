@@ -13,10 +13,11 @@ model User {
   email       String        @unique
   password    String        // Mantido para o nosso login provisório local
   typeUser    String        // "STUDENT", "TEACHER", "COORDINATOR"
-  keywords    UserKeyword[]
-  student     Student?
-  teacher     Teacher?
-  logs        ActivityLog[]
+  keywords      UserKeyword[]
+  student       Student?
+  teacher       Teacher?
+  logs          ActivityLog[]
+  notifications Notification[]
 }
 
 model Keyword {
@@ -161,4 +162,18 @@ model ActivityLog {
   logoutAt        DateTime?
   sessionDuration Int?
   createdAt       DateTime  @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   // NEW_REQUEST, REQUEST_RESPONSE, VACANCY_DEFINED, CONTESTATION
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  link      String?  // rota no front para "ver detalhes" (opcional)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
 }

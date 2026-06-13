@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
+import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
-// Sem controller — o service é exportado para ser consumido por outros módulos.
+// Service exportado para ser disparado por outros módulos (requests, vacancies,
+// contestations); controller expõe os endpoints do próprio usuário.
 @Module({
-  providers: [NotificationsService],
+  controllers: [NotificationsController],
+  providers: [NotificationsService, PrismaService],
   exports: [NotificationsService],
 })
 export class NotificationsModule {}

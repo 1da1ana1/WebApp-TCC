@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	ForbiddenException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
@@ -33,6 +38,53 @@ export class ReportsService {
 			: 0;
 
 		// Orientações têm semesterId — quando informado, escopa por semestre.
+		const semesterFilter = semesterId !== undefined ? { semesterId } : {};
+
+		const activeOrientations = await this.prisma.orientation.count({
+			where: { supervisorId: teacherId, status: 'ACTIVE', ...semesterFilter },
+		});
+
+		const completedOrientations = await this.prisma.orientation.count({
+			where: { supervisorId: teacherId, status: 'COMPLETED', ...semesterFilter },
+		});
+
+		return {
+			totalRequests,
+			acceptedRequests,
+			acceptanceRate: `${acceptanceRate}%`,
+			activeOrientations,
+			completedOrientations,
+			semesterId: semesterId ?? null,
+		};
+	}
+
+	async getTeacherStatsByUserId(userId: number, semesterId?: number) {
+		const user = await this.prisma.user.findUnique({
+			where: { id: userId },
+			include: { teacher: true },
+		});
+
+		if (!user) {
+			throw new NotFoundException('Usuário não encontrado.');
+		}
+		if (!user.teacher) {
+			throw new BadRequestException('O usuário informado não é um docente.');
+		}
+
+		const teacherId = user.teacher.id;
+
+		// Mesma lógica de cálculo do getTeacherStats — duplicada propositalmente
+		// para não alterar o método existente (blindagem de escopo).
+		const totalRequests = await this.prisma.request.count({ where: { teacherId } });
+
+		const acceptedRequests = await this.prisma.request.count({
+			where: { teacherId, status: 'ACCEPTED' },
+		});
+
+		const acceptanceRate = totalRequests > 0
+			? Math.round((acceptedRequests / totalRequests) * 100)
+			: 0;
+
 		const semesterFilter = semesterId !== undefined ? { semesterId } : {};
 
 		const activeOrientations = await this.prisma.orientation.count({
