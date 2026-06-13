@@ -38,6 +38,16 @@ export class AuthService {
       sub: validatedUser.id,
       typeUser: validatedUser.typeUser,
     };
+
+    // Auditoria de login (RF016). Falha ao registrar não deve impedir o login.
+    try {
+      await this.prisma.activityLog.create({
+        data: { userId: validatedUser.id, action: 'LOGIN', loginAt: new Date() },
+      });
+    } catch {
+      // ignora — logging é best-effort
+    }
+
     return {
       access_token: this.jwtService.sign(payload),
       user: {
@@ -49,5 +59,27 @@ export class AuthService {
         studentId: validatedUser.student?.id ?? null,
       },
     };
+  }
+
+  /**
+   * Registra o LOGOUT do usuário e calcula a duração da sessão (em segundos)
+   * a partir do último LOGIN. Idempotente o suficiente para o front chamar
+   * ao sair; se não houver login anterior, grava sem duração.
+   */
+  async logout(userId: number) {
+    const lastLogin = await this.prisma.activityLog.findFirst({
+      where: { userId, action: 'LOGIN' },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const now = new Date();
+    const start = lastLogin?.loginAt ?? lastLogin?.createdAt ?? null;
+    const sessionDuration = start
+      ? Math.max(0, Math.round((now.getTime() - new Date(start).getTime()) / 1000))
+      : undefined;
+
+    return this.prisma.activityLog.create({
+      data: { userId, action: 'LOGOUT', logoutAt: now, sessionDuration },
+    });
   }
 }
