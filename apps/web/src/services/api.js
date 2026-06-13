@@ -112,6 +112,7 @@ export async function resolveContestation(id, payload) {
 /**
  * @typedef {Object} ApiTeacherDetail
  * @property {number} id
+ * @property {number} userId
  * @property {string|null} lattesLink
  * @property {boolean} isCoordinator
  * @property {{ name: string, email: string, keywords?: Array<any> }} user
@@ -153,17 +154,17 @@ export async function getStudentById(id) {
  */
 
 /**
- * TODO Back-5: GET /users/:userId/logs?semesterId=...
- * Model `ActivityLog` já existe em schema.prisma, mas LogsController/Service estão vazios.
- * Esperado: { data: ApiActivityLog[] } ou array direto.
+ * Logs de atividade de um usuário (paginado, mais recentes primeiro).
+ * GET /logs/user/:userId?page&pageSize — retorna
+ * { data: ApiActivityLog[], page, pageSize, total, totalPages }.
+ * (O backend ainda não filtra por semestre; params extras são ignorados.)
  * @param {number|string} userId
- * @param {{ semesterId?: number }} [params]
- * @returns {Promise<ApiActivityLog[]>}
+ * @param {{ page?: number, pageSize?: number }} [params]
+ * @returns {Promise<{ data: ApiActivityLog[], page: number, pageSize: number, total: number, totalPages: number }>}
  */
-// eslint-disable-next-line no-unused-vars
-export async function getUserLogs(userId, params) {
-  // eslint-disable-next-line no-throw-literal
-  throw { isNotImplemented: true, message: NOT_IMPLEMENTED_ERROR };
+export async function getUserLogs(userId, params = {}) {
+  const response = await api.get(`/logs/user/${userId}`, { params });
+  return response.data;
 }
 
 /**
@@ -261,6 +262,38 @@ export async function respondRequest(id, status, justification) {
     body.denialJustification = justification;
   }
   const response = await api.patch(`/requests/${id}/respond`, body);
+  return response.data;
+}
+
+// ─── Notificações (RF003) ─────────────────────────────────────
+/**
+ * @typedef {Object} ApiNotification
+ * @property {number} id
+ * @property {number} userId
+ * @property {string} type    NEW_REQUEST | REQUEST_RESPONSE | VACANCY_DEFINED | CONTESTATION
+ * @property {string} title
+ * @property {string} body
+ * @property {boolean} read
+ * @property {string|null} link
+ * @property {string} createdAt
+ */
+
+/**
+ * Notificações do usuário autenticado (mais recentes primeiro).
+ * @returns {Promise<ApiNotification[]>}
+ */
+export async function getNotifications() {
+  const response = await api.get('/notifications/me');
+  return response.data;
+}
+
+/**
+ * Marca uma notificação como lida.
+ * @param {number} id
+ * @returns {Promise<ApiNotification>}
+ */
+export async function markNotificationRead(id) {
+  const response = await api.patch(`/notifications/${id}/read`);
   return response.data;
 }
 

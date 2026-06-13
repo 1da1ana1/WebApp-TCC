@@ -7,6 +7,7 @@
     <nav class="header-nav-desktop">
       <ul class="header-links">
         <NavLinks />
+        <NotificationBell />
       </ul>
     </nav>
 
@@ -23,6 +24,7 @@
 
 <script setup>
 import NavLinks from '@/components/NavLinks.vue';
+import NotificationBell from '@/components/NotificationBell.vue';
 </script>
 
 <style scoped>

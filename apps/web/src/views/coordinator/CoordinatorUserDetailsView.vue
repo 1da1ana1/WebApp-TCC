@@ -411,6 +411,8 @@ async function loadUser() {
     const teacher = await getTeacherById(id)
     user.value = {
       id: teacher.id,
+      // userId é a chave dos logs (ActivityLog.userId) — distinta de teacher.id.
+      userId: teacher.userId ?? null,
       nome: teacher.user?.name || 'Docente',
       registro: teacher.id,
       type: 'teacher',
@@ -441,10 +443,18 @@ async function loadUser() {
 }
 
 async function loadLogs() {
-  if (!route.params.id) return
+  // Logs são indexados por User.id. Resolvemos via o perfil já carregado
+  // (teacher.userId). Sem userId (ex.: aluno — depende de GET /students/:id,
+  // ainda stub), tratamos como pendente em vez de consultar com id errado.
+  const targetUserId = user.value.userId
+  if (!targetUserId) {
+    logs.value = []
+    logsState.value = { isLoading: false, error: null, notImplemented: true, loaded: true }
+    return
+  }
   logsState.value = { isLoading: true, error: null, notImplemented: false, loaded: false }
   try {
-    const raw = await getUserLogs(route.params.id, { semester: semestreSelecionado.value })
+    const raw = await getUserLogs(targetUserId, { semester: semestreSelecionado.value })
     const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
     logs.value = list.map(normalizeLog)
     logsState.value = { isLoading: false, error: null, notImplemented: false, loaded: true }
