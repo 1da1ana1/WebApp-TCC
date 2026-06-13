@@ -80,28 +80,28 @@ export const NOT_IMPLEMENTED_ERROR = 'NOT_IMPLEMENTED';
  */
 
 /**
- * Lista contestações da coordenação logada.
- * TODO Back-4: GET /contestations?status=PENDING (recomendado: filtro por semestre ativo)
- * Esperado: { data: ApiContestation[] }  — ou array direto.
+ * Lista as contestações pendentes (coordenador).
+ * GET /contestations — retorna array de ApiContestation com status PENDING,
+ * incluindo `teacher.user` e `vacancy`.
  * @returns {Promise<ApiContestation[]>}
  */
 export async function getContestations() {
-  // eslint-disable-next-line no-throw-literal
-  throw { isNotImplemented: true, message: NOT_IMPLEMENTED_ERROR };
+  const response = await api.get('/contestations');
+  return response.data;
 }
 
 /**
- * Resolve uma contestação (aceita/recusa).
- * TODO Back-4: PATCH /contestations/:id  body: { status: 'ACCEPTED'|'REJECTED', justification?: string }
- * Esperado: ApiContestation resolvido.
+ * Resolve uma contestação (aceita/recusa) — coordenador.
+ * PATCH /contestations/:id
+ *   body: { status: 'ACCEPTED'|'REJECTED', newQuantity?: number, justification?: string }
+ *   `newQuantity` é obrigatório quando status=ACCEPTED (vira a nova Vacancy.quantity).
  * @param {number} id
- * @param {{ status: 'ACCEPTED'|'REJECTED', justification?: string }} payload
+ * @param {{ status: 'ACCEPTED'|'REJECTED', newQuantity?: number, justification?: string }} payload
  * @returns {Promise<ApiContestation>}
  */
-// eslint-disable-next-line no-unused-vars
 export async function resolveContestation(id, payload) {
-  // eslint-disable-next-line no-throw-literal
-  throw { isNotImplemented: true, message: NOT_IMPLEMENTED_ERROR };
+  const response = await api.patch(`/contestations/${id}`, payload);
+  return response.data;
 }
 
 // ─── Perfil de usuário visto pelo coordenador (Back-5) ────────

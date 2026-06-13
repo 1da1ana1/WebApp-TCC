@@ -114,7 +114,9 @@ import {
  * @property {boolean} isResolving  Flag de loading por linha
  */
 
-const emit = defineEmits(['accepted'])
+// Mantido por compatibilidade com o listener @accepted do dashboard, embora
+// o accept agora resolva a quantidade inline (sem redirecionar).
+defineEmits(['accepted'])
 
 // ── Estado da listagem ─────────────────────────────────────────
 const contests = /** @type {import('vue').Ref<UiContestation[]>} */ (ref([]))
@@ -139,9 +141,17 @@ function normalizeContestation(raw) {
     teacherId: Number(raw?.teacherId ?? raw?.teacher?.id),
     teacherName: raw?.teacher?.user?.name || 'Docente desconhecido',
     reason: raw?.contestationReason || '',
-    // Backend hoje só tem PENDING/RESOLVED. Quando a distinção
-    // accepted/rejected ficar disponível, ajustar aqui.
-    status: apiStatus === 'RESOLVED' ? 'accepted' : 'pending',
+    vacancyId: raw?.vacancyId ?? raw?.vacancy?.id ?? null,
+    // Quantidade atual da vaga — usada para pré-preencher o prompt do accept.
+    currentQuantity: raw?.vacancy?.quantity ?? null,
+    // Backend retorna PENDING | ACCEPTED | REJECTED. A listagem só traz
+    // PENDING; ACCEPTED/REJECTED viriam de um histórico futuro.
+    status:
+      apiStatus === 'ACCEPTED'
+        ? 'accepted'
+        : apiStatus === 'REJECTED'
+          ? 'rejected'
+          : 'pending',
     isResolving: false,
   }
 }
@@ -175,44 +185,53 @@ async function loadContests() {
   }
 }
 
-// ── Ações: aceitar / recusar (passam pelo stub Back-4) ─────────
+// ── Ações: aceitar / recusar ───────────────────────────────────
+// Aceitar exige a nova quantidade de vagas (backend atualiza Vacancy.quantity
+// na mesma transação). Coletamos via prompt inline, pré-preenchido com a
+// quantidade atual da vaga.
 async function openAcceptContest(contest) {
   if (contest.isResolving) return
+
+  const { value: qtyRaw } = await Swal.fire({
+    title: 'Aceitar contestação',
+    input: 'number',
+    inputLabel: `Nova quantidade de vagas para ${contest.teacherName}`,
+    inputValue: contest.currentQuantity ?? '',
+    inputAttributes: { min: '0', step: '1' },
+    showCancelButton: true,
+    confirmButtonText: 'Confirmar',
+    confirmButtonColor: '#28a745',
+    inputValidator: (v) => {
+      if (v === '' || v === null) return 'Informe a nova quantidade de vagas.'
+      const n = Number(v)
+      if (!Number.isInteger(n) || n < 0) return 'Use um número inteiro maior ou igual a 0.'
+      return null
+    },
+  })
+
+  // Cancelado / fechado sem confirmar.
+  if (qtyRaw === undefined) return
+
+  const newQuantity = Number(qtyRaw)
   contest.isResolving = true
   try {
-    await resolveContestation(contest.id, { status: 'ACCEPTED' })
+    await resolveContestation(contest.id, { status: 'ACCEPTED', newQuantity })
     contest.status = 'accepted'
     Swal.fire({
-      title: 'Solicitação aceita com sucesso!',
-      text: 'Você está sendo redirecionado para a página de Definição de vagas para realizar o ajuste.',
       icon: 'success',
-      timer: 3000,
+      title: 'Contestação aceita!',
+      text: `Vagas do docente atualizadas para ${newQuantity}.`,
+      timer: 2200,
       timerProgressBar: true,
       showConfirmButton: false,
-      willClose: () => {
-        emit('accepted', {
-          id: contest.teacherId,
-          name: contest.teacherName,
-          contestationId: contest.id,
-        })
-      },
     })
   } catch (err) {
-    if (err?.isNotImplemented) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Endpoint pendente (Back-4)',
-        text: 'A persistência da decisão será habilitada quando o backend de contestações estiver disponível.',
-        confirmButtonColor: '#065f8b',
-      })
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erro ao aceitar contestação',
-        text: extractApiError(err) || 'Tente novamente.',
-        confirmButtonColor: '#c0392b',
-      })
-    }
+    Swal.fire({
+      icon: 'error',
+      title: 'Erro ao aceitar contestação',
+      text: extractApiError(err) || 'Tente novamente.',
+      confirmButtonColor: '#c0392b',
+    })
   } finally {
     contest.isResolving = false
   }
