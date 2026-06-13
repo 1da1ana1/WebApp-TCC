@@ -106,7 +106,13 @@
 
 html,
 body {
-  height: 100vh;
+  /* min-height (não height) — com `height: 100vh` o <html> ficava travado
+     na altura da viewport e o conteúdo transbordava só no <body>, o que
+     deixava `window.scrollTo`/`window.scrollY` inertes (eles operam sobre o
+     scrollingElement = <html>). Isso quebrava a navegação do menu lateral
+     da página pública e o botão "voltar ao topo". Com min-height o documento
+     cresce com o conteúdo e o scroll volta a ser do window. */
+  min-height: 100vh;
   font-family: 'Poppins', sans-serif;
   /* Trava o scroll horizontal nos dois elementos. Aplicar só no body
      deixa o html livre pra rolar lateralmente em alguns cenários
