@@ -264,6 +264,7 @@ import {
   getUserLogs,
   getRequestsByUserId,
   getTeacherStatsById,
+  getTeacherVacancies,
   NOT_IMPLEMENTED_ERROR,
 } from '@/services/api'
 
@@ -469,10 +470,16 @@ async function loadLogs() {
 }
 
 async function loadRequests() {
-  if (!route.params.id) return
+  // Backend espera User.id; resolvemos via o perfil carregado (teacher.userId).
+  const targetUserId = user.value.userId
+  if (!targetUserId) {
+    requests.value = []
+    requestsState.value = { isLoading: false, error: null, notImplemented: true, loaded: true }
+    return
+  }
   requestsState.value = { isLoading: true, error: null, notImplemented: false, loaded: false }
   try {
-    const raw = await getRequestsByUserId(route.params.id, { semester: semestreSelecionado.value })
+    const raw = await getRequestsByUserId(targetUserId, { semester: semestreSelecionado.value })
     const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
     requests.value = list.map(normalizeRequest)
     requestsState.value = { isLoading: false, error: null, notImplemented: false, loaded: true }
@@ -487,15 +494,39 @@ async function loadRequests() {
 }
 
 async function loadStats() {
-  if (user.value.type !== 'teacher' || !user.value.id) {
+  // Backend espera User.id (resolve docente). Sem userId (ex.: aluno), pendente.
+  if (user.value.type !== 'teacher' || !user.value.userId) {
     statsState.value = { isLoading: false, error: null, notImplemented: true, loaded: true }
     estatisticas.value = null
     return
   }
   statsState.value = { isLoading: true, error: null, notImplemented: false, loaded: false }
   try {
-    const raw = await getTeacherStatsById(user.value.id, { semester: semestreSelecionado.value })
-    estatisticas.value = raw
+    const raw = await getTeacherStatsById(user.value.userId, { semester: semestreSelecionado.value })
+
+    // vagasTotais não vem do endpoint de stats — somamos as vagas do docente.
+    let vagasTotais = 0
+    try {
+      const vacancies = await getTeacherVacancies(user.value.id)
+      vagasTotais = (Array.isArray(vacancies) ? vacancies : []).reduce(
+        (sum, v) => sum + (Number(v?.quantity) || 0),
+        0,
+      )
+    } catch {
+      // tolerante — sem vagas, mantém 0
+    }
+
+    // Normaliza o shape do backend para o que os StatisticCard esperam.
+    const totalRequests = raw?.totalRequests ?? 0
+    const acceptedRequests = raw?.acceptedRequests ?? 0
+    estatisticas.value = {
+      recebidas: totalRequests,
+      aceitas: acceptedRequests,
+      recusadas: Math.max(totalRequests - acceptedRequests, 0),
+      taxaAceite: parseInt(raw?.acceptanceRate, 10) || 0,
+      vagasOcupadas: raw?.activeOrientations ?? 0,
+      vagasTotais,
+    }
     statsState.value = { isLoading: false, error: null, notImplemented: false, loaded: true }
   } catch (err) {
     estatisticas.value = null

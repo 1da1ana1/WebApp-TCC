@@ -179,31 +179,27 @@ export async function getUserLogs(userId, params = {}) {
  */
 
 /**
- * TODO Back-5: GET /users/:userId/requests?semesterId=...
- * Hoje só existe GET /requests que retorna do usuário LOGADO — coordenador
- * precisa de um endpoint capaz de ler o histórico de OUTRO usuário.
- * Esperado: { data: ApiRequestEntry[] } ou array direto.
- * @param {number|string} userId
- * @param {{ semesterId?: number }} [params]
+ * Solicitações de um usuário (coordenador) — onde ele é aluno OU professor.
+ * GET /requests/user/:userId — inclui student/teacher + keywords.
+ * @param {number|string} userId  User.id do alvo
+ * @param {object} [params]
  * @returns {Promise<ApiRequestEntry[]>}
  */
-// eslint-disable-next-line no-unused-vars
-export async function getRequestsByUserId(userId, params) {
-  // eslint-disable-next-line no-throw-literal
-  throw { isNotImplemented: true, message: NOT_IMPLEMENTED_ERROR };
+export async function getRequestsByUserId(userId, params = {}) {
+  const response = await api.get(`/requests/user/${userId}`, { params });
+  return response.data;
 }
 
 /**
- * TODO Back-5: GET /reports/teacher-stats/:teacherId
- * Hoje /reports/teacher-stats só retorna do usuário LOGADO.
- * @param {number|string} teacherId
+ * Estatísticas de um docente por User.id (coordenador).
+ * GET /reports/teacher-stats/:id (aceita ?semesterId).
+ * @param {number|string} userId  User.id do docente alvo
  * @param {{ semesterId?: number }} [params]
  * @returns {Promise<any>}
  */
-// eslint-disable-next-line no-unused-vars
-export async function getTeacherStatsById(teacherId, params) {
-  // eslint-disable-next-line no-throw-literal
-  throw { isNotImplemented: true, message: NOT_IMPLEMENTED_ERROR };
+export async function getTeacherStatsById(userId, params = {}) {
+  const response = await api.get(`/reports/teacher-stats/${userId}`, { params });
+  return response.data;
 }
 
 export async function getMyOrientations() {
