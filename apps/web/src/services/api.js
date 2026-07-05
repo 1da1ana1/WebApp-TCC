@@ -293,4 +293,44 @@ export async function markNotificationRead(id) {
   return response.data;
 }
 
+// ─── Whitelist / Lista de acesso (RF018) ─────────────────────
+/**
+ * @typedef {Object} WhitelistUploadResult
+ * @property {boolean} success
+ * @property {number} importedCount       usuários efetivamente importados
+ * @property {number} skippedCount        linhas inválidas descartadas
+ * @property {number} totalRows           linhas de dados no arquivo (sem header)
+ * @property {string} message             resumo pronto para exibir ao usuário
+ * @property {Array<{ line: number, raw: string, reason: string }>} rejections
+ */
+
+/**
+ * Envia um arquivo CSV de lista de acesso (coordenador).
+ * POST /whitelist/upload — multipart/form-data, campo `file`.
+ * @param {File} file  arquivo .csv selecionado pelo usuário
+ * @returns {Promise<WhitelistUploadResult>}
+ */
+export async function uploadWhitelist(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/whitelist/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+}
+
+// ─── Transferência de coordenação (RF020) ────────────────────
+/**
+ * Transfere a coordenação do coordenador logado para outro docente.
+ * POST /coordinator/transfer — body { targetTeacherId }.
+ * Restrito a COORDINATOR. Após o sucesso, o token atual fica defasado
+ * (o usuário virou TEACHER) e deve ser descartado pelo chamador.
+ * @param {number} targetTeacherId  Teacher.id do novo coordenador
+ * @returns {Promise<{ success: boolean, message: string, from: object, to: object }>}
+ */
+export async function transferCoordination(targetTeacherId) {
+  const response = await api.post('/coordinator/transfer', { targetTeacherId });
+  return response.data;
+}
+
 export default api;

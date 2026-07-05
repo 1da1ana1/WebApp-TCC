@@ -9,6 +9,8 @@
           <button class="tab-btn" :class="{ active: currentTab === 'vacancies' }" @click="currentTab = 'vacancies'">Definição de vagas</button>
           <button class="tab-btn" :class="{ active: currentTab === 'contests' }" @click="currentTab = 'contests'">Vagas contestadas</button>
           <button class="tab-btn" :class="{ active: currentTab === 'stats' }" @click="currentTab = 'stats'">Estatísticas</button>
+          <button class="tab-btn" :class="{ active: currentTab === 'whitelist' }" @click="currentTab = 'whitelist'">Lista de acesso</button>
+          <button class="tab-btn" :class="{ active: currentTab === 'transfer' }" @click="currentTab = 'transfer'">Transferir coordenação</button>
         </nav>
 
         <main class="tab-content">
@@ -20,6 +22,8 @@
           />
           <ContestsPanel v-else-if="currentTab === 'contests'" @accepted="handleContestAccepted" />
           <StatsPanel v-else-if="currentTab === 'stats'" />
+          <WhitelistPanel v-else-if="currentTab === 'whitelist'" />
+          <TransferPanel v-else-if="currentTab === 'transfer'" />
         </main>
       </div>
     </div>
@@ -33,6 +37,8 @@ import CalendarPanel from './panel/CalendarPanel.vue'
 import VacanciesPanel from './panel/VacanciesPanel.vue'
 import ContestsPanel from './panel/ContestsPanel.vue'
 import StatsPanel from './panel/StatsPanel.vue'
+import WhitelistPanel from './panel/WhitelistPanel.vue'
+import TransferPanel from './panel/TransferPanel.vue'
 
 const currentTab = ref('calendar')
 const selectedProfessors = ref([

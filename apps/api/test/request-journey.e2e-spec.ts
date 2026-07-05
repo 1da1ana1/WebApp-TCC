@@ -1,14 +1,13 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaClient } from '@prisma/client';
+import { INestApplication } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from '../src/app.module';
+import { createE2EApp } from './utils/e2e-app';
 
 describe('Request Journey (e2e)', () => {
   let app: INestApplication<App>;
-  const prisma = new PrismaClient();
+  let prisma: PrismaService;
 
   const suffix = Date.now();
   const password = '123456';
@@ -26,13 +25,7 @@ describe('Request Journey (e2e)', () => {
   let studentId: number;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true }));
-    await app.init();
+    ({ app, prisma } = await createE2EApp());
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -146,6 +139,11 @@ describe('Request Journey (e2e)', () => {
     await prisma.coordinator.deleteMany({ where: { teacherId: coordinatorTeacherId } });
     await prisma.student.deleteMany({ where: { id: studentId } });
     await prisma.teacher.deleteMany({ where: { id: { in: [coordinatorTeacherId, teacherId] } } });
+    // Logins geram ActivityLog (RF016) e os fluxos geram Notification; ambos
+    // têm FK para User e precisam sair antes do usuário.
+    const userIds = [coordinatorUserId, teacherUserId, studentUserId];
+    await prisma.activityLog.deleteMany({ where: { userId: { in: userIds } } });
+    await prisma.notification.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.user.deleteMany({
       where: {
         id: { in: [coordinatorUserId, teacherUserId, studentUserId] },
@@ -153,8 +151,8 @@ describe('Request Journey (e2e)', () => {
     });
     await prisma.semester.deleteMany({ where: { id: semesterId } });
 
+    // app.close() dispara o onModuleDestroy do PrismaService ($disconnect).
     await app.close();
-    await prisma.$disconnect();
   });
 
   it('authenticates teacher and student, creates vacancy, and creates request with DB validation', async () => {

@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+playwright-report
+test-results
+.git
+.gitignore
+*.log
+Dockerfile
+.dockerignore
+# Mantém .env.production (consumido pelo `vite build`).
+.env.local
+.env.*.local

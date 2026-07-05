@@ -1,0 +1,28 @@
+# Banco de dados isolado para a suíte de testes (e2e) e para CI.
+# Sobe um Postgres efêmero numa porta dedicada (5433) para não colidir com o
+# banco de desenvolvimento. Os dados vivem só na vida do container.
+#
+# Uso:
+#   npm run db:test:up      # sobe e espera ficar saudável
+#   npm run test:e2e        # roda os e2e contra este banco (.env.test)
+#   npm run db:test:down    # derruba e limpa o volume
+
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: webapptcc-postgres-test
+    restart: "no"
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: webapp_test
+    ports:
+      - "5433:5432"
+    # tmpfs: dados em memória — mais rápido e descartável entre execuções.
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d webapp_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 20

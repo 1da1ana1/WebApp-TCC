@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TeachersService } from './teachers.service';
 import { ListTeachersQueryDto } from './dto/list-teachers-query.dto';
@@ -23,8 +23,9 @@ export class TeachersController {
   @ApiOperation({ summary: 'Buscar docente por ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Docente encontrado' })
+  @ApiResponse({ status: 400, description: 'ID inválido (não numérico)' })
   @ApiResponse({ status: 404, description: 'Docente não encontrado' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.teachersService.findOne(id);
   }
 }

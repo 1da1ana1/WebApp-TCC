@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { buildValidationPipe } from './common/validation';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -25,7 +25,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(buildValidationPipe());
 
   await app.listen(process.env.PORT ?? 3000);
 }

@@ -48,14 +48,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
 const SEED_PASSWORD = '123456'
+
+// Mapeia a role (typeUser) para o dashboard correspondente após o SSO.
+const DASHBOARD_BY_TYPE = {
+  student: '/perfil/aluno',
+  teacher: '/perfil/docente',
+  coordinator: '/perfil-coordenador',
+}
 
 const roles = [
   {
@@ -87,6 +95,27 @@ const roles = [
 const loading = ref(false)
 const pendingRole = ref(null)
 const error = ref('')
+
+// RF019 — trata o retorno do callback do SSO na querystring:
+//  - error=unauthorized_bsi → e-mail fora da whitelist (Cenário A);
+//  - sso_token=<jwt>        → autorizado (Cenário B): finaliza a sessão.
+onMounted(() => {
+  if (route.query.error === 'unauthorized_bsi') {
+    error.value = 'Acesso negado. Sistema exclusivo para o curso de BSI.'
+    return
+  }
+
+  const token = route.query.sso_token
+  if (typeof token === 'string' && token) {
+    const ok = authStore.loginWithToken(token)
+    if (ok) {
+      const dest = DASHBOARD_BY_TYPE[authStore.user?.type] || '/'
+      router.replace(dest)
+    } else {
+      error.value = 'Falha ao processar o login institucional. Tente novamente.'
+    }
+  }
+})
 
 const loginAs = async (role) => {
   loading.value = true

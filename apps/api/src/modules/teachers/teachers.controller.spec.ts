@@ -43,14 +43,14 @@ describe('TeachersController', () => {
 
     (service.findOne as jest.Mock).mockResolvedValue(mock);
 
-    const result = await controller.findOne('1');
+    const result = await controller.findOne(1);
     expect(result).toEqual(mock);
-    expect(service.findOne).toHaveBeenCalledWith('1');
+    expect(service.findOne).toHaveBeenCalledWith(1);
   });
 
   it('should throw NotFoundException when teacher is not found', async () => {
     (service.findOne as jest.Mock).mockRejectedValue(new NotFoundException());
 
-    await expect(controller.findOne('999')).rejects.toThrow(NotFoundException);
+    await expect(controller.findOne(999)).rejects.toThrow(NotFoundException);
   });
 });

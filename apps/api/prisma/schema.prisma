@@ -7,6 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// Papel de um e-mail na lista de acesso (RF018). Restrito a STUDENT/TEACHER:
+/// COORDINATOR é provisionado manualmente, nunca via upload de whitelist.
+enum WhitelistRole {
+  STUDENT
+  TEACHER
+}
+
+/// Lista de acesso (whitelist) importada pelo coordenador via CSV (RF018).
+/// O `email` é único: um mesmo e-mail não pode aparecer duas vezes, e o
+/// `createMany({ skipDuplicates: true })` do upload ignora silenciosamente
+/// e-mails já presentes.
+model Whitelist {
+  id        Int           @id @default(autoincrement())
+  email     String        @unique
+  role      WhitelistRole
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
 model User {
   id          Int           @id @default(autoincrement())
   name        String
@@ -157,7 +176,8 @@ model ActivityLog {
   id              Int       @id @default(autoincrement())
   userId          Int
   user            User      @relation(fields: [userId], references: [id])
-  action          String    // Ex: "LOGIN", "CREATE_REQUEST", "ACCEPT_STUDENT"
+  action          String    // Ex: "LOGIN", "CREATE_REQUEST", "ACCEPT_STUDENT", "TRANSFER_COORDINATION"
+  details         String?   // Contexto livre da ação. Ex.: "de quem -> para quem" na transferência de coordenação (RF020)
   loginAt         DateTime?
   logoutAt        DateTime?
   sessionDuration Int?

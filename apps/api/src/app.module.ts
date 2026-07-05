@@ -15,6 +15,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { ReportsModule } from './modules/reports/reports.module';
 import { LogsModule } from './modules/logs/logs.module';
 import { ContestationsModule } from './modules/contestations/contestations.module';
+import { WhitelistModule } from './modules/whitelist/whitelist.module';
+import { CoordinatorModule } from './modules/coordinator/coordinator.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { ContestationsModule } from './modules/contestations/contestations.modul
     ReportsModule,
     LogsModule,
     ContestationsModule,
+    WhitelistModule,
+    CoordinatorModule,
     PrismaModule,
     AuthModule,
   ],

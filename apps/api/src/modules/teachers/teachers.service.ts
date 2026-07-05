@@ -49,11 +49,9 @@ export class TeachersService {
     });
   }
 
-  async findOne(id: string) {
-    const teacherId = Number(id);
-
+  async findOne(id: number) {
     const teacher = await this.prisma.teacher.findUnique({
-      where: { id: teacherId },
+      where: { id },
       include: {
         user: {
           select: {

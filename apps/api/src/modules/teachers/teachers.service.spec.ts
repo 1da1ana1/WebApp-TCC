@@ -45,7 +45,7 @@ describe('TeachersService', () => {
 
     (prisma.teacher.findUnique as jest.Mock).mockResolvedValue(mock);
 
-    const result = await service.findOne('1');
+    const result = await service.findOne(1);
     expect(result).toEqual(mock);
     expect(prisma.teacher.findUnique).toHaveBeenCalledWith({
       where: { id: 1 },
@@ -69,6 +69,6 @@ describe('TeachersService', () => {
   it('should throw NotFoundException when teacher does not exist', async () => {
     (prisma.teacher.findUnique as jest.Mock).mockResolvedValue(null);
 
-    await expect(service.findOne('999')).rejects.toThrow(NotFoundException);
+    await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
   });
 });
