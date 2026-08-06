@@ -3,11 +3,20 @@ dist
 coverage
 playwright-report
 test-results
+e2e
+playwright.config.js
+vitest.config.js
+.vite
+.vscode
+deploy
+README.md
 .git
 .gitignore
 *.log
 Dockerfile
 .dockerignore
-# Mantém .env.production (consumido pelo `vite build`).
+# Mantém .env.production (consumido pelo `vite build`); o resto fica de fora.
+# O `vite build` também leria .env, mas ele guarda valores de desenvolvimento.
+.env
 .env.local
 .env.*.local

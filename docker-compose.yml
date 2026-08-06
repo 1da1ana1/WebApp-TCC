@@ -1,11 +1,16 @@
 # ──────────────────────────────────────────────────────────────────────────
 # Ambiente completo (produção/staging): PostgreSQL + API NestJS + Front (Nginx).
 #
+#   cp .env.example .env               # OBRIGATÓRIO antes do primeiro up
 #   docker compose up --build          # sobe tudo
 #   docker compose down                # derruba (mantém o volume do banco)
 #   docker compose down -v             # derruba e apaga os dados
 #
-# Variáveis: copie .env.example para .env e ajuste (sobretudo JWT_SECRET).
+# POSTGRES_PASSWORD e JWT_SECRET usam a sintaxe `${VAR:?erro}`: sem .env o
+# compose falha na hora, em vez de subir com credenciais padrão conhecidas.
+#
+# Os healthchecks de `api` e `web` vivem nas próprias imagens (HEALTHCHECK nos
+# Dockerfiles), para que valham também fora do compose.
 # ──────────────────────────────────────────────────────────────────────────
 
 services:
@@ -14,7 +19,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env (copie de .env.example)}
       POSTGRES_DB: ${POSTGRES_DB:-webapp_db}
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -30,21 +35,26 @@ services:
     restart: unless-stopped
     environment:
       # Aponta para o serviço `db` na rede interna do compose.
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-webapp_db}?schema=public
-      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-webapp_db}?schema=public
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env (copie de .env.example)}
       PORT: 3000
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "${API_PORT:-3000}:3000"
+      # Só loopback: o acesso público entra pelo Nginx (/api → api:3000).
+      # Publicar em 0.0.0.0 exporia a API por fora do proxy.
+      - "127.0.0.1:${API_PORT:-3000}:3000"
 
   web:
     build:
       context: ./apps/web
     restart: unless-stopped
     depends_on:
-      - api
+      # `service_healthy`, e não a forma curta: a API roda `migrate deploy`
+      # antes de escutar, e o Nginx devolveria 502 se subisse junto.
+      api:
+        condition: service_healthy
     ports:
       - "${WEB_PORT:-8080}:80"
 

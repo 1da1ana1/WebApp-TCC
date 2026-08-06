@@ -37,8 +37,28 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY package*.json ./
 
+# Desliga a checagem de versão da CLI do Prisma (evita uma chamada HTTP a cada
+# start do container).
+ENV CHECKPOINT_DISABLE=1
+
+# Usuário `node` (uid 1000) já existe na imagem oficial. A aplicação apenas lê
+# os arquivos copiados, então não é preciso ajustar ownership.
+USER node
+
 EXPOSE 3000
+
+# start-period cobre o `migrate deploy`, que roda antes do listen.
+HEALTHCHECK --interval=10s --timeout=5s --start-period=40s --retries=5 \
+  CMD wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1
 
 # Aplica as migrations (baseline + futuras) e sobe a API.
 # `migrate deploy` é idempotente e seguro para produção (nunca dá reset).
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+#
+# ATENÇÃO ao caminho `dist/src/main.js`: o tsc aninha a saída sob `src/` porque
+# o projeto compila arquivos fora de src/ (prisma/, config/, seed.ts) e a raiz
+# comum passa a ser a raiz do projeto. O `rootDir: "."` no tsconfig.json fixa
+# esse layout — não troque por `dist/main.js`.
+#
+# Usamos o binário local em vez de `npx` para não depender de resolução via
+# rede/cache do npm rodando como usuário não-root.
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
