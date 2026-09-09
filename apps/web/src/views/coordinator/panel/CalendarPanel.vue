@@ -19,27 +19,27 @@
       >
         <label>{{ item.label }}</label>
         <div class="date-inputs">
-          <div class="input-wrapper" :class="{ 'input-error': item.error }">
-            <input
-              type="date"
-              v-model="item.startDate"
-              class="date-input"
-              :disabled="isSaving"
-              @change="validarItem(item)"
-            />
-            <i class="bi bi-calendar"></i>
-          </div>
-          <span class="arrow">➝</span>
-          <div class="input-wrapper" :class="{ 'input-error': item.error }">
-            <input
-              type="date"
+          <!-- DateFieldBR em vez de <input type="date">: o campo nativo exibe a
+               data no formato do navegador do usuário (mm/dd/aaaa em interface
+               inglesa) e a página não pode mudar isso. -->
+          <DateFieldBR
+            v-model="item.startDate"
+            :disabled="isSaving"
+            :aria-label="`${item.label} — início`"
+            @update:modelValue="validarItem(item)"
+          />
+          <!-- Etapas de fase única (endKey null) têm só uma data no schema;
+               mostrar um segundo campo sugeriria que ele é gravado, e não é. -->
+          <template v-if="item.endKey">
+            <span class="arrow">➝</span>
+            <DateFieldBR
               v-model="item.endDate"
-              class="date-input"
               :disabled="isSaving"
-              @change="validarItem(item)"
+              :aria-label="`${item.label} — fim`"
+              @update:modelValue="validarItem(item)"
             />
-            <i class="bi bi-calendar"></i>
-          </div>
+          </template>
+          <span v-else class="single-phase-hint">(data única)</span>
         </div>
         <p v-if="item.error" class="error-inline">
           <i class="bi bi-exclamation-circle"></i> {{ item.error }}
@@ -59,18 +59,50 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
 import { createSemester } from '@/services/api'
+import { useTimelineStore } from '@/stores/timelineData'
+import DateFieldBR from '@/components/DateFieldBR.vue'
+
+const timelineStore = useTimelineStore()
 
 // Cada item carrega as chaves do payload que recebem startDate/endDate.
 // Etapas com fase única no schema (orientação, homologação, encerramento)
 // só consomem startKey; endKey fica null e a data final não é persistida.
+//
+// A ordem das etapas aqui é a da linha do tempo (STEP_DEFINITIONS em
+// stores/timelineData.js), para o painel bater com o que os usuários veem.
 const cronogramaItems = ref([
   {
     label: 'Definição de vagas',
     startDate: '', endDate: '', error: '',
     startKey: 'vacancyDefStartDate', endKey: 'vacancyDefEndDate',
+  },
+  {
+    label: 'Cadastro de temas',
+    startDate: '', endDate: '', error: '',
+    startKey: 'themeRegStartDate', endKey: 'themeRegEndDate',
+  },
+  {
+    label: 'Período de busca e solicitação',
+    startDate: '', endDate: '', error: '',
+    startKey: 'searchStartDate', endKey: 'searchEndDate',
+  },
+  {
+    label: 'Análise das solicitações',
+    startDate: '', endDate: '', error: '',
+    startKey: 'analysisStartDate', endKey: 'analysisEndDate',
+  },
+  {
+    label: 'Confirmação do vínculo',
+    startDate: '', endDate: '', error: '',
+    startKey: 'linkConfirmStartDate', endKey: 'linkConfirmEndDate',
+  },
+  {
+    label: 'Encerramento do período de buscas',
+    startDate: '', endDate: '', error: '',
+    startKey: 'closureDate', endKey: null,
   },
   {
     label: 'Início das orientações',
@@ -82,31 +114,45 @@ const cronogramaItems = ref([
     startDate: '', endDate: '', error: '',
     startKey: 'homologationDate', endKey: null,
   },
-  {
-    label: 'Análise das solicitações',
-    startDate: '', endDate: '', error: '',
-    startKey: 'analysisStartDate', endKey: 'analysisEndDate',
-  },
-  {
-    label: 'Encerramento do período de buscas',
-    startDate: '', endDate: '', error: '',
-    startKey: 'closureDate', endKey: null,
-  },
-  {
-    label: 'Período de busca e solicitação',
-    startDate: '', endDate: '', error: '',
-    startKey: 'searchStartDate', endKey: 'searchEndDate',
-  },
-  {
-    label: 'Confirmação do vínculo',
-    startDate: '', endDate: '', error: '',
-    startKey: 'linkConfirmStartDate', endKey: 'linkConfirmEndDate',
-  },
 ])
 
 const isSaving = ref(false)
+const isLoading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+
+// ISO ("2026-03-01T00:00:00.000Z") → "YYYY-MM-DD" para o <input type="date">.
+// UTC, e não hora local, pelo mesmo motivo do store: em UTC-3 o getDate() local
+// devolveria o dia anterior.
+function isoToInputDate(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const dd = String(date.getUTCDate()).padStart(2, '0')
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0')
+  return `${date.getUTCFullYear()}-${mm}-${dd}`
+}
+
+// Preenche o formulário com o cronograma já salvo, para o coordenador ver e
+// editar o que está no ar em vez de encarar campos vazios.
+function preencherComSemestre(semester) {
+  if (!semester) return
+  cronogramaItems.value.forEach((item) => {
+    item.startDate = isoToInputDate(semester[item.startKey])
+    item.endDate = item.endKey ? isoToInputDate(semester[item.endKey]) : ''
+    item.error = ''
+  })
+}
+
+onMounted(async () => {
+  isLoading.value = true
+  try {
+    await timelineStore.loadActiveSemester()
+    preencherComSemestre(timelineStore.semester)
+  } finally {
+    isLoading.value = false
+  }
+})
 
 function clearMessages(delay = 4000) {
   setTimeout(() => {
@@ -117,7 +163,8 @@ function clearMessages(delay = 4000) {
 
 // ── Validação de um item individual ────────────────────────────
 const validarItem = (item) => {
-  if (!item.startDate || !item.endDate) {
+  // Etapa de fase única não tem data de fim para comparar.
+  if (!item.endKey || !item.startDate || !item.endDate) {
     item.error = ''
     return
   }
@@ -192,15 +239,15 @@ const confirmarDatas = async () => {
   successMessage.value = ''
   errorMessage.value = ''
 
-  // 1. Todos os campos preenchidos?
-  const algumVazio = items.some(i => !i.startDate || !i.endDate)
+  // 1. Todos os campos preenchidos? (fase única exige apenas o início)
+  const algumVazio = items.some(i => !i.startDate || (i.endKey && !i.endDate))
   if (algumVazio) {
     Swal.fire({ icon: 'warning', title: 'Atenção', text: 'Preencha todas as datas antes de confirmar.' })
     return
   }
 
   // 2. Alguma data de fim anterior ao início?
-  const erroOrdem = items.find(i => i.endDate < i.startDate)
+  const erroOrdem = items.find(i => i.endKey && i.endDate && i.endDate < i.startDate)
   if (erroOrdem) {
     Swal.fire({
       icon: 'error',
@@ -230,6 +277,14 @@ const confirmarDatas = async () => {
   isSaving.value = true
   try {
     await createSemester(payload)
+
+    // Recarrega a fonte única da linha do tempo. Sem isto o store continua com
+    // o semestre antigo em memória (ele só busca uma vez, no primeiro mount) e
+    // os cronogramas do aluno, do docente e da página pública seguiriam
+    // mostrando as datas anteriores até o usuário recarregar o navegador.
+    await timelineStore.loadActiveSemester()
+    preencherComSemestre(timelineStore.semester)
+
     successMessage.value = 'Cronograma salvo com sucesso!'
     Swal.fire({
       icon: 'success',
@@ -260,18 +315,13 @@ const confirmarDatas = async () => {
 .calendar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem 4rem; margin-bottom: 3rem; }
 .date-group label { display: block; font-weight: 600; font-style: italic; margin-bottom: 0.5rem; color: #000; }
 .date-inputs { display: flex; align-items: center; gap: 1rem; }
-.input-wrapper { border: 2px solid #aabcfc; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; width: 180px; color: #666; font-size: 0.9rem; background: #fff; position: relative; }
-.date-input { border: none; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; color: #333; width: 100%; background: transparent; cursor: pointer; }
-.date-input:disabled { cursor: not-allowed; opacity: 0.6; }
-.date-input::-webkit-calendar-picker-indicator { position: absolute; left: 0; right: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-.input-wrapper i { pointer-events: none; color: #aabcfc; }
+.single-phase-hint { color: #777; font-size: 0.8rem; font-style: italic; }
+/* A moldura e o ícone dos campos de data agora vivem em DateFieldBR.vue. */
 .arrow { color: #666; font-weight: bold; }
 .action-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee; }
 .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ── Estados de erro ────────────────────────────────────────── */
-.input-error { border-color: #e74c3c; }
-.input-error i { color: #e74c3c; }
 .error-inline {
   color: #c0392b;
   font-size: 0.78rem;

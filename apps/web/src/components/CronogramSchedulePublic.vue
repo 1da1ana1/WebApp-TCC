@@ -42,9 +42,9 @@ const { steps } = storeToRefs(timelineStore)
 const timelineSteps = computed(() => steps.value)
 
 onMounted(() => {
-  if (!timelineStore.hasLoaded) {
-    timelineStore.loadActiveSemester()
-  }
+  // Revalida se os dados venceram, para o cronograma acompanhar o que a
+  // coordenação salvou sem depender de recarregar o navegador.
+  timelineStore.ensureLoaded()
 })
 </script>
 

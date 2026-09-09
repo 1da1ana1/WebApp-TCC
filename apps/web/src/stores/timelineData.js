@@ -1,58 +1,23 @@
 import { defineStore } from 'pinia';
 import { getActiveSemester } from '@/services/api';
+import { buildSteps } from '@/utils/timelineSteps';
 
-const STEP_DEFINITIONS = [
-  { label: 'Definição de vagas', icon: 'bi-paperclip', startField: 'vacancyDefStartDate', endField: 'vacancyDefEndDate', description: 'A coordenação define quantas vagas cada docente oferece no semestre.' },
-  { label: 'Cadastro de temas', icon: 'bi-list-check', startField: 'themeRegStartDate', endField: 'themeRegEndDate', description: 'Docentes cadastram suas áreas e temas de orientação.' },
-  { label: 'Período de busca', icon: 'bi-chat-left-text', startField: 'searchStartDate', endField: 'searchEndDate', description: 'Alunos buscam orientadores e enviam solicitações de orientação.' },
-  { label: 'Análise solicitações', icon: 'bi-hourglass-split', startField: 'analysisStartDate', endField: 'analysisEndDate', description: 'Docentes analisam e respondem (aceitam ou recusam) às solicitações.' },
-  { label: 'Confirmação vínculo', icon: 'bi-person-check', startField: 'linkConfirmStartDate', endField: 'linkConfirmEndDate', description: 'Os vínculos aceitos são oficializados no sistema.' },
-  { label: 'Encerramento', icon: 'bi-lock', startField: 'closureDate', description: 'Fim do período de buscas por orientador.' },
-  { label: 'Início orientações', icon: 'bi-pencil-square', startField: 'orientationStartDate', description: 'Começam as orientações com os vínculos firmados.' },
-  { label: 'Homologação', icon: 'bi-graph-up', startField: 'homologationDate', description: 'Homologação final do processo pela coordenação.' },
-];
+// Tempo que os dados em memória continuam valendo. Serve para uma aba deixada
+// aberta não ficar presa a um cronograma antigo: ao navegar para outra página,
+// o store revalida em vez de reaproveitar indefinidamente o primeiro fetch.
+const STALE_AFTER_MS = 60 * 1000;
 
-const formatDay = (value) => {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  // UTC para casar com a data que o coordenador cadastrou (salva como
-  // YYYY-MM-DDT00:00:00Z); usar hora local causaria off-by-one em UTC-3.
-  const dd = String(date.getUTCDate()).padStart(2, '0');
-  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const yyyy = date.getUTCFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-};
-
-const formatRange = (start, end) => {
-  if (!start && !end) return '';
-  if (start && end) return `${formatDay(start)} a ${formatDay(end)}`;
-  return formatDay(start || end);
-};
-
-const isCurrent = (todayMs, start, end) => {
-  if (!start) return false;
-  const startMs = new Date(start).getTime();
-  if (Number.isNaN(startMs)) return false;
-  const endMs = end ? new Date(end).getTime() : startMs;
-  // Include the entire end day
-  return todayMs >= startMs && todayMs <= endMs + (24 * 60 * 60 * 1000 - 1);
-};
-
-const buildSteps = (semester) => {
-  const todayMs = Date.now();
-  return STEP_DEFINITIONS.map((def) => {
-    const start = semester?.[def.startField] || null;
-    const end = def.endField ? semester?.[def.endField] || null : null;
-    return {
-      label: def.label,
-      icon: def.icon,
-      description: def.description,
-      date: def.endField ? formatRange(start, end) : formatDay(start),
-      active: isCurrent(todayMs, start, end),
-    };
-  });
-};
+// Requisição em andamento, compartilhada por todos os chamadores. Fica fora do
+// state porque promise não é estado serializável (o app usa
+// pinia-plugin-persistedstate).
+//
+// Existe para resolver a corrida entre componentes que montam juntos: na tela
+// da coordenação, o cronograma e o formulário de calendário chamam o store no
+// mesmo tick. Sem isto, o segundo chamador precisaria escolher entre disparar
+// um fetch duplicado ou desistir — e desistir devolveria o controle antes de
+// `semester` estar preenchido, deixando o formulário em branco. Devolvendo a
+// promise em voo, quem chega depois espera o mesmo resultado.
+let inFlight = null;
 
 export const useTimelineStore = defineStore('timeline', {
   state: () => ({
@@ -60,22 +25,48 @@ export const useTimelineStore = defineStore('timeline', {
     steps: buildSteps(null),
     isLoading: false,
     hasLoaded: false,
+    lastLoadedAt: 0,
   }),
 
+  getters: {
+    isStale: (state) => !state.hasLoaded || Date.now() - state.lastLoadedAt > STALE_AFTER_MS,
+  },
+
   actions: {
+    // Busca o semestre ativo. Use depois de gravar o cronograma, para as telas
+    // refletirem o que acabou de ser salvo.
+    //
+    // Sempre resolve DEPOIS de `semester` estar atualizado — quem dá await pode
+    // ler o resultado em seguida com segurança.
     async loadActiveSemester() {
+      if (inFlight) return inFlight;
+
       this.isLoading = true;
-      try {
-        const data = await getActiveSemester();
-        this.semester = data || null;
-        this.steps = buildSteps(this.semester);
-      } catch (err) {
-        console.error('Erro ao carregar semestre ativo:', err);
-        this.steps = buildSteps(null);
-      } finally {
-        this.isLoading = false;
-        this.hasLoaded = true;
-      }
+      inFlight = (async () => {
+        try {
+          const data = await getActiveSemester();
+          this.semester = data || null;
+          this.steps = buildSteps(this.semester);
+          this.lastLoadedAt = Date.now();
+        } catch (err) {
+          console.error('Erro ao carregar semestre ativo:', err);
+          // Mantém as etapas anteriores se já havia dados: um erro de rede não
+          // deve apagar da tela um cronograma que estava correto.
+          if (!this.hasLoaded) this.steps = buildSteps(null);
+        } finally {
+          this.isLoading = false;
+          this.hasLoaded = true;
+          inFlight = null;
+        }
+      })();
+
+      return inFlight;
+    },
+
+    // Ponto de entrada dos componentes de cronograma: só vai à rede quando os
+    // dados nunca foram carregados ou já venceram.
+    async ensureLoaded() {
+      if (this.isStale) await this.loadActiveSemester();
     },
   },
 });

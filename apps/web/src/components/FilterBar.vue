@@ -12,7 +12,9 @@
 
         <!-- Nuvem de chips com scroll automático -->
         <div class="visual-tags-header">
-          <div class="tags-cloud" v-if="allTags.length">
+          <p v-if="isLoadingTags" class="loading-message">Carregando áreas...</p>
+          
+          <div class="tags-cloud" v-else-if="allTags.length">
             <button
               v-for="tag in allTags"
               :key="tag"
@@ -41,7 +43,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { getKeywords } from '@/services/api'
 
 defineProps({
   title: {
@@ -52,21 +55,27 @@ defineProps({
 
 const emit = defineEmits(['filter-changed', 'clear'])
 
-// ── Mock de dados: 10 áreas de interesse ─────────────────────────
-const MOCK_TAGS = [
-  'Inteligência Artificial',
-  'Engenharia de Software',
-  'Redes de Computadores',
-  'Segurança da Informação',
-  'Banco de Dados',
-  'Sistemas Embarcados',
-  'Computação em Nuvem',
-  'Visão Computacional',
-  'Desenvolvimento Web',
-  'Internet das Coisas (IoT)',
-]
+// ── Tags dinâmicas carregadas do backend ──────────────────────────
+const allTags = ref([])
+const isLoadingTags = ref(true)
 
-const allTags = ref(MOCK_TAGS)
+// ── Carregar keywords do backend ──────────────────────────────────
+const loadKeywords = async () => {
+  isLoadingTags.value = true
+  try {
+    const keywords = await getKeywords()
+    allTags.value = Array.isArray(keywords) 
+      ? keywords.map(k => k.name).filter(Boolean)
+      : []
+  } catch (err) {
+    console.error('Erro ao carregar keywords:', err)
+    allTags.value = []
+  } finally {
+    isLoadingTags.value = false
+  }
+}
+
+onMounted(loadKeywords)
 
 // ── Estado interno das tags selecionadas ──────────────────────────
 const selectedTags = ref([])
@@ -224,10 +233,21 @@ const handleClear = () => {
 }
 
 /* ── Mensagem vazia ──────────────────────────────────────────── */
-.empty-message {
+.empty-message,
+.loading-message {
   margin: 0;
   color: #555;
   font-size: 0.875rem;
+}
+
+.loading-message {
+  font-style: italic;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 /* ── Botão limpar ────────────────────────────────────────────── */

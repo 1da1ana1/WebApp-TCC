@@ -12,9 +12,16 @@
 
       <div class="tags-column">
         <div class="registered-tags">
-          <span class="tag">Inteligência Artificial</span>
-          <span class="tag">Machine Learning</span>
-          <span class="tag">Mineração de Dados</span>
+          <span 
+            v-for="(tag, index) in professor.tags" 
+            :key="index" 
+            class="tag"
+          >
+            {{ tag }}
+          </span>
+          <span v-if="!professor.tags || professor.tags.length === 0" class="no-tags">
+            Sem áreas cadastradas
+          </span>
         </div>
       </div>
     </div>
@@ -144,6 +151,12 @@ defineProps({
   background-color: var(--color-tag3, #e8f5e9);
   color: var(--color-tag3-darker, #2e7d32);
   border: 1px solid var(--color-tag3-darker, #2e7d32);
+}
+
+.no-tags {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
 }
 
 /* Coluna do Botão de Ação */

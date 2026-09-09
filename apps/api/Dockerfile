@@ -15,7 +15,7 @@ RUN npm ci
 
 # Gera o Prisma Client (precisa do schema antes do restante do código).
 COPY prisma ./prisma
-RUN npx prisma generate
+RUN npm run prisma:generate
 
 # Compila o projeto.
 COPY . .

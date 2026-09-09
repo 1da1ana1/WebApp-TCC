@@ -47,6 +47,11 @@ export async function getMyRequests() {
   return response.data;
 }
 
+export async function createRequest(teacherId) {
+  const response = await api.post('/requests', { teacherId });
+  return response.data;
+}
+
 export async function getTeacherStats(semesterId) {
   const response = await api.get('/reports/teacher-stats', {
     params: semesterId != null ? { semesterId } : {},

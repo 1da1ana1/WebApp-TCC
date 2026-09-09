@@ -25,7 +25,14 @@
           </div>
         </div>
 
-        <button class="btn-send-request" @click="abrirModal">Enviar Solicitação</button>
+        <button 
+          class="btn-send-request" 
+          @click="abrirModal"
+          :disabled="hasPendingRequest"
+          :title="hasPendingRequest ? 'Você já possui uma solicitação pendente' : ''"
+        >
+          {{ hasPendingRequest ? 'Solicitação Enviada' : 'Enviar Solicitação' }}
+        </button>
       </div>
     </div>
 
@@ -55,7 +62,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Swal from 'sweetalert2'
-import { getTeacherById } from '@/services/api'
+import { getTeacherById, createRequest, getMyRequests } from '@/services/api'
 
 const docente = ref(null)
 const isLoading = ref(true)
@@ -73,14 +80,20 @@ const normalizeTeacher = (t) => ({
 // --- LÓGICA DO MODAL (Mantida igual) ---
 const showModal = ref(false)
 const isSending = ref(false)
+const hasPendingRequest = ref(false)
 
-const abrirModal = () => { showModal.value = true }
+const abrirModal = () => { 
+  if (!hasPendingRequest.value) {
+    showModal.value = true 
+  }
+}
 const fecharModal = () => { if (!isSending.value) showModal.value = false }
 
 const confirmarEnvio = async () => {
   isSending.value = true
   try {
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    await createRequest(docente.value.id)
+    hasPendingRequest.value = true
     showModal.value = false
     setTimeout(() => {
       Swal.fire({
@@ -92,11 +105,19 @@ const confirmarEnvio = async () => {
       })
     }, 200)
   } catch (err) {
+    console.error('Erro ao enviar solicitação:', err)
     showModal.value = false
+    
+    // Extract error message from backend response
+    let errorMessage = 'Não foi possível enviar a solicitação.'
+    if (err.response?.data?.message) {
+      errorMessage = err.response.data.message
+    }
+    
     setTimeout(() => {
       Swal.fire({
         title: 'Erro!',
-        text: 'Não foi possível enviar a solicitação.',
+        text: errorMessage,
         icon: 'error',
         confirmButtonColor: 'var(--color-status-danger)',
       })
@@ -108,8 +129,13 @@ const confirmarEnvio = async () => {
 
 onMounted(async () => {
   try {
+    // Load teacher profile
     const data = await getTeacherById(route.params.id)
     docente.value = normalizeTeacher(data)
+    
+    // Check if student has any pending requests
+    const myRequests = await getMyRequests()
+    hasPendingRequest.value = myRequests.some(req => req.status === 'PENDING')
   } catch (err) {
     console.error('Erro ao buscar docente:', err)
     docente.value = null
@@ -229,8 +255,15 @@ onMounted(async () => {
   transition: opacity 0.2s ease;
 }
 
-.btn-send-request:hover {
+.btn-send-request:hover:not(:disabled) {
   opacity: 0.8;
+}
+
+.btn-send-request:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #6c757d;
+  border-color: #5a6268;
 }
 
 /* MODAL */
